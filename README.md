@@ -1,0 +1,1 @@
+# terraform-provider-public-api
