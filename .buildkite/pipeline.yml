@@ -1,0 +1,4 @@
+steps:
+  - label: 'Tests'
+    commands:
+      - echo "--- Placeholder"
