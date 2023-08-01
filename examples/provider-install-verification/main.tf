@@ -7,9 +7,7 @@ terraform {
   }
 }
 
-provider "publicapi" {
-  token = "sgp_5onYxVMgX7tlhtE67V4dFifGYXIsMeppwVeW4xjo8b4qYd3AcegYYF42pNMLT5Xc"
-}
+provider "publicapi" {}
 
 data "publicapi_workspace" "example" {}
 
