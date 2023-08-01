@@ -1,4 +1,4 @@
-module terraform-provider-public-api
+module terraform-provider-segment
 
 go 1.19
 

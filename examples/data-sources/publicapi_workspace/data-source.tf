@@ -1,2 +1,2 @@
 # Gets the workspace info
-data "publicapi_workspace" "my_workspace" {}
+data "segment_workspace" "my_workspace" {}

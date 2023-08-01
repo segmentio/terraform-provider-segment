@@ -8,7 +8,7 @@ import (
 	"flag"
 	"log"
 
-	"terraform-provider-public-api/internal/provider"
+	"terraform-provider-segment/internal/provider"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
@@ -40,7 +40,7 @@ func main() {
 
 	opts := providerserver.ServeOpts{
 		// TODO: Update this string with the published name of your provider.
-		Address: "registry.terraform.io/hashicorp/public-api",
+		Address: "registry.terraform.io/hashicorp/segment",
 		Debug:   debug,
 	}
 

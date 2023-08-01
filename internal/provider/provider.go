@@ -16,11 +16,11 @@ import (
 	api "github.com/segmentio/public-api-sdk-go/api"
 )
 
-// Ensure PublicApiProvider satisfies various provider interfaces.
-var _ provider.Provider = &PublicApiProvider{}
+// Ensure segmentProvider satisfies various provider interfaces.
+var _ provider.Provider = &segmentProvider{}
 
-// PublicApiProvider defines the provider implementation.
-type PublicApiProvider struct {
+// segmentProvider defines the provider implementation.
+type segmentProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
@@ -32,18 +32,18 @@ type ClientInfo struct {
 	authContext context.Context
 }
 
-// PublicApiProviderModel describes the provider data model.
-type PublicApiProviderModel struct {
+// segmentProviderModel describes the provider data model.
+type segmentProviderModel struct {
 	Url   types.String `tfsdk:"url"`
 	Token types.String `tfsdk:"token"`
 }
 
-func (p *PublicApiProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "publicapi"
+func (p *segmentProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "segment"
 	resp.Version = p.version
 }
 
-func (p *PublicApiProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *segmentProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "The Public API provider.",
 		Attributes: map[string]schema.Attribute{
@@ -60,9 +60,9 @@ func (p *PublicApiProvider) Schema(ctx context.Context, req provider.SchemaReque
 	}
 }
 
-func (p *PublicApiProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	// Retrieve provider data from configuration
-	var config PublicApiProviderModel
+	var config segmentProviderModel
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -140,11 +140,11 @@ func (p *PublicApiProvider) Configure(ctx context.Context, req provider.Configur
 	resp.ResourceData = clientInfo
 }
 
-func (p *PublicApiProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return nil
 }
 
-func (p *PublicApiProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *segmentProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewWorkspaceDataSource,
 	}
@@ -152,7 +152,7 @@ func (p *PublicApiProvider) DataSources(ctx context.Context) []func() datasource
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &PublicApiProvider{
+		return &segmentProvider{
 			version: version,
 		}
 	}

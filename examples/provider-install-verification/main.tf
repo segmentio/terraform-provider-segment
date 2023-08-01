@@ -1,16 +1,16 @@
 terraform {
   required_providers {
-    publicapi = {
-      source  = "registry.terraform.io/hashicorp/public-api"
+    segment = {
+      source  = "registry.terraform.io/hashicorp/segment"
       version = "0.0.1"
     }
   }
 }
 
-provider "publicapi" {}
+provider "segment" {}
 
-data "publicapi_workspace" "example" {}
+data "segment_workspace" "example" {}
 
 output "workspace" {
-  value = data.publicapi_workspace.example
+  value = data.segment_workspace.example
 }

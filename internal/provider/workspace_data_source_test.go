@@ -26,7 +26,7 @@ func TestAccWorkspaceDataSource(t *testing.T) {
 	defer fakeServer.Close()
 
 	providerConfig := `
-	provider "publicapi" {
+	provider "segment" {
 		url   = "` + fakeServer.URL + `"
 		token = "abc123"
 	}
@@ -37,13 +37,13 @@ func TestAccWorkspaceDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Read testing
 			{
-				Config: providerConfig + `data "publicapi_workspace" "test" {}`,
+				Config: providerConfig + `data "segment_workspace" "test" {}`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					// Verify number of coffees returned
-					resource.TestCheckResourceAttr("data.publicapi_workspace.test", "id", "my-workspace-id"),
+					resource.TestCheckResourceAttr("data.segment_workspace.test", "id", "my-workspace-id"),
 					// Verify the first coffee to ensure all attributes are set
-					resource.TestCheckResourceAttr("data.publicapi_workspace.test", "name", "My workspace name"),
-					resource.TestCheckResourceAttr("data.publicapi_workspace.test", "slug", "my-workspace-slug"),
+					resource.TestCheckResourceAttr("data.segment_workspace.test", "name", "My workspace name"),
+					resource.TestCheckResourceAttr("data.segment_workspace.test", "slug", "my-workspace-slug"),
 				),
 			},
 		},
