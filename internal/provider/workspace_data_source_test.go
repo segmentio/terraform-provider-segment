@@ -12,15 +12,17 @@ func TestAccWorkspaceDataSource(t *testing.T) {
 	fakeServer := httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("content-type", "application/json")
-			_, _ = w.Write([]byte(`{
-                    "data": {
-											"workspace": {
-												"id": "my-workspace-id",
-												"name": "My workspace name",
-												"slug": "my-workspace-slug"
-											}
-                    }
-                }`))
+			_, _ = w.Write([]byte(`
+				{
+					"data": {
+						"workspace": {
+							"id": "my-workspace-id",
+							"name": "My workspace name",
+							"slug": "my-workspace-slug"
+						}
+					}
+				}
+			`))
 		}),
 	)
 	defer fakeServer.Close()

@@ -103,7 +103,6 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 	}
 
 	if url == "" {
-		// TODO: Point this to prod
 		url = "https://api.segmentapis.com"
 	}
 
