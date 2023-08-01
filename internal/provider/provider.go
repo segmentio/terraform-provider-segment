@@ -146,6 +146,7 @@ func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resou
 func (p *segmentProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewWorkspaceDataSource,
+		NewDestinationCatalogDataSource,
 	}
 }
 
