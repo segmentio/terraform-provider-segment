@@ -45,13 +45,16 @@ func (p *PublicApiProvider) Metadata(ctx context.Context, req provider.MetadataR
 
 func (p *PublicApiProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "The Public API provider.",
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
-				Optional: true,
+				Optional:    true,
+				Description: "The Public API url. If not set, the PUBLIC_API_URL environment variable will be used, or a default of 'api.segmentapis.com'.",
 			},
 			"token": schema.StringAttribute{
-				Required:  true,
-				Sensitive: true,
+				Required:    true,
+				Sensitive:   true,
+				Description: "The Public API token. If not set, the PUBLIC_API_TOKEN environment variable will be used.",
 			},
 		},
 	}
@@ -101,7 +104,7 @@ func (p *PublicApiProvider) Configure(ctx context.Context, req provider.Configur
 
 	if url == "" {
 		// TODO: Point this to prod
-		url = "https://api.segmentapis.build"
+		url = "https://api.segmentapis.com"
 	}
 
 	if token == "" {
@@ -120,6 +123,11 @@ func (p *PublicApiProvider) Configure(ctx context.Context, req provider.Configur
 
 	auth := context.WithValue(context.Background(), api.ContextAccessToken, token)
 	configuration := api.NewConfiguration()
+	configuration.Servers = api.ServerConfigurations{
+		{
+			URL: url,
+		},
+	}
 
 	client := api.NewAPIClient(configuration)
 

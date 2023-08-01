@@ -25,7 +25,7 @@ type workspaceDataSource struct {
 }
 
 type workspaceDataSourceModel struct {
-	Id   types.String `tfsdk:"id"`
+	ID   types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
 	Slug types.String `tfsdk:"slug"`
 }
@@ -36,15 +36,19 @@ func (d *workspaceDataSource) Metadata(_ context.Context, req datasource.Metadat
 
 func (d *workspaceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "The Workspace.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The unique identifier.",
 			},
 			"name": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The human-readable name.",
 			},
 			"slug": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The URL-friendly slug.",
 			},
 		},
 	}
@@ -62,7 +66,7 @@ func (d *workspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	state.Id = types.StringValue(workspace.Data.Workspace.Id)
+	state.ID = types.StringValue(workspace.Data.Workspace.Id)
 	state.Name = types.StringValue(workspace.Data.Workspace.Name)
 	state.Slug = types.StringValue(workspace.Data.Workspace.Slug)
 
