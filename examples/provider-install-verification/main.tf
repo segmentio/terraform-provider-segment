@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     publicapi = {
-      source = "registry.terraform.io/hashicorp/public-api"
+      source  = "registry.terraform.io/hashicorp/public-api"
       version = "0.0.1"
     }
   }
