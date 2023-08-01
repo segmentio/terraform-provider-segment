@@ -45,7 +45,7 @@ func (p *segmentProvider) Metadata(ctx context.Context, req provider.MetadataReq
 
 func (p *segmentProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The Public API provider.",
+		Description: "The Segment provider.",
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
 				Optional:    true,

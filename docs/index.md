@@ -3,12 +3,12 @@
 page_title: "segment Provider"
 subcategory: ""
 description: |-
-  The Public API provider.
+  The Segment provider.
 ---
 
 # segment Provider
 
-The Public API provider.
+The Segment provider.
 
 ## Example Usage
 
