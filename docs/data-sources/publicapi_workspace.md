@@ -3,12 +3,12 @@
 page_title: "publicapi_workspace Data Source - terraform-provider-public-api"
 subcategory: ""
 description: |-
-  
+  The Workspace.
 ---
 
 # publicapi_workspace (Data Source)
 
-
+The Workspace.
 
 
 
@@ -17,6 +17,6 @@ description: |-
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `name` (String)
-- `slug` (String)
+- `id` (String) The unique identifier.
+- `name` (String) The human-readable name.
+- `slug` (String) The URL-friendly slug.

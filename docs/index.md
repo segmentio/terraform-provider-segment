@@ -3,12 +3,12 @@
 page_title: "public-api Provider"
 subcategory: ""
 description: |-
-  
+  The Public API provider.
 ---
 
 # public-api Provider
 
-
+The Public API provider.
 
 ## Example Usage
 
@@ -23,8 +23,8 @@ provider "scaffolding" {
 
 ### Required
 
-- `token` (String, Sensitive)
+- `token` (String, Sensitive) The Public API token. If not set, the PUBLIC_API_TOKEN environment variable will be used.
 
 ### Optional
 
-- `url` (String)
+- `url` (String) The Public API url. If not set, the PUBLIC_API_URL environment variable will be used, or a default of 'api.segmentapis.com'.
