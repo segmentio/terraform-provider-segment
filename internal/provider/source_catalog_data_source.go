@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -44,93 +43,7 @@ func (d *sourceCatalogDataSource) Schema(_ context.Context, _ datasource.SchemaR
 			"source_metadatas": schema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"id": schema.StringAttribute{
-							Computed:    true,
-							Description: "The id for this Source metadata in the Segment catalog. Config API note: analogous to `name`.",
-						},
-						"name": schema.StringAttribute{
-							Computed:    true,
-							Description: "The user-friendly name of this Source. Config API note: equal to `displayName`.",
-						},
-						"slug": schema.StringAttribute{
-							Computed:    true,
-							Description: "The slug that identifies this Source in the Segment app. Config API note: equal to `name`.",
-						},
-						"description": schema.StringAttribute{
-							Computed:    true,
-							Description: "The description of this Source.",
-						},
-						"logos": schema.ListNestedAttribute{
-							Computed:    true,
-							Description: "The logos for this Source.",
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"default": schema.StringAttribute{
-										Computed:    true,
-										Description: "The default URL for this logo.",
-									},
-									"mark": schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: "The logo mark.",
-									},
-									"alt": schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: "The alternative text for this logo.",
-									},
-								},
-							},
-						},
-						"options": schema.ListNestedAttribute{
-							Computed:    true,
-							Description: "Options for this Source.",
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Computed:    true,
-										Description: "The name identifying this option in the context of a Segment Integration.",
-									},
-									"type": schema.StringAttribute{
-										Computed:    true,
-										Description: "Defines the type for this option in the schema.",
-									},
-									"required": schema.BoolAttribute{
-										Computed:    true,
-										Description: "Whether this is a required option when setting up the Integration.",
-									},
-									"description": schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: "An optional short text description of the field.",
-									},
-									//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-									//"default_value": {
-									//	Type:        schema.TypeAny,
-									//	Optional:    true,
-									//	Computed:    true,
-									//	Description: "An optional default value for the field.",
-									"label": schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: "An optional label for this field.",
-									},
-								},
-							},
-						},
-
-						"categories": schema.ListAttribute{
-							ElementType: types.StringType,
-							Computed:    true,
-							Description: "A list of categories this Source belongs to.",
-						},
-						"is_cloud_event_source": schema.ListAttribute{
-							ElementType: types.BoolType,
-							Computed:    true,
-							Description: "True if this is a Cloud Event Source.",
-						},
-					},
+					Attributes: sourceMetadataSchema(),
 				},
 			},
 		},

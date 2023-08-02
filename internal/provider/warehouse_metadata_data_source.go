@@ -26,6 +26,86 @@ type warehouseMetadataDataSource struct {
 	authContext context.Context
 }
 
+func warehouseMetadataSchema() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"id": schema.StringAttribute{
+			Computed:    true,
+			Description: "The id of this object.",
+		},
+		"name": schema.StringAttribute{
+			Computed:    true,
+			Description: "The name of this object.",
+		},
+		"slug": schema.StringAttribute{
+			Computed:    true,
+			Description: "A human-readable, unique identifier for object.",
+		},
+		"description": schema.StringAttribute{
+			Computed:    true,
+			Description: "A description, in English, of this object.",
+		},
+		"logos": schema.ListNestedAttribute{
+			Computed:    true,
+			Description: "Logo information for this object.",
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: map[string]schema.Attribute{
+					"default": schema.StringAttribute{
+						Computed:    true,
+						Description: "The default URL for this logo.",
+					},
+					"mark": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "The logo mark.",
+					},
+					"alt": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "The alternative text for this logo.",
+					},
+				},
+			},
+		},
+		"options": schema.ListNestedAttribute{
+			Computed:    true,
+			Description: "The Integration options for this object.",
+			NestedObject: schema.NestedAttributeObject{
+				Attributes: map[string]schema.Attribute{
+					"name": schema.StringAttribute{
+						Computed:    true,
+						Description: "The name identifying this option in the context of a Segment Integration.",
+					},
+					"type": schema.StringAttribute{
+						Computed:    true,
+						Description: "Defines the type for this option in the schema.",
+					},
+					"required": schema.BoolAttribute{
+						Computed:    true,
+						Description: "Whether this is a required option when setting up the Integration.",
+					},
+					"description": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "An optional short text description of the field.",
+					},
+					//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
+					//"default_value": {
+					//	Type:        schema.TypeAny,
+					//	Optional:    true,
+					//	Computed:    true,
+					//	Description: "An optional default value for the field.",
+					//},
+					"label": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "An optional label for this field.",
+					},
+				},
+			},
+		},
+	}
+}
+
 // Metadata returns the data source type name.
 func (d *warehouseMetadataDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_warehouseMetadata"
@@ -39,83 +119,7 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 func (d *warehouseMetadataDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "The warehouse metadata",
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed:    true,
-				Description: "The id of this object.",
-			},
-			"name": schema.StringAttribute{
-				Computed:    true,
-				Description: "The name of this object.",
-			},
-			"slug": schema.StringAttribute{
-				Computed:    true,
-				Description: "A human-readable, unique identifier for object.",
-			},
-			"description": schema.StringAttribute{
-				Computed:    true,
-				Description: "A description, in English, of this object.",
-			},
-			"logos": schema.ListNestedAttribute{
-				Computed:    true,
-				Description: "Logo information for this object.",
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"default": schema.StringAttribute{
-							Computed:    true,
-							Description: "The default URL for this logo.",
-						},
-						"mark": schema.StringAttribute{
-							Optional:    true,
-							Computed:    true,
-							Description: "The logo mark.",
-						},
-						"alt": schema.StringAttribute{
-							Optional:    true,
-							Computed:    true,
-							Description: "The alternative text for this logo.",
-						},
-					},
-				},
-			},
-			"options": schema.ListNestedAttribute{
-				Computed:    true,
-				Description: "The Integration options for this object.",
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Computed:    true,
-							Description: "The name identifying this option in the context of a Segment Integration.",
-						},
-						"type": schema.StringAttribute{
-							Computed:    true,
-							Description: "Defines the type for this option in the schema.",
-						},
-						"required": schema.BoolAttribute{
-							Computed:    true,
-							Description: "Whether this is a required option when setting up the Integration.",
-						},
-						"description": schema.StringAttribute{
-							Optional:    true,
-							Computed:    true,
-							Description: "An optional short text description of the field.",
-						},
-						//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-						//"default_value": {
-						//	Type:        schema.TypeAny,
-						//	Optional:    true,
-						//	Computed:    true,
-						//	Description: "An optional default value for the field.",
-						//},
-						"label": schema.StringAttribute{
-							Optional:    true,
-							Computed:    true,
-							Description: "An optional label for this field.",
-						},
-					},
-				},
-			},
-		},
+		Attributes:  warehouseMetadataSchema(),
 	}
 }
 
