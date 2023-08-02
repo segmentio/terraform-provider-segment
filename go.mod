@@ -7,8 +7,10 @@ require (
 	github.com/hashicorp/terraform-plugin-framework v1.3.3
 	github.com/hashicorp/terraform-plugin-go v0.18.0
 	github.com/hashicorp/terraform-plugin-testing v1.4.0
-	github.com/segmentio/public-api-sdk-go v0.0.0-20230731214639-bee26edfa972
+	github.com/segmentio/public-api-sdk-go v0.0.0-20230802183131-9cddb05f491b
 )
+
+replace github.com/segmentio/public-api-sdk-go => /Users/deanhuynh/dev/src/github.com/segmentio/public-api/generated/go-sdk
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect

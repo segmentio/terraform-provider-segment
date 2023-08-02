@@ -11,6 +11,14 @@ provider "segment" {}
 
 data "segment_workspace" "example" {}
 
+data "segment_source" "example" {
+  id = "0HK6vEPONy"
+}
+
 output "workspace" {
   value = data.segment_workspace.example
+}
+
+output "source" {
+  value = data.segment_source.example
 }

@@ -122,6 +122,7 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	auth := context.WithValue(context.Background(), api.ContextAccessToken, token)
 	configuration := api.NewConfiguration()
+	configuration.UserAgent = "Segment (terraform v" + p.version + ")"
 	configuration.Servers = api.ServerConfigurations{
 		{
 			URL: url,
@@ -146,6 +147,7 @@ func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resou
 func (p *segmentProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewWorkspaceDataSource,
+		NewSourceDataSource,
 	}
 }
 
