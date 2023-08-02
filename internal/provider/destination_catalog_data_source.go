@@ -281,7 +281,7 @@ func (d *destinationCatalogDataSource) Schema(_ context.Context, _ datasource.Sc
 										Description: "An example value displayed but not saved.",
 										Optional:    true,
 									},
-									//TODO: Find the correct type
+									//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
 									//"default_value": {
 									//	Type:        schema.TypeAny,
 									//	Description: "A default value that is saved the first time an action is created.",

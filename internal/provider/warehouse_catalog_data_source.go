@@ -100,7 +100,7 @@ func (d *warehouseCatalogDataSource) Schema(_ context.Context, _ datasource.Sche
 							Computed:    true,
 							Description: "An optional short text description of the field.",
 						},
-						//TODO: Find correct type
+						//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
 						//"default_value": {
 						//	Type:        schema.TypeAny,
 						//	Optional:    true,
