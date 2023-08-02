@@ -38,6 +38,7 @@ func (d *warehouseCatalogDataSource) Read(ctx context.Context, req datasource.Re
 // Schema defines the schema for the data source.
 func (d *warehouseCatalogDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "An item of the warehouse catalog",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
