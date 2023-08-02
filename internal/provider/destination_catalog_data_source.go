@@ -72,6 +72,7 @@ func (d *destinationCatalogDataSource) Schema(_ context.Context, _ datasource.Sc
 			},
 			"options": schema.ListNestedAttribute{
 				Description: "Options configured for the Destination.",
+				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
@@ -90,10 +91,11 @@ func (d *destinationCatalogDataSource) Schema(_ context.Context, _ datasource.Sc
 							Description: "An optional short text description of the field.",
 							Optional:    true,
 						},
-						"default_value": schema.StringAttribute{
-							Description: "An optional default value for the field.",
-							Optional:    true,
-						},
+						//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
+						//"default_value": schema.AnyAttribute{
+						//	Description: "An optional default value for the field.",
+						//	Optional:    true,
+						//},
 						"label": schema.StringAttribute{
 							Description: "An optional label for this field.",
 							Optional:    true,
@@ -295,10 +297,12 @@ func (d *destinationCatalogDataSource) Schema(_ context.Context, _ datasource.Sc
 										Description: "Whether a user can provide multiples of this field.",
 										Computed:    true,
 									},
-									"choices": schema.MapAttribute{
-										Description: "A list of machine-readable value/label pairs to populate a static dropdown.",
-										Optional:    true,
-									},
+									//TODO: This Map field has dynamic values and since there is no equivalent of type Any, this field is excluded.
+									//"choices": schema.MapAttribute{
+									//	ElementType: types.MapType{},
+									//	Description: "A list of machine-readable value/label pairs to populate a static dropdown.",
+									//	Optional:    true,
+									//},
 									"dynamic": schema.BoolAttribute{
 										Description: "Whether this field should execute a dynamic request to fetch choices to populate a dropdown. When true, `choices` is ignored.",
 										Computed:    true,
@@ -325,10 +329,12 @@ func (d *destinationCatalogDataSource) Schema(_ context.Context, _ datasource.Sc
 							Description: "The name of the subscription.",
 							Computed:    true,
 						},
-						"fields": schema.MapAttribute{
-							Description: "The default settings for action fields.",
-							Computed:    true,
-						},
+						//TODO: This Map field has dynamic values and since there is no equivalent of type Any, this field is excluded.
+						//"fields": schema.MapAttribute{
+						//	ElementType: types.MapType{},
+						//	Computed:    true,
+						//	Description: "The default settings for action fields.",
+						//},
 						"trigger": schema.StringAttribute{
 							Description: "FQL string that describes what events should trigger an action. See https://segment.com/docs/config-api/fql/ for more information regarding Segment's Filter Query Language (FQL).",
 							Computed:    true,
