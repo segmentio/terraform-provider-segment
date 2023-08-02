@@ -32,3 +32,21 @@ data "segment_warehouseCatalog" "example" {}
 output "warehouse_catalog" {
   value = data.segment_warehouseCatalog.example
 }
+
+data "segment_warehouseMetadata" "example" {}
+
+output "warehouse_metadata" {
+  value = data.segment_warehouseMetadata.example
+}
+
+data "segment_sourceMetadata" "example" {}
+
+output "source_metadata" {
+  value = data.segment_sourceMetadata.example
+}
+
+data "segment_destinationMetadata" "example" {}
+
+output "destination_metadata" {
+  value = data.segment_destinationMetadata.example
+}

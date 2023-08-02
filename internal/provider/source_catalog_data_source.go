@@ -36,9 +36,6 @@ func (d *sourceCatalogDataSource) Metadata(_ context.Context, req datasource.Met
 func (d *sourceCatalogDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 }
 
-//source catalog to have a list with all data on it
-//source metadata to retrieve a single source metadata
-
 // Schema defines the schema for the data source.
 func (d *sourceCatalogDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
