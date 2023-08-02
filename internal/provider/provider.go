@@ -148,6 +148,7 @@ func (p *segmentProvider) DataSources(ctx context.Context) []func() datasource.D
 		NewWorkspaceDataSource,
 		NewDestinationCatalogDataSource,
 		NewSourceCatalogDataSource,
+		NewWarehouseCatalogDataSource,
 	}
 }
 
