@@ -147,6 +147,7 @@ func (p *segmentProvider) DataSources(ctx context.Context) []func() datasource.D
 	return []func() datasource.DataSource{
 		NewWorkspaceDataSource,
 		NewDestinationCatalogDataSource,
+		NewSourceCatalogDataSource,
 	}
 }
 
