@@ -71,7 +71,6 @@ Read-Only:
 
 Read-Only:
 
-- `default_value` (String) An optional default value for the field.
 - `description` (String) An optional short text description of the field.
 - `label` (String) An optional label for this field.
 - `name` (String) The name identifying this option in the context of a Segment Integration.
