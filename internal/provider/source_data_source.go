@@ -42,7 +42,7 @@ type Label struct {
 }
 
 type SourceMetadata struct {
-	Categories         *[]types.String     `tfsdk:"categories"`
+	Categories         []types.String      `tfsdk:"categories"`
 	Description        types.String        `tfsdk:"description"`
 	ID                 types.String        `tfsdk:"id"`
 	IsCloudEventSource types.Bool          `tfsdk:"is_cloud_event_source"`
@@ -195,7 +195,7 @@ func (d *sourceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 							Computed:    true,
 							Description: "The value associated with the key of this label.",
 						},
-						"description": schema.BoolAttribute{
+						"description": schema.StringAttribute{
 							Computed:    true,
 							Description: "An optional description of the purpose of this label.",
 						},
@@ -228,61 +228,100 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	var state sourceDataSourceModel
 
 	state.ID = types.StringValue(source.Id)
-	state.Name = types.StringValue(*source.Name)
+	if source.Name != nil {
+		state.Name = types.StringValue(*source.Name)
+	}
 	state.Slug = types.StringValue(source.Slug)
 	state.Enabled = types.BoolValue(source.Enabled)
 	state.WorkspaceID = types.StringValue(source.WorkspaceId)
-
-	// Populate write keys
-	for _, writeKey := range source.WriteKeys {
-		state.WriteKeys = append(state.WriteKeys, types.StringValue(writeKey))
-	}
-
-	// Populate labels
-	for _, label := range source.Labels {
-		state.Labels = append(state.Labels, Label{
-			Key:         types.StringValue(label.Key),
-			Value:       types.StringValue(label.Value),
-			Description: types.StringValue(*label.Description),
-		})
-	}
-
+	state.WriteKeys = getWriteKeys(source.WriteKeys)
+	state.Labels = getLabels(source.Labels)
+	state.Metadata = getMetadata(source.Metadata)
 	// TODO: Populate settings
-
-	// Populate source metadata
-	state.Metadata = &SourceMetadata{
-		ID:                 types.StringValue(source.Metadata.Id),
-		Description:        types.StringValue(source.Metadata.Description),
-		IsCloudEventSource: types.BoolValue(source.Metadata.IsCloudEventSource),
-		Logos: &Logos{
-			Alt:     types.StringValue(*source.Metadata.Logos.Alt.Get()),
-			Default: types.StringValue(source.Metadata.Logos.Default),
-			Mark:    types.StringValue(*source.Metadata.Logos.Mark.Get()),
-		},
-		Name: types.StringValue(source.Metadata.Name),
-		Slug: types.StringValue(source.Metadata.Slug),
-	}
-
-	for _, metadataCategory := range source.Metadata.Categories {
-		*state.Metadata.Categories = append(*state.Metadata.Categories, types.StringValue(metadataCategory))
-	}
-
-	for _, integrationOption := range source.Metadata.Options {
-
-		state.Metadata.Options = append(state.Metadata.Options, IntegrationOption{
-			Name:         types.StringValue(integrationOption.Name),
-			Type:         types.StringValue(integrationOption.Type),
-			Required:     types.BoolValue(integrationOption.Required),
-			Description:  types.StringValue(*integrationOption.Description),
-			DefaultValue: types.StringValue(fmt.Sprintf("%v", integrationOption.DefaultValue)),
-		})
-	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func getLogos(logos api.Logos1) *Logos {
+	logosToAdd := Logos{
+		Default: types.StringValue(logos.Default),
+	}
+	if logos.Alt.IsSet() {
+		logosToAdd.Alt = types.StringValue(*logos.Alt.Get())
+	}
+	if logos.Mark.IsSet() {
+		logosToAdd.Mark = types.StringValue(*logos.Mark.Get())
+	}
+
+	return &logosToAdd
+}
+
+func getMetadata(metadata api.Metadata2) *SourceMetadata {
+	metadataToAdd := SourceMetadata{
+		ID:                 types.StringValue(metadata.Id),
+		Description:        types.StringValue(metadata.Description),
+		IsCloudEventSource: types.BoolValue(metadata.IsCloudEventSource),
+		Logos:              getLogos(metadata.Logos),
+		Name:               types.StringValue(metadata.Name),
+		Slug:               types.StringValue(metadata.Slug),
+	}
+
+	for _, metadataCategory := range metadata.Categories {
+		metadataToAdd.Categories = append(metadataToAdd.Categories, types.StringValue(metadataCategory))
+	}
+
+	for _, integrationOption := range metadata.Options {
+		integrationOptionToAdd := IntegrationOption{
+			Name:     types.StringValue(integrationOption.Name),
+			Type:     types.StringValue(integrationOption.Type),
+			Required: types.BoolValue(integrationOption.Required),
+		}
+
+		if integrationOption.Description != nil {
+			integrationOptionToAdd.Description = types.StringValue(*integrationOption.Description)
+		}
+
+		if integrationOption.DefaultValue != nil {
+			integrationOptionToAdd.DefaultValue = types.StringValue(fmt.Sprintf("%v", integrationOption.DefaultValue))
+		}
+
+		metadataToAdd.Options = append(metadataToAdd.Options, integrationOptionToAdd)
+	}
+
+	return &metadataToAdd
+}
+
+func getLabels(labels []api.LabelV1) []Label {
+	var labelsToAdd []Label
+
+	for _, label := range labels {
+		labelToAdd := Label{
+			Key:   types.StringValue(label.Key),
+			Value: types.StringValue(label.Value),
+		}
+
+		if label.Description != nil {
+			labelToAdd.Description = types.StringValue(*label.Description)
+		}
+
+		labelsToAdd = append(labelsToAdd, labelToAdd)
+	}
+
+	return labelsToAdd
+}
+
+func getWriteKeys(writeKeys []string) []types.String {
+	var writeKeysToAdd []types.String
+
+	for _, writeKey := range writeKeys {
+		writeKeysToAdd = append(writeKeysToAdd, types.StringValue(writeKey))
+	}
+
+	return writeKeysToAdd
 }
 
 func (d *sourceDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
