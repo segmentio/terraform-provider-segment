@@ -41,9 +41,7 @@ func TestAccWorkspaceDataSource(t *testing.T) {
 			{
 				Config: providerConfig + `data "segment_workspace" "test" {}`,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					// Verify number of coffees returned
 					resource.TestCheckResourceAttr("data.segment_workspace.test", "id", "my-workspace-id"),
-					// Verify the first coffee to ensure all attributes are set
 					resource.TestCheckResourceAttr("data.segment_workspace.test", "name", "My workspace name"),
 					resource.TestCheckResourceAttr("data.segment_workspace.test", "slug", "my-workspace-slug"),
 				),

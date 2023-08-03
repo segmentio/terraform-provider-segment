@@ -1,6 +1,11 @@
-default: testacc
+all: generate test
+
+generate:
+	go generate ./...
+.PHONY: generate
 
 # Run acceptance tests
-.PHONY: testacc
-testacc:
+test:
 	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
+.PHONY: test
+
