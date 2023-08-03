@@ -14,39 +14,20 @@ data "segment_workspace" "example" {}
 output "workspace" {
   value = data.segment_workspace.example
 }
-
-data "segment_destinationCatalog" "example" {}
-
-output "destination_catalog" {
-  value = data.segment_destinationCatalog.example
-}
-
-data "segment_sourceCatalog" "example" {}
-
-output "source_catalog" {
-  value = data.segment_sourceCatalog.example
-}
-
-data "segment_warehouseCatalog" "example" {}
-
-output "warehouse_catalog" {
-  value = data.segment_warehouseCatalog.example
-}
-
-data "segment_warehouseMetadata" "example" {}
+data "segment_warehouse_metadata" "example" {}
 
 output "warehouse_metadata" {
-  value = data.segment_warehouseMetadata.example
+  value = data.segment_warehouse_metadata.example
 }
 
-data "segment_sourceMetadata" "example" {}
+data "segment_source_metadata" "example" {}
 
 output "source_metadata" {
-  value = data.segment_sourceMetadata.example
+  value = data.segment_source_metadata.example
 }
 
-data "segment_destinationMetadata" "example" {}
+data "segment_destination_metadata" "example" {}
 
 output "destination_metadata" {
-  value = data.segment_destinationMetadata.example
+  value = data.segment_destination_metadata.example
 }
