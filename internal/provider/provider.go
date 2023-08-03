@@ -122,7 +122,7 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	auth := context.WithValue(context.Background(), api.ContextAccessToken, token)
 	configuration := api.NewConfiguration()
-	configuration.UserAgent = "Segment (terraform v" + p.version + ")"
+	configuration.UserAgent = "Segment (terraform " + p.version + ")"
 	configuration.Servers = api.ServerConfigurations{
 		{
 			URL: url,
