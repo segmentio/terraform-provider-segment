@@ -25,8 +25,8 @@ data "segment_source_metadata" "my_source_metadata" {}
 - `categories` (List of String) A list of categories this Source belongs to.
 - `description` (String) The description of this Source.
 - `id` (String) The id for this Source metadata in the Segment catalog. Config API note: analogous to `name`.
-- `is_cloud_event_source` (List of Boolean) True if this is a Cloud Event Source.
-- `logos` (Attributes List) The logos for this Source. (see [below for nested schema](#nestedatt--logos))
+- `is_cloud_event_source` (Boolean) True if this is a Cloud Event Source.
+- `logos` (Attributes) The logos for this Source. (see [below for nested schema](#nestedatt--logos))
 - `name` (String) The user-friendly name of this Source. Config API note: equal to `displayName`.
 - `options` (Attributes List) Options for this Source. (see [below for nested schema](#nestedatt--options))
 - `slug` (String) The slug that identifies this Source in the Segment app. Config API note: equal to `name`.
