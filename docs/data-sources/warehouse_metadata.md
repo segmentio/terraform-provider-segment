@@ -24,7 +24,7 @@ data "segment_warehouse_metadata" "my_warehouse_metadata" {}
 
 - `description` (String) A description, in English, of this object.
 - `id` (String) The id of this object.
-- `logos` (Attributes List) Logo information for this object. (see [below for nested schema](#nestedatt--logos))
+- `logos` (Attributes) Logo information for this object. (see [below for nested schema](#nestedatt--logos))
 - `name` (String) The name of this object.
 - `options` (Attributes List) The Integration options for this object. (see [below for nested schema](#nestedatt--options))
 - `slug` (String) A human-readable, unique identifier for object.
