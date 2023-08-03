@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	api "github.com/segmentio/public-api-sdk-go/api"
+	"github.com/segmentio/public-api-sdk-go/api"
 )
 
 var (
@@ -53,12 +53,12 @@ type SourceMetadata struct {
 }
 
 type IntegrationOption struct {
-	DefaultValue types.String `tfsdk:"default_value"`
-	Description  types.String `tfsdk:"description"`
-	Label        types.String `tfsdk:"label"`
-	Name         types.String `tfsdk:"name"`
-	Required     types.Bool   `tfsdk:"required"`
-	Type         types.String `tfsdk:"type"`
+	// TODO: DefaultValue types.String `tfsdk:"default_value"`
+	Description types.String `tfsdk:"description"`
+	Label       types.String `tfsdk:"label"`
+	Name        types.String `tfsdk:"name"`
+	Required    types.Bool   `tfsdk:"required"`
+	Type        types.String `tfsdk:"type"`
 }
 
 type Logos struct {
@@ -146,10 +146,7 @@ func (d *sourceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 									Computed:    true,
 									Description: "An optional short text description of the field.",
 								},
-								"default_value": schema.StringAttribute{
-									Computed:    true,
-									Description: "An optional default value for the field.",
-								},
+								// TODO: "default_value": schema.StringAttribute { Computed: true, Description: "An optional default value for the field." },
 								"label": schema.StringAttribute{
 									Computed:    true,
 									Description: "An optional label for this field.",
@@ -285,9 +282,7 @@ func getMetadata(metadata api.Metadata2) *SourceMetadata {
 			integrationOptionToAdd.Description = types.StringValue(*integrationOption.Description)
 		}
 
-		if integrationOption.DefaultValue != nil {
-			integrationOptionToAdd.DefaultValue = types.StringValue(fmt.Sprintf("%v", integrationOption.DefaultValue))
-		}
+		// TODO handle integrationOption.DefaultValue (typed as interface{})
 
 		metadataToAdd.Options = append(metadataToAdd.Options, integrationOptionToAdd)
 	}
