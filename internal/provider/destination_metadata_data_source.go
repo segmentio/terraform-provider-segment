@@ -375,7 +375,7 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 
 // Metadata returns the data source type name.
 func (d *destinationMetadataDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_destinationMetadata"
+	resp.TypeName = req.ProviderTypeName + "_destination_metadata"
 }
 
 // Schema defines the schema for the data source.

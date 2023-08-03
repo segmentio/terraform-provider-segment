@@ -108,7 +108,7 @@ func warehouseMetadataSchema() map[string]schema.Attribute {
 
 // Metadata returns the data source type name.
 func (d *warehouseMetadataDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_warehouseMetadata"
+	resp.TypeName = req.ProviderTypeName + "_warehouse_metadata"
 }
 
 // Read refreshes the Terraform state with the latest data.

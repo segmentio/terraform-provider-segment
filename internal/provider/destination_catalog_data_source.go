@@ -28,7 +28,7 @@ type destinationCatalogDataSource struct {
 
 // Metadata returns the data source type name.
 func (d *destinationCatalogDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_destinationCatalog"
+	resp.TypeName = req.ProviderTypeName + "_destination_catalog"
 }
 
 // Schema defines the schema for the data source.

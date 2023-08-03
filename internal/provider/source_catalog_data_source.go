@@ -28,7 +28,7 @@ type sourceCatalogDataSource struct {
 
 // Metadata returns the data source type name.
 func (d *sourceCatalogDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_sourceCatalog"
+	resp.TypeName = req.ProviderTypeName + "_source_catalog"
 }
 
 // Read refreshes the Terraform state with the latest data.
