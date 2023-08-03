@@ -53,7 +53,7 @@ type SourceMetadata struct {
 }
 
 type IntegrationOption struct {
-	DefaultValue interface{}  `tfsdk:"default_value"`
+	DefaultValue types.String `tfsdk:"default_value"`
 	Description  types.String `tfsdk:"description"`
 	Label        types.String `tfsdk:"label"`
 	Name         types.String `tfsdk:"name"`
