@@ -653,17 +653,15 @@ func getSupportedRegions(regions []string) []types.String {
 func getContacts(contacts []api.Contact) []Contact {
 	var contactsToAdd []Contact
 
-	if contacts != nil {
-		for _, c := range contacts {
-			contactToAdd := Contact{
-				Name:      types.StringValue(*c.Name),
-				Email:     types.StringValue(c.Email),
-				Role:      types.StringValue(*c.Role),
-				IsPrimary: types.BoolValue(*c.IsPrimary),
-			}
-
-			contactsToAdd = append(contactsToAdd, contactToAdd)
+	for _, c := range contacts {
+		contactToAdd := Contact{
+			Name:      types.StringValue(*c.Name),
+			Email:     types.StringValue(c.Email),
+			Role:      types.StringValue(*c.Role),
+			IsPrimary: types.BoolValue(*c.IsPrimary),
 		}
+
+		contactsToAdd = append(contactsToAdd, contactToAdd)
 	}
 
 	return contactsToAdd
