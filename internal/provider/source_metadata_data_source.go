@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
@@ -55,7 +56,6 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	response, _, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, state.Id.ValueString()).Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",
@@ -64,7 +64,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	var sourceMetadata = response.Data.SourceMetadata
+	sourceMetadata := response.Data.SourceMetadata
 
 	state.Id = types.StringValue(sourceMetadata.Id)
 	state.Name = types.StringValue(sourceMetadata.Name)

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	api "github.com/segmentio/public-api-sdk-go/api"
+	"github.com/segmentio/public-api-sdk-go/api"
 )
 
 var (

@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
@@ -389,7 +390,8 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 							},
 						},
 					},
-				}},
+				},
+			},
 		},
 		"presets": schema.ListNestedAttribute{
 			Description: "Predefined Destination subscriptions that can optionally be applied when connecting a new instance of the Destination.",
@@ -414,7 +416,8 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 						Description: "FQL string that describes what events should trigger an action. See https://segment.com/docs/config-api/fql/ for more information regarding Segment's Filter Query Language (FQL).",
 						Computed:    true,
 					},
-				}},
+				},
+			},
 		},
 		"contacts": schema.ListNestedAttribute{
 			NestedObject: schema.NestedAttributeObject{
@@ -482,7 +485,6 @@ func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource
 	}
 
 	response, _, err := d.client.CatalogApi.GetDestinationMetadata(d.authContext, state.Id.ValueString()).Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",
@@ -491,7 +493,7 @@ func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
-	var destinationMetadata = response.Data.DestinationMetadata
+	destinationMetadata := response.Data.DestinationMetadata
 
 	state.Id = types.StringValue(destinationMetadata.Id)
 	state.Name = types.StringValue(destinationMetadata.Name)

@@ -1,10 +1,11 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccSourceMetadataDataSource(t *testing.T) {

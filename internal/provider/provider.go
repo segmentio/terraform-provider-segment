@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	api "github.com/segmentio/public-api-sdk-go/api"
+	"github.com/segmentio/public-api-sdk-go/api"
 )
 
 // Ensure segmentProvider satisfies various provider interfaces.
