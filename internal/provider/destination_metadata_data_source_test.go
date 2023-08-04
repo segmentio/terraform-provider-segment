@@ -8,10 +8,12 @@ import (
 )
 
 func TestAccDestinationMetadataDataSource(t *testing.T) {
-	fakeServer := httptest.NewServer(
-		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-			w.Header().Set("content-type", "application/json")
-			_, _ = w.Write([]byte(`
+
+	t.Run("happy path", func(t *testing.T) {
+		fakeServer := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("content-type", "application/json")
+				_, _ = w.Write([]byte(`
 				{
   "data": {
     "destinationMetadata": {
@@ -122,107 +124,107 @@ func TestAccDestinationMetadataDataSource(t *testing.T) {
   }
 }
 			`))
-		}),
-	)
-	defer fakeServer.Close()
+			}),
+		)
+		defer fakeServer.Close()
 
-	providerConfig := `
+		providerConfig := `
 	provider "segment" {
 		url   = "` + fakeServer.URL + `"
 		token = "abc123"
 	}
 	`
 
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Read testing
-			{
-				Config: providerConfig + `data "segment_destination_metadata" "test" {}`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "id", "destination-metadata-id"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "name", "Destination Metadata"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "slug", "destination-metadata"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "description", "Description."),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "logos.default", "default"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "logos.mark", "mark"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "logos.alt", "alt"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.name", "apiKey"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.type", "string"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.required", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.description", "description"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.label", "API Key"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "status", "PUBLIC"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.0", "Analytics"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "website", "https://test.com"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.code", "https://github.com/master/integrations/integration-name"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.owner", "OWNER"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.type", "BROWSER"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "previous_names.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "previous_names.0", "destination-metadata"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.track", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.pageview", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.identify", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.group", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.alias", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_platforms.browser", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_platforms.mobile", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_platforms.server", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.cloud_mode_instances", "0"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.device_mode_instances", "0"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.replay", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.browser_unbundling", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.browser_unbundling_public", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.id", "the-id"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.slug", "action-slug"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.name", "action-name"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.description", "action-description"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.platform", "action-platform"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.hidden", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.default_trigger", "trigger"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.id", "field-id"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.sort_order", "0"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.field_key", "field-key"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.label", "field-label"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.type", "field-type"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.description", "field-description"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.placeholder", "field-placeholder"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.required", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.multiple", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.dynamic", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.allow_null", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.action_id", "id"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.name", "name"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.trigger", "trigger"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.0.name", "Contact Name"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.0.email", "contact@contact.com"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.0.role", "Product Manager"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.0.is_primary", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "partner_owned", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_regions.#", "2"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_regions.0", "eu-west-1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_regions.1", "us-west-2"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "region_endpoints.#", "2"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "region_endpoints.0", "US"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "region_endpoints.1", "EU"),
-				),
+		resource.Test(t, resource.TestCase{
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				// Read testing
+				{
+					Config: providerConfig + `data "segment_destination_metadata" "test" {}`,
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "id", "destination-metadata-id"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "name", "Destination Metadata"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "slug", "destination-metadata"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "description", "Description."),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "logos.default", "default"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "logos.mark", "mark"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "logos.alt", "alt"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.name", "apiKey"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.type", "string"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.required", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.description", "description"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.label", "API Key"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "status", "PUBLIC"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.0", "Analytics"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "website", "https://test.com"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.code", "https://github.com/master/integrations/integration-name"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.owner", "OWNER"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.type", "BROWSER"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "previous_names.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "previous_names.0", "destination-metadata"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.track", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.pageview", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.identify", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.group", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_methods.alias", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_platforms.browser", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_platforms.mobile", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_platforms.server", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.cloud_mode_instances", "0"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.device_mode_instances", "0"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.replay", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.browser_unbundling", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_features.browser_unbundling_public", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.id", "the-id"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.slug", "action-slug"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.name", "action-name"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.description", "action-description"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.platform", "action-platform"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.hidden", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.default_trigger", "trigger"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.id", "field-id"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.sort_order", "0"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.field_key", "field-key"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.label", "field-label"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.type", "field-type"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.description", "field-description"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.placeholder", "field-placeholder"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.required", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.multiple", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.dynamic", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.allow_null", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.action_id", "id"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.name", "name"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.trigger", "trigger"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.0.name", "Contact Name"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.0.email", "contact@contact.com"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.0.role", "Product Manager"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "contacts.0.is_primary", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "partner_owned", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_regions.#", "2"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_regions.0", "eu-west-1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "supported_regions.1", "us-west-2"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "region_endpoints.#", "2"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "region_endpoints.0", "US"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "region_endpoints.1", "EU"),
+					),
+				},
 			},
-		},
+		})
 	})
-}
 
-func TestAccDestinationMetadataDataSourceOptional(t *testing.T) {
-	fakeServer := httptest.NewServer(
-		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-			w.Header().Set("content-type", "application/json")
-			_, _ = w.Write([]byte(`
+	t.Run("nulls", func(t *testing.T) {
+		fakeServer := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("content-type", "application/json")
+				_, _ = w.Write([]byte(`
 				{
   "data": {
     "destinationMetadata": {
@@ -293,80 +295,81 @@ func TestAccDestinationMetadataDataSourceOptional(t *testing.T) {
   }
 }
 			`))
-		}),
-	)
-	defer fakeServer.Close()
+			}),
+		)
+		defer fakeServer.Close()
 
-	providerConfig := `
+		providerConfig := `
 	provider "segment" {
 		url   = "` + fakeServer.URL + `"
 		token = "abc123"
 	}
 	`
 
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Read testing
-			{
-				Config: providerConfig + `data "segment_destination_metadata" "test" {}`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "id", "destination-metadata-id"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "name", "Destination Metadata"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "slug", "destination-metadata"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "description", "Description."),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "logos.default", "default"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.name", "apiKey"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.type", "string"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.required", "true"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "status", "PUBLIC"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.0", "Analytics"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "website", "https://test.com"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.code", "https://github.com/master/integrations/integration-name"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.type", "BROWSER"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "previous_names.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "previous_names.0", "destination-metadata"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.track"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.pageview"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.identify"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.group"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.alias"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_platforms.browser"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_platforms.mobile"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_platforms.server"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.cloud_mode_instances"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.device_mode_instances"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.replay"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.browser_unbundling"),
-					resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.browser_unbundling_public"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.id", "the-id"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.slug", "action-slug"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.name", "action-name"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.description", "action-description"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.platform", "action-platform"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.hidden", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.default_trigger", "trigger"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.id", "field-id"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.sort_order", "0"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.field_key", "field-key"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.label", "field-label"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.type", "field-type"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.description", "field-description"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.required", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.multiple", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.dynamic", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.allow_null", "false"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.#", "1"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.action_id", "id"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.name", "name"),
-					resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.trigger", "trigger"),
-				),
+		resource.Test(t, resource.TestCase{
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				// Read testing
+				{
+					Config: providerConfig + `data "segment_destination_metadata" "test" {}`,
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "id", "destination-metadata-id"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "name", "Destination Metadata"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "slug", "destination-metadata"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "description", "Description."),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "logos.default", "default"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.name", "apiKey"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.type", "string"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.required", "true"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "status", "PUBLIC"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.0", "Analytics"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "website", "https://test.com"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.code", "https://github.com/master/integrations/integration-name"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "components.0.type", "BROWSER"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "previous_names.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "previous_names.0", "destination-metadata"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.track"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.pageview"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.identify"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.group"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_methods.alias"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_platforms.browser"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_platforms.mobile"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_platforms.server"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.cloud_mode_instances"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.device_mode_instances"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.replay"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.browser_unbundling"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "supported_features.browser_unbundling_public"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.id", "the-id"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.slug", "action-slug"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.name", "action-name"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.description", "action-description"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.platform", "action-platform"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.hidden", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.default_trigger", "trigger"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.id", "field-id"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.sort_order", "0"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.field_key", "field-key"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.label", "field-label"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.type", "field-type"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.description", "field-description"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.required", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.multiple", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.dynamic", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.allow_null", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.#", "1"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.action_id", "id"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.name", "name"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.trigger", "trigger"),
+					),
+				},
 			},
-		},
+		})
 	})
 }
