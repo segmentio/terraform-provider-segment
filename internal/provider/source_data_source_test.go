@@ -104,7 +104,6 @@ func TestAccSourceDataSource(t *testing.T) {
 				},
 			},
 		})
-
 	})
 
 	t.Run("nulls", func(t *testing.T) {
