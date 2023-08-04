@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
@@ -25,20 +26,6 @@ func NewWarehouseMetadataDataSource() datasource.DataSource {
 type warehouseMetadataDataSource struct {
 	client      *api.APIClient
 	authContext context.Context
-}
-
-type Logos struct {
-	Default types.String `tfsdk:"default"`
-	Mark    types.String `tfsdk:"mark"`
-	Alt     types.String `tfsdk:"alt"`
-}
-
-type IntegrationOption struct {
-	Name        types.String `tfsdk:"name"`
-	Type        types.String `tfsdk:"type"`
-	Required    types.Bool   `tfsdk:"required"`
-	Description types.String `tfsdk:"description"`
-	Label       types.String `tfsdk:"label"`
 }
 
 type warehouseMetadataDataSourceModel struct {
@@ -160,7 +147,7 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 	state.Name = types.StringValue(warehouseMetadata.Name)
 	state.Description = types.StringValue(warehouseMetadata.Description)
 	state.Slug = types.StringValue(warehouseMetadata.Slug)
-	state.Logos = getLogos(warehouseMetadata.Logos)
+	state.Logos = getLogos2(warehouseMetadata.Logos)
 	state.Options = getOptions(warehouseMetadata.Options)
 
 	diags = resp.State.Set(ctx, &state)
@@ -199,7 +186,7 @@ func getOptions(options []api.IntegrationOptionBeta) []IntegrationOption {
 	return integrationOptions
 }
 
-func getLogos(logos api.Logos2) *Logos {
+func getLogos2(logos api.Logos2) *Logos {
 	logosToAdd := Logos{
 		Default: types.StringValue(logos.Default),
 	}

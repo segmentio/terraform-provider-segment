@@ -14,6 +14,15 @@ data "segment_workspace" "example" {}
 output "workspace" {
   value = data.segment_workspace.example
 }
+
+data "segment_source" "example" {
+  id = "0HK6vEPONy"
+}
+
+output "source" {
+  value = data.segment_source.example
+}
+
 data "segment_warehouse_metadata" "example" {}
 
 output "warehouse_metadata" {
