@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -30,7 +31,7 @@ type destinationDataSourceModel struct {
 	Enabled  types.Bool                          `tfsdk:"enabled"`
 	Metadata *destinationMetadataDataSourceModel `tfsdk:"metadata"`
 	SourceId types.String                        `tfsdk:"source_id"`
-	//TODO: Add Settings
+	// TODO: Add Settings
 }
 
 func (d *destinationDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -62,7 +63,7 @@ func (d *destinationDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Description: "The id of a Source connected to this instance of a Destination. Config API note: analogous to `parent`.",
 				Computed:    true,
 			},
-			//TODO: Settings
+			// TODO: Settings
 		},
 	}
 }
@@ -78,7 +79,6 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	response, _, err := d.client.DestinationsApi.GetDestination(d.authContext, state.Id.ValueString()).Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Destination",
@@ -87,7 +87,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	var destination = response.Data.GetDestination()
+	destination := response.Data.GetDestination()
 
 	state.Id = types.StringValue(destination.Id)
 
