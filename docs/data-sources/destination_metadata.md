@@ -34,12 +34,12 @@ data "segment_destination_metadata" "my_destination_metadata" {}
 - `partner_owned` (Boolean) Partner Owned flag.
 - `presets` (Attributes List) Predefined Destination subscriptions that can optionally be applied when connecting a new instance of the Destination. (see [below for nested schema](#nestedatt--presets))
 - `previous_names` (List of String) A list of names previously used by the Destination.
-- `region_endpoints` (String) The list of regional endpoints for this Destination.
+- `region_endpoints` (List of String) The list of regional endpoints for this Destination.
 - `slug` (String) The slug used to identify the Destination in the Segment app.
 - `status` (String) Support status of the Destination.
-- `supported_features` (Attributes List) Features that this Destination supports. (see [below for nested schema](#nestedatt--supported_features))
-- `supported_methods` (Attributes List) Methods that this Destination supports. (see [below for nested schema](#nestedatt--supported_methods))
-- `supported_platforms` (Attributes List) Platforms from which the Destination receives events. (see [below for nested schema](#nestedatt--supported_platforms))
+- `supported_features` (Attributes) Features that this Destination supports. (see [below for nested schema](#nestedatt--supported_features))
+- `supported_methods` (Attributes) Methods that this Destination supports. (see [below for nested schema](#nestedatt--supported_methods))
+- `supported_platforms` (Attributes) Platforms from which the Destination receives events. (see [below for nested schema](#nestedatt--supported_platforms))
 - `supported_regions` (List of String) A list of supported regions for this Destination.
 - `website` (String) A website URL for this Destination.
 
