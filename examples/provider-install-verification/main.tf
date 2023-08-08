@@ -40,3 +40,9 @@ data "segment_destination_metadata" "example" {}
 output "destination_metadata" {
   value = data.segment_destination_metadata.example
 }
+
+data "segment_warehouse" "example" {}
+
+output "warehouse" {
+  value = data.segment_warehouse.example
+}
