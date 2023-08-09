@@ -22,6 +22,7 @@ data "segment_labels" "my_labels" {}
 
 ### Read-Only
 
+- `id` (String) The ID of this resource.
 - `labels` (Attributes List) (see [below for nested schema](#nestedatt--labels))
 
 <a id="nestedatt--labels"></a>
