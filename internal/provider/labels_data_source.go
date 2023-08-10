@@ -25,11 +25,11 @@ type labelsDataSource struct {
 }
 
 type labelsDataSourceModel struct {
-	Id     types.String `tfsdk:"id"`
-	Labels []labelModel `tfsdk:"labels"`
+	Id     types.String           `tfsdk:"id"`
+	Labels []labelDataSourceModel `tfsdk:"labels"`
 }
 
-type labelModel struct {
+type labelDataSourceModel struct {
 	Key         types.String `tfsdk:"key"`
 	Value       types.String `tfsdk:"value"`
 	Description types.String `tfsdk:"description"`
@@ -86,7 +86,7 @@ func (d *labelsDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	labels := response.Data.Labels
 
 	for _, label := range labels {
-		newLabel := labelModel{
+		newLabel := labelDataSourceModel{
 			Key:   types.StringValue(label.Key),
 			Value: types.StringValue(label.Value),
 		}
