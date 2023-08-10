@@ -28,7 +28,11 @@ type labelResource struct {
 }
 
 type labelResourceModel struct {
-	Id          types.String `tfsdk:"id"`
+	Id    types.String `tfsdk:"id"`
+	Label labelModel   `tfsdk:"label"`
+}
+
+type labelModel struct {
 	Key         types.String `tfsdk:"key"`
 	Value       types.String `tfsdk:"value"`
 	Description types.String `tfsdk:"description"`
@@ -42,22 +46,27 @@ func (r *labelResource) Metadata(_ context.Context, req resource.MetadataRequest
 // Schema defines the schema for the resource.
 func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "A label associated with the current Workspace.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
 			},
-			"key": schema.StringAttribute{
-				Description: "The key that represents the name of this label.",
+			"label": schema.SingleNestedAttribute{
+				Description: "A label associated with the current Workspace.",
 				Required:    true,
-			},
-			"value": schema.StringAttribute{
-				Description: "The value associated with the key of this label.",
-				Required:    true,
-			},
-			"description": schema.StringAttribute{
-				Description: "An optional description of the purpose of this label.",
-				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					"key": schema.StringAttribute{
+						Description: "The key that represents the name of this label.",
+						Required:    true,
+					},
+					"value": schema.StringAttribute{
+						Description: "The value associated with the key of this label.",
+						Required:    true,
+					},
+					"description": schema.StringAttribute{
+						Description: "An optional description of the purpose of this label.",
+						Optional:    true,
+					},
+				},
 			},
 		},
 	}
@@ -74,11 +83,11 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	label := api.Label{
-		Key:   types.String.ValueString(plan.Key),
-		Value: types.String.ValueString(plan.Value),
+		Key:   types.String.ValueString(plan.Label.Key),
+		Value: types.String.ValueString(plan.Label.Value),
 	}
 
-	label.Description = types.String.ValueStringPointer(plan.Description)
+	label.Description = types.String.ValueStringPointer(plan.Label.Description)
 
 	// Generate API request body from plan
 	response, _, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
@@ -93,12 +102,12 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	plan.Key = types.StringValue(response.Data.Label.Key)
-	plan.Value = types.StringValue(response.Data.Label.Value)
+	plan.Label.Key = types.StringValue(response.Data.Label.Key)
+	plan.Label.Value = types.StringValue(response.Data.Label.Value)
 	plan.Id = types.StringValue("placeholder")
 
 	if response.Data.Label.Description != nil {
-		plan.Description = types.StringPointerValue(response.Data.Label.Description)
+		plan.Label.Description = types.StringPointerValue(response.Data.Label.Description)
 	}
 
 	// Set state to fully populated data
@@ -131,13 +140,13 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	label := api.LabelV1{}
 	for _, l := range labels {
-		if l.Key == types.String.ValueString(state.Key) && l.Value == types.String.ValueString(state.Value) {
+		if l.Key == types.String.ValueString(state.Label.Key) && l.Value == types.String.ValueString(state.Label.Value) {
 			label = l
 		}
 	}
 
-	state.Key = types.StringValue(label.Key)
-	state.Value = types.StringValue(label.Value)
+	state.Label.Key = types.StringValue(label.Key)
+	state.Label.Value = types.StringValue(label.Value)
 	state.Id = types.StringValue("placeholder")
 
 	diags = resp.State.Set(ctx, &state)
@@ -149,6 +158,7 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *labelResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
