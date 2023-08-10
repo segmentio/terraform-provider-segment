@@ -163,6 +163,21 @@ func (r *labelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// Retrieve values from state
+	var state labelResourceModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	_, _, err := r.client.LabelsApi.DeleteLabel(ctx, state.Label.Key.ValueString(), state.Label.Value.ValueString()).Execute()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Deleting a Label", "Could not delete a label, unexpected error: "+err.Error(),
+		)
+		return
+	}
 }
 
 // Configure adds the provider configured client to the resource.
