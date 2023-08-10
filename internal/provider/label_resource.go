@@ -3,6 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
@@ -53,18 +56,30 @@ func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"label": schema.SingleNestedAttribute{
 				Description: "A label associated with the current Workspace.",
 				Required:    true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"key": schema.StringAttribute{
 						Description: "The key that represents the name of this label.",
 						Required:    true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"value": schema.StringAttribute{
 						Description: "The value associated with the key of this label.",
 						Required:    true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"description": schema.StringAttribute{
 						Description: "An optional description of the purpose of this label.",
 						Optional:    true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 				},
 			},
@@ -158,7 +173,8 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *labelResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-
+	// Label does not have an update functionality, so added RequiresReplace to each attribute that can be configurable.
+	// reference: https://developer.hashicorp.com/terraform/plugin/framework/resources/update#caveats
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
