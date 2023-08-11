@@ -8,11 +8,9 @@ terraform {
 }
 
 resource "segment_label" "test" {
-  label = {
-    key         = "environment"
-    value       = "dev"
-    description = "dev environment"
-  }
+  key         = "environment"
+  value       = "dev"
+  description = "dev environment"
 }
 
 output "dev_label" {

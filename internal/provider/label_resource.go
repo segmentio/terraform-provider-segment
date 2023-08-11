@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
@@ -32,11 +32,7 @@ type labelResource struct {
 }
 
 type labelResourceModel struct {
-	Id    types.String `tfsdk:"id"`
-	Label labelModel   `tfsdk:"label"`
-}
-
-type labelModel struct {
+	Id          types.String `tfsdk:"id"`
 	Key         types.String `tfsdk:"key"`
 	Value       types.String `tfsdk:"value"`
 	Description types.String `tfsdk:"description"`
@@ -50,38 +46,30 @@ func (r *labelResource) Metadata(_ context.Context, req resource.MetadataRequest
 // Schema defines the schema for the resource.
 func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "A label associated with the current Workspace.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
 			},
-			"label": schema.SingleNestedAttribute{
-				Description: "A label associated with the current Workspace.",
+			"key": schema.StringAttribute{
+				Description: "The key that represents the name of this label.",
 				Required:    true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
 				},
-				Attributes: map[string]schema.Attribute{
-					"key": schema.StringAttribute{
-						Description: "The key that represents the name of this label.",
-						Required:    true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
-					},
-					"value": schema.StringAttribute{
-						Description: "The value associated with the key of this label.",
-						Required:    true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
-					},
-					"description": schema.StringAttribute{
-						Description: "An optional description of the purpose of this label.",
-						Optional:    true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
-					},
+			},
+			"value": schema.StringAttribute{
+				Description: "The value associated with the key of this label.",
+				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description: "An optional description of the purpose of this label.",
+				Optional:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 		},
@@ -99,11 +87,11 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	label := api.Label{
-		Key:   types.String.ValueString(plan.Label.Key),
-		Value: types.String.ValueString(plan.Label.Value),
+		Key:   types.String.ValueString(plan.Key),
+		Value: types.String.ValueString(plan.Value),
 	}
 
-	label.Description = types.String.ValueStringPointer(plan.Label.Description)
+	label.Description = types.String.ValueStringPointer(plan.Description)
 
 	// Generate API request body from plan
 	response, _, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
@@ -117,12 +105,12 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	plan.Label.Key = types.StringValue(response.Data.Label.Key)
-	plan.Label.Value = types.StringValue(response.Data.Label.Value)
+	plan.Key = types.StringValue(response.Data.Label.Key)
+	plan.Value = types.StringValue(response.Data.Label.Value)
 	plan.Id = types.StringValue("placeholder")
 
 	if response.Data.Label.Description != nil {
-		plan.Label.Description = types.StringPointerValue(response.Data.Label.Description)
+		plan.Description = types.StringPointerValue(response.Data.Label.Description)
 	}
 
 	// Set state to fully populated data
@@ -155,13 +143,13 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	label := api.LabelV1{}
 	for _, l := range labels {
-		if l.Key == types.String.ValueString(state.Label.Key) && l.Value == types.String.ValueString(state.Label.Value) {
+		if l.Key == types.String.ValueString(state.Key) && l.Value == types.String.ValueString(state.Value) {
 			label = l
 		}
 	}
 
-	state.Label.Key = types.StringValue(label.Key)
-	state.Label.Value = types.StringValue(label.Value)
+	state.Key = types.StringValue(label.Key)
+	state.Value = types.StringValue(label.Value)
 	state.Id = types.StringValue("placeholder")
 
 	diags = resp.State.Set(ctx, &state)
@@ -187,7 +175,7 @@ func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	_, _, err := r.client.LabelsApi.DeleteLabel(ctx, state.Label.Key.ValueString(), state.Label.Value.ValueString()).Execute()
+	_, _, err := r.client.LabelsApi.DeleteLabel(ctx, state.Key.ValueString(), state.Value.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Deleting a Label", "Could not delete a label, unexpected error: "+err.Error(),

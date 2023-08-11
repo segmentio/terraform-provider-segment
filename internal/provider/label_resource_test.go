@@ -60,18 +60,16 @@ func TestAccLabelResource(t *testing.T) {
 			{
 				Config: providerConfig + `
 resource "segment_label" "test" {
-    label = {
-		key = "environment"
-      	value = "dev"
-      	description = "dev environment"
-	}
+    key = "environment"
+	value = "dev"
+	description = "dev environment"
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("segment_label.test", "id"),
-					resource.TestCheckResourceAttr("segment_label.test", "label.key", "environment"),
-					resource.TestCheckResourceAttr("segment_label.test", "label.value", "dev"),
-					resource.TestCheckResourceAttr("segment_label.test", "label.description", "dev environment"),
+					resource.TestCheckResourceAttr("segment_label.test", "key", "environment"),
+					resource.TestCheckResourceAttr("segment_label.test", "value", "dev"),
+					resource.TestCheckResourceAttr("segment_label.test", "description", "dev environment"),
 				),
 			},
 		},
