@@ -60,7 +60,7 @@ func TestAccLabelResource(t *testing.T) {
 			{
 				Config: providerConfig + `
 resource "segment_label" "test" {
-    key = "environment"
+	key = "environment"
 	value = "dev"
 	description = "dev environment"
 }
