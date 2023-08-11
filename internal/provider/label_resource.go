@@ -94,7 +94,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	label.Description = types.String.ValueStringPointer(plan.Description)
 
 	// Generate API request body from plan
-	response, _, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
+	out, _, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
 		Label: label,
 	}).Execute()
 	if err != nil {
@@ -105,12 +105,13 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	plan.Key = types.StringValue(response.Data.Label.Key)
-	plan.Value = types.StringValue(response.Data.Label.Value)
-	plan.Id = types.StringValue("placeholder")
+	outLabel := out.Data.Label
+	plan.Key = types.StringValue(outLabel.Key)
+	plan.Value = types.StringValue(outLabel.Value)
+	plan.Id = types.StringValue(id(outLabel.Key, outLabel.Value))
 
-	if response.Data.Label.Description != nil {
-		plan.Description = types.StringPointerValue(response.Data.Label.Description)
+	if outLabel.Description != nil {
+		plan.Description = types.StringPointerValue(outLabel.Description)
 	}
 
 	// Set state to fully populated data
@@ -150,7 +151,7 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	state.Key = types.StringValue(label.Key)
 	state.Value = types.StringValue(label.Value)
-	state.Id = types.StringValue("placeholder")
+	state.Id = types.StringValue(id(label.Key, label.Value))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -203,4 +204,8 @@ func (r *labelResource) Configure(_ context.Context, req resource.ConfigureReque
 
 	r.client = config.client
 	r.authContext = config.authContext
+}
+
+func id(key string, value string) string {
+	return fmt.Sprintf("label:%s:%s", key, value)
 }
