@@ -9,14 +9,7 @@ import (
 )
 
 func TestAccLabelResource(t *testing.T) {
-	fakeServer := httptest.NewServer(
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("content-type", "application/json")
-
-			switch r.Method {
-			case "POST":
-				{
-					_, _ = w.Write([]byte(`
+	postPayload := `
 {
   "data": {
     "label": {
@@ -25,12 +18,9 @@ func TestAccLabelResource(t *testing.T) {
       "description": "dev environment"
     }
   }
-}
-			`))
-				}
-			case "GET":
-				{
-					_, _ = w.Write([]byte(`
+}`
+
+	getPayload := `
 {
   "data": {
     "labels": [
@@ -41,8 +31,16 @@ func TestAccLabelResource(t *testing.T) {
       }
     ]
   }
-}			`))
-				}
+}`
+
+	fakeServer := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("content-type", "application/json")
+			switch r.Method {
+			case "POST":
+				_, _ = w.Write([]byte(postPayload))
+			case "GET":
+				_, _ = w.Write([]byte(getPayload))
 			}
 		}),
 	)
