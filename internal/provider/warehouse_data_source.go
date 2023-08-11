@@ -30,7 +30,7 @@ type warehouseDataSourceModel struct {
 	Metadata    *warehouseMetadataDataSourceModel `tfsdk:"metadata"`
 	WorkspaceId types.String                      `tfsdk:"workspace_id"`
 	Enabled     types.Bool                        `tfsdk:"enabled"`
-	//TODO: Add settings
+	// TODO: Add settings
 }
 
 func (d *warehouseDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -58,7 +58,7 @@ func (d *warehouseDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 				Computed:    true,
 				Description: "When set to true, this Warehouse receives data.",
 			},
-			//TODO: Add settings
+			// TODO: Add settings
 		},
 	}
 }

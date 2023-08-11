@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -108,7 +109,6 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	response, _, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
 		Label: label,
 	}).Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create a label",
