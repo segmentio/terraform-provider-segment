@@ -17,13 +17,13 @@ func TestAccLabelResource(t *testing.T) {
 			case "POST":
 				{
 					_, _ = w.Write([]byte(`
-				{
+{
   "data": {
     "label": {
-        "key": "environment",
-        "value": "dev",
-        "description": "dev environment"
-      }
+      "key": "environment",
+      "value": "dev",
+      "description": "dev environment"
+    }
   }
 }
 			`))
@@ -31,16 +31,17 @@ func TestAccLabelResource(t *testing.T) {
 			case "GET":
 				{
 					_, _ = w.Write([]byte(`
-				{
+{
   "data": {
-    "labels": [{
+    "labels": [
+      {
         "key": "environment",
         "value": "dev",
         "description": "dev environment"
-      }]
+      }
+    ]
   }
-}
-			`))
+}			`))
 				}
 			}
 		}),
