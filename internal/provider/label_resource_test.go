@@ -66,7 +66,7 @@ resource "segment_label" "test" {
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttrSet("segment_label.test", "id"),
+					resource.TestCheckResourceAttr("segment_label.test", "id", "label:environment:dev"),
 					resource.TestCheckResourceAttr("segment_label.test", "key", "environment"),
 					resource.TestCheckResourceAttr("segment_label.test", "value", "dev"),
 					resource.TestCheckResourceAttr("segment_label.test", "description", "dev environment"),
