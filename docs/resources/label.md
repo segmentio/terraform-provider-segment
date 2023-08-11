@@ -3,12 +3,12 @@
 page_title: "segment_label Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  
+  A label associated with the current Workspace.
 ---
 
 # segment_label (Resource)
 
-
+A label associated with the current Workspace.
 
 
 
@@ -17,20 +17,13 @@ description: |-
 
 ### Required
 
-- `label` (Attributes) A label associated with the current Workspace. (see [below for nested schema](#nestedatt--label))
+- `key` (String) The key that represents the name of this label.
+- `value` (String) The value associated with the key of this label.
+
+### Optional
+
+- `description` (String) An optional description of the purpose of this label.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-<a id="nestedatt--label"></a>
-### Nested Schema for `label`
-
-Required:
-
-- `key` (String) The key that represents the name of this label.
-- `value` (String) The value associated with the key of this label.
-
-Optional:
-
-- `description` (String) An optional description of the purpose of this label.
