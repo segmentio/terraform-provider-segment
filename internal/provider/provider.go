@@ -143,6 +143,7 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewLabelResource,
+		NewDestinationResource,
 	}
 }
 
