@@ -23,26 +23,15 @@ output "source" {
   value = data.segment_source.example
 }
 
-data "segment_warehouse_metadata" "example" {}
+# resource "segment_source" "example" {
+#   slug = "dean-terraform-source"
+#   name = "Dean's Terraform Source woohoo!"
+#   metadata = {
+#     id = "UBrsG9RVzw"
+#   }
+#   enabled = false
+# }
 
-output "warehouse_metadata" {
-  value = data.segment_warehouse_metadata.example
-}
-
-data "segment_source_metadata" "example" {}
-
-output "source_metadata" {
-  value = data.segment_source_metadata.example
-}
-
-data "segment_destination_metadata" "example" {}
-
-output "destination_metadata" {
-  value = data.segment_destination_metadata.example
-}
-
-data "segment_warehouse" "example" {}
-
-output "warehouse" {
-  value = data.segment_warehouse.example
-}
+# output "source_resource" {
+#   value = resource.segment_source.example
+# }
