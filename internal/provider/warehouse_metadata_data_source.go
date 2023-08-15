@@ -29,12 +29,12 @@ type warehouseMetadataDataSource struct {
 }
 
 type warehouseMetadataDataSourceModel struct {
-	Id          types.String        `tfsdk:"id"`
-	Name        types.String        `tfsdk:"name"`
-	Slug        types.String        `tfsdk:"slug"`
-	Description types.String        `tfsdk:"description"`
-	Logos       *Logos              `tfsdk:"logos"`
-	Options     []IntegrationOption `tfsdk:"options"`
+	Id          types.String                  `tfsdk:"id"`
+	Name        types.String                  `tfsdk:"name"`
+	Slug        types.String                  `tfsdk:"slug"`
+	Description types.String                  `tfsdk:"description"`
+	Logos       *LogosStateModel              `tfsdk:"logos"`
+	Options     []IntegrationOptionStateModel `tfsdk:"options"`
 }
 
 func warehouseMetadataSchema() map[string]schema.Attribute {
@@ -156,11 +156,11 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 	}
 }
 
-func getOptions(options []api.IntegrationOptionBeta) []IntegrationOption {
-	var integrationOptions []IntegrationOption
+func getOptions(options []api.IntegrationOptionBeta) []IntegrationOptionStateModel {
+	var integrationOptions []IntegrationOptionStateModel
 
 	for _, opt := range options {
-		integrationOption := IntegrationOption{
+		integrationOption := IntegrationOptionStateModel{
 			Name:     types.StringValue(opt.Name),
 			Type:     types.StringValue(opt.Type),
 			Required: types.BoolValue(opt.Required),
@@ -185,8 +185,8 @@ func getOptions(options []api.IntegrationOptionBeta) []IntegrationOption {
 	return integrationOptions
 }
 
-func getLogos2(logos api.Logos2) *Logos {
-	logosToAdd := Logos{
+func getLogos2(logos api.Logos2) *LogosStateModel {
+	logosToAdd := LogosStateModel{
 		Default: types.StringValue(logos.Default),
 	}
 

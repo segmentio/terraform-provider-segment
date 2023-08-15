@@ -95,26 +95,26 @@ type Contact struct {
 }
 
 type destinationMetadataDataSourceModel struct {
-	Id                 types.String        `tfsdk:"id"`
-	Name               types.String        `tfsdk:"name"`
-	Slug               types.String        `tfsdk:"slug"`
-	Description        types.String        `tfsdk:"description"`
-	Logos              *Logos              `tfsdk:"logos"`
-	Options            []IntegrationOption `tfsdk:"options"`
-	Categories         []types.String      `tfsdk:"categories"`
-	Website            types.String        `tfsdk:"website"`
-	Components         []Component         `tfsdk:"components"`
-	PreviousNames      []types.String      `tfsdk:"previous_names"`
-	Status             types.String        `tfsdk:"status"`
-	SupportedFeatures  *SupportedFeature   `tfsdk:"supported_features"`
-	SupportedMethods   *SupportedMethod    `tfsdk:"supported_methods"`
-	SupportedPlatforms *SupportedPlatform  `tfsdk:"supported_platforms"`
-	Actions            []Action            `tfsdk:"actions"`
-	Presets            []Preset            `tfsdk:"presets"`
-	Contacts           []Contact           `tfsdk:"contacts"`
-	PartnerOwned       types.Bool          `tfsdk:"partner_owned"`
-	SupportedRegions   []types.String      `tfsdk:"supported_regions"`
-	RegionEndpoints    []types.String      `tfsdk:"region_endpoints"`
+	Id                 types.String                  `tfsdk:"id"`
+	Name               types.String                  `tfsdk:"name"`
+	Slug               types.String                  `tfsdk:"slug"`
+	Description        types.String                  `tfsdk:"description"`
+	Logos              *LogosStateModel              `tfsdk:"logos"`
+	Options            []IntegrationOptionStateModel `tfsdk:"options"`
+	Categories         []types.String                `tfsdk:"categories"`
+	Website            types.String                  `tfsdk:"website"`
+	Components         []Component                   `tfsdk:"components"`
+	PreviousNames      []types.String                `tfsdk:"previous_names"`
+	Status             types.String                  `tfsdk:"status"`
+	SupportedFeatures  *SupportedFeature             `tfsdk:"supported_features"`
+	SupportedMethods   *SupportedMethod              `tfsdk:"supported_methods"`
+	SupportedPlatforms *SupportedPlatform            `tfsdk:"supported_platforms"`
+	Actions            []Action                      `tfsdk:"actions"`
+	Presets            []Preset                      `tfsdk:"presets"`
+	Contacts           []Contact                     `tfsdk:"contacts"`
+	PartnerOwned       types.Bool                    `tfsdk:"partner_owned"`
+	SupportedRegions   []types.String                `tfsdk:"supported_regions"`
+	RegionEndpoints    []types.String                `tfsdk:"region_endpoints"`
 }
 
 func destinationMetadataSchema() map[string]schema.Attribute {
@@ -756,8 +756,8 @@ func (d *destinationMetadataDataSource) Configure(_ context.Context, req datasou
 	d.authContext = clientInfo.authContext
 }
 
-func getLogosDestinationMetadata(logos api.Logos) *Logos {
-	logosToAdd := Logos{
+func getLogosDestinationMetadata(logos api.Logos) *LogosStateModel {
+	logosToAdd := LogosStateModel{
 		Default: types.StringValue(logos.Default),
 	}
 
