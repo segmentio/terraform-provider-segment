@@ -29,14 +29,14 @@ type sourceMetadataDataSource struct {
 }
 
 type sourceMetadataDataSourceModel struct {
-	Id                 types.String        `tfsdk:"id"`
-	Name               types.String        `tfsdk:"name"`
-	Slug               types.String        `tfsdk:"slug"`
-	Description        types.String        `tfsdk:"description"`
-	Logos              *Logos              `tfsdk:"logos"`
-	Options            []IntegrationOption `tfsdk:"options"`
-	Categories         []types.String      `tfsdk:"categories"`
-	IsCloudEventSource types.Bool          `tfsdk:"is_cloud_event_source"`
+	Id                 types.String                  `tfsdk:"id"`
+	Name               types.String                  `tfsdk:"name"`
+	Slug               types.String                  `tfsdk:"slug"`
+	Description        types.String                  `tfsdk:"description"`
+	Logos              *LogosStateModel              `tfsdk:"logos"`
+	Options            []IntegrationOptionStateModel `tfsdk:"options"`
+	Categories         []types.String                `tfsdk:"categories"`
+	IsCloudEventSource types.Bool                    `tfsdk:"is_cloud_event_source"`
 }
 
 // Metadata returns the data source type name.
@@ -92,8 +92,8 @@ func getCategories(categories []string) []types.String {
 	return categoriesToAdd
 }
 
-func getLogosSourceMetadata(logos api.Logos1) *Logos {
-	logosToAdd := Logos{
+func getLogosSourceMetadata(logos api.Logos1) *LogosStateModel {
+	logosToAdd := LogosStateModel{
 		Default: types.StringValue(logos.Default),
 	}
 
