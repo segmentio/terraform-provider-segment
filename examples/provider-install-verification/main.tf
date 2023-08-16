@@ -22,16 +22,3 @@ data "segment_source" "example" {
 output "source" {
   value = data.segment_source.example
 }
-
-# resource "segment_source" "example" {
-#   slug = "dean-terraform-source"
-#   name = "Dean's Terraform Source woohoo!"
-#   metadata = {
-#     id = "UBrsG9RVzw"
-#   }
-#   enabled = false
-# }
-
-# output "source_resource" {
-#   value = resource.segment_source.example
-# }

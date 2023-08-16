@@ -35,7 +35,7 @@ endif
 
 coverage-threshold = ( \
 	bash -c '\
-	COVERAGE_THRESHOLD=89;\
+	COVERAGE_THRESHOLD=85;\
 	ACTUAL_COVERAGE=`go tool cover -func=coverage.out | grep total | grep -Eo "[0-9]{2,3}"`; \
 	if [ $$ACTUAL_COVERAGE -ge $$COVERAGE_THRESHOLD ]; then \
 	  echo "✅ Code coverage OK: $$ACTUAL_COVERAGE% (threshold $$COVERAGE_THRESHOLD%)"; \

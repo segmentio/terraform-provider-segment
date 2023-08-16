@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -13,8 +14,9 @@ import (
 )
 
 var (
-	_ resource.Resource              = &sourceResource{}
-	_ resource.ResourceWithConfigure = &sourceResource{}
+	_ resource.Resource                = &sourceResource{}
+	_ resource.ResourceWithConfigure   = &sourceResource{}
+	_ resource.ResourceWithImportState = &sourceResource{}
 )
 
 func NewSourceResource() resource.Resource {
@@ -317,6 +319,11 @@ func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		)
 		return
 	}
+}
+
+func (r *sourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
 func (r *sourceResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
