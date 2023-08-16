@@ -22,27 +22,3 @@ data "segment_source" "example" {
 output "source" {
   value = data.segment_source.example
 }
-
-data "segment_warehouse_metadata" "example" {}
-
-output "warehouse_metadata" {
-  value = data.segment_warehouse_metadata.example
-}
-
-data "segment_source_metadata" "example" {}
-
-output "source_metadata" {
-  value = data.segment_source_metadata.example
-}
-
-data "segment_destination_metadata" "example" {}
-
-output "destination_metadata" {
-  value = data.segment_destination_metadata.example
-}
-
-data "segment_warehouse" "example" {}
-
-output "warehouse" {
-  value = data.segment_warehouse.example
-}
