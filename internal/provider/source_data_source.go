@@ -199,7 +199,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	source := out.Data.Source
 
 	var state SourceStateModel
-	state.Get(source)
+	state.Fill(source)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

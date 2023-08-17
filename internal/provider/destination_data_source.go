@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/segmentio/public-api-sdk-go/api"
@@ -80,15 +79,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	destination := response.Data.GetDestination()
 
-	state.Id = types.StringValue(destination.Id)
-
-	if destination.Name != nil {
-		state.Name = types.StringValue(*destination.Name)
-	}
-
-	state.SourceId = types.StringValue(destination.SourceId)
-	state.Enabled = types.BoolValue(destination.Enabled)
-	state.Metadata = GetDestinationMetadata(destination.Metadata)
+	state.Fill(&destination)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

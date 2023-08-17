@@ -225,7 +225,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	source.Name = updateOut.Data.Source.Name
 
 	var state SourceStateModel
-	state.Get(api.Source4(source))
+	state.Fill(api.Source4(source))
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -255,7 +255,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	source := out.Data.Source
 
 	var state SourceStateModel
-	state.Get(source)
+	state.Fill(source)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -294,7 +294,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	source := out.Data.Source
 
-	state.Get(api.Source4(source))
+	state.Fill(api.Source4(source))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

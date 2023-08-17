@@ -462,14 +462,10 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	outDest := out.Data.Destination
+	destination := api.Destination(out.Data.Destination)
 
 	var state DestinationStateModel
-	state.Id = types.StringValue(outDest.Id)
-	state.Name = types.StringPointerValue(outDest.Name)
-	state.SourceId = types.StringValue(outDest.SourceId)
-	state.Enabled = types.BoolValue(outDest.Enabled)
-	state.Metadata = GetDestinationMetadata(outDest.Metadata)
+	state.Fill(&destination)
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -499,15 +495,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 
 	destination := out.Data.Destination
 
-	state.Id = types.StringValue(destination.Id)
-
-	if destination.Name != nil {
-		state.Name = types.StringValue(*destination.Name)
-	}
-
-	state.Enabled = types.BoolValue(destination.Enabled)
-	state.SourceId = types.StringValue(destination.SourceId)
-	state.Metadata = GetDestinationMetadata(destination.Metadata)
+	state.Fill(&destination)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -542,14 +530,10 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	outDest := out.Data.Destination
+	destination := api.Destination(out.Data.Destination)
 
 	var state DestinationStateModel
-	state.Id = types.StringValue(outDest.Id)
-	state.Name = types.StringPointerValue(outDest.Name)
-	state.SourceId = types.StringValue(outDest.SourceId)
-	state.Enabled = types.BoolValue(outDest.Enabled)
-	state.Metadata = GetDestinationMetadata(outDest.Metadata)
+	state.Fill(&destination)
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)

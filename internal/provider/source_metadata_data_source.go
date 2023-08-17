@@ -28,17 +28,6 @@ type sourceMetadataDataSource struct {
 	authContext context.Context
 }
 
-type sourceMetadataDataSourceModel struct {
-	Id                 types.String                  `tfsdk:"id"`
-	Name               types.String                  `tfsdk:"name"`
-	Slug               types.String                  `tfsdk:"slug"`
-	Description        types.String                  `tfsdk:"description"`
-	Logos              *LogosStateModel              `tfsdk:"logos"`
-	Options            []IntegrationOptionStateModel `tfsdk:"options"`
-	Categories         []types.String                `tfsdk:"categories"`
-	IsCloudEventSource types.Bool                    `tfsdk:"is_cloud_event_source"`
-}
-
 // Metadata returns the data source type name.
 func (d *sourceMetadataDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_source_metadata"
@@ -46,7 +35,7 @@ func (d *sourceMetadataDataSource) Metadata(_ context.Context, req datasource.Me
 
 // Read refreshes the Terraform state with the latest data.
 func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state sourceMetadataDataSourceModel
+	var state SourceMetadataStateModel
 
 	diags := req.Config.Get(ctx, &state)
 
@@ -55,7 +44,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	response, _, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, state.Id.ValueString()).Execute()
+	response, _, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",
@@ -65,47 +54,13 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	sourceMetadata := response.Data.SourceMetadata
-
-	state.Id = types.StringValue(sourceMetadata.Id)
-	state.Name = types.StringValue(sourceMetadata.Name)
-	state.Description = types.StringValue(sourceMetadata.Description)
-	state.Slug = types.StringValue(sourceMetadata.Slug)
-	state.Logos = getLogosSourceMetadata(sourceMetadata.Logos)
-	state.Options = getOptions(sourceMetadata.Options)
-	state.IsCloudEventSource = types.BoolValue(sourceMetadata.IsCloudEventSource)
-	state.Categories = getCategories(sourceMetadata.Categories)
+	state.Fill(sourceMetadata)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func getCategories(categories []string) []types.String {
-	var categoriesToAdd []types.String
-
-	for _, cat := range categories {
-		categoriesToAdd = append(categoriesToAdd, types.StringValue(cat))
-	}
-
-	return categoriesToAdd
-}
-
-func getLogosSourceMetadata(logos api.Logos1) *LogosStateModel {
-	logosToAdd := LogosStateModel{
-		Default: types.StringValue(logos.Default),
-	}
-
-	if logos.Mark.IsSet() {
-		logosToAdd.Mark = types.StringValue(*logos.Mark.Get())
-	}
-
-	if logos.Alt.IsSet() {
-		logosToAdd.Alt = types.StringValue(*logos.Alt.Get())
-	}
-
-	return &logosToAdd
 }
 
 func sourceMetadataSchema() map[string]schema.Attribute {
