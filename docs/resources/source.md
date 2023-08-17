@@ -15,7 +15,8 @@ description: |-
 ```terraform
 # Configures a specific source
 resource "segment_source" "my_source" {
-  name    = "My destination"
+  slug    = "my_source_slug"
+  name    = "My Source"
   enabled = true
   metadata = {
     id = "abc123"
