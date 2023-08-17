@@ -22,3 +22,12 @@ data "segment_source" "example" {
 output "source" {
   value = data.segment_source.example
 }
+
+resource "segment_destination" "example" {
+  name      = "Dean's Terraform Destination"
+  enabled   = true
+  source_id = data.segment_source.example.id
+  metadata = {
+    id = "54521fd725e721e32a72eebf"
+  }
+}

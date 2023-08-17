@@ -25,15 +25,6 @@ type destinationDataSource struct {
 	authContext context.Context
 }
 
-type destinationDataSourceModel struct {
-	Id       types.String                        `tfsdk:"id"`
-	Name     types.String                        `tfsdk:"name"`
-	Enabled  types.Bool                          `tfsdk:"enabled"`
-	Metadata *destinationMetadataDataSourceModel `tfsdk:"metadata"`
-	SourceId types.String                        `tfsdk:"source_id"`
-	// TODO: Add Settings
-}
-
 func (d *destinationDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_destination"
 }
@@ -69,7 +60,7 @@ func (d *destinationDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 }
 
 func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state destinationDataSourceModel
+	var state DestinationStateModel
 
 	diags := req.Config.Get(ctx, &state)
 
@@ -97,40 +88,13 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	state.SourceId = types.StringValue(destination.SourceId)
 	state.Enabled = types.BoolValue(destination.Enabled)
-	state.Metadata = getDestinationMetadata(destination.Metadata)
+	state.Metadata = GetDestinationMetadata(destination.Metadata)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func getDestinationMetadata(destinationMetadata api.Metadata) *destinationMetadataDataSourceModel {
-	var state destinationMetadataDataSourceModel
-
-	state.Id = types.StringValue(destinationMetadata.Id)
-	state.Name = types.StringValue(destinationMetadata.Name)
-	state.Description = types.StringValue(destinationMetadata.Description)
-	state.Slug = types.StringValue(destinationMetadata.Slug)
-	state.Logos = getLogosDestinationMetadata(destinationMetadata.Logos)
-	state.Options = getOptions(destinationMetadata.Options)
-	state.Actions = getActions(destinationMetadata.Actions)
-	state.Categories = getCategories(destinationMetadata.Categories)
-	state.Presets = getPresets(destinationMetadata.Presets)
-	state.Contacts = getContacts(destinationMetadata.Contacts)
-	state.PartnerOwned = getPartnerOwned(destinationMetadata.PartnerOwned)
-	state.SupportedRegions = getSupportedRegions(destinationMetadata.SupportedRegions)
-	state.RegionEndpoints = getRegionEndpoints(destinationMetadata.RegionEndpoints)
-	state.Status = types.StringValue(destinationMetadata.Status)
-	state.Website = types.StringValue(destinationMetadata.Website)
-	state.Components = getComponents(destinationMetadata.Components)
-	state.PreviousNames = getPreviousNames(destinationMetadata.PreviousNames)
-	state.SupportedMethods = getSupportedMethods(destinationMetadata.SupportedMethods)
-	state.SupportedFeatures = getSupportedFeatures(destinationMetadata.SupportedFeatures)
-	state.SupportedPlatforms = getSupportedPlatforms(destinationMetadata.SupportedPlatforms)
-
-	return &state
 }
 
 func (d *destinationDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

@@ -94,7 +94,7 @@ type Contact struct {
 	IsPrimary types.Bool   `tfsdk:"is_primary"`
 }
 
-type destinationMetadataDataSourceModel struct {
+type destinationMetadataStateModel struct {
 	Id                 types.String                  `tfsdk:"id"`
 	Name               types.String                  `tfsdk:"name"`
 	Slug               types.String                  `tfsdk:"slug"`
@@ -475,7 +475,7 @@ func (d *destinationMetadataDataSource) Schema(_ context.Context, _ datasource.S
 
 // Read refreshes the Terraform state with the latest data.
 func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state destinationMetadataDataSourceModel
+	var state destinationMetadataStateModel
 
 	diags := req.Config.Get(ctx, &state)
 

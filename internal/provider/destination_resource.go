@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -30,38 +31,6 @@ type destinationResource struct {
 	authContext context.Context
 }
 
-type destinationResourceModel struct {
-	Id      types.String `tfsdk:"id"`
-	Name    types.String `tfsdk:"name"`
-	Enabled types.Bool   `tfsdk:"enabled"`
-	//Metadata   *destinationMetadataResourceModel `tfsdk:"metadata"` //TODO: Implement destination metadata handling
-	MetadataId types.String `tfsdk:"metadata_id"`
-	SourceId   types.String `tfsdk:"source_id"`
-}
-
-type destinationMetadataResourceModel struct {
-	Id                 types.String        `tfsdk:"id"`
-	Name               types.String        `tfsdk:"name"`
-	Slug               types.String        `tfsdk:"slug"`
-	Description        types.String        `tfsdk:"description"`
-	Logos              *Logos              `tfsdk:"logos"`
-	Options            []IntegrationOption `tfsdk:"options"`
-	Categories         []types.String      `tfsdk:"categories"`
-	Website            types.String        `tfsdk:"website"`
-	Components         []Component         `tfsdk:"components"`
-	PreviousNames      []types.String      `tfsdk:"previous_names"`
-	Status             types.String        `tfsdk:"status"`
-	SupportedFeatures  *SupportedFeature   `tfsdk:"supported_features"`
-	SupportedMethods   *SupportedMethod    `tfsdk:"supported_methods"`
-	SupportedPlatforms *SupportedPlatform  `tfsdk:"supported_platforms"`
-	Actions            []Action            `tfsdk:"actions"`
-	Presets            []Preset            `tfsdk:"presets"`
-	Contacts           []Contact           `tfsdk:"contacts"`
-	PartnerOwned       types.Bool          `tfsdk:"partner_owned"`
-	SupportedRegions   []types.String      `tfsdk:"supported_regions"`
-	RegionEndpoints    []types.String      `tfsdk:"region_endpoints"`
-}
-
 // Metadata returns the resource type name.
 func (r *destinationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_destination"
@@ -80,219 +49,33 @@ func (r *destinationResource) Schema(_ context.Context, _ resource.SchemaRequest
 			},
 			"name": schema.StringAttribute{
 				Optional: true,
+				Computed: true,
 			},
 			"enabled": schema.BoolAttribute{
 				Required: true,
 			},
 			"source_id": schema.StringAttribute{
 				Required: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
-			"metadata_id": schema.StringAttribute{
-				Required: true,
+			"metadata": schema.SingleNestedAttribute{
+				Required:   true,
+				Attributes: destinationMetadataResourceSchema(),
 			},
-			//"metadata": schema.SingleNestedAttribute{ TODO: Implement destination metadata handling
-			//	Computed:   true,
-			//	Attributes: destinationMetadataResourceSchema(),
-			//},
 		},
 	}
-}
-
-// Create creates the resource and sets the initial Terraform state.
-func (r *destinationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	//Retrieve values from plan
-	var plan destinationResourceModel
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	input := api.CreateDestinationV1Input{
-		SourceId:   plan.SourceId.ValueString(),
-		MetadataId: plan.MetadataId.ValueString(),
-		Enabled:    plan.Enabled.ValueBoolPointer(),
-		Name:       plan.Name.ValueStringPointer(),
-	}
-
-	// Generate API request body from plan
-	out, _, err := r.client.DestinationsApi.CreateDestination(ctx).CreateDestinationV1Input(input).Execute()
-
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Create a destination",
-			err.Error(),
-		)
-		return
-	}
-
-	outDest := out.Data.Destination
-	plan.Id = types.StringValue(outDest.Id)
-	plan.Name = types.StringPointerValue(outDest.Name)
-	plan.SourceId = types.StringValue(outDest.SourceId)
-	plan.Enabled = types.BoolValue(outDest.Enabled)
-	plan.MetadataId = types.StringValue(outDest.Metadata.Id)
-	//plan.Metadata = getDestinationMetadataResource(outDest.Metadata) //TODO: Implement destination metadata handling
-
-	// Set state to fully populated data
-	diags = resp.State.Set(ctx, plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-}
-
-// Read refreshes the Terraform state with the latest data.
-func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state destinationResourceModel
-	diags := req.State.Get(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, state.Id.ValueString()).Execute()
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Read Labels",
-			err.Error(),
-		)
-		return
-	}
-
-	destination := out.Data.Destination
-
-	state.Id = types.StringValue(destination.Id)
-
-	if destination.Name != nil {
-		state.Name = types.StringValue(*destination.Name)
-	}
-
-	state.Enabled = types.BoolValue(destination.Enabled)
-	state.SourceId = types.StringValue(destination.SourceId)
-	//state.Metadata = getDestinationMetadataResource(destination.Metadata) TODO: Implement destination metadata handling
-
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-}
-
-// Update updates the resource and sets the updated Terraform state on success.
-func (r *destinationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//Retrieve values from plan
-	var plan destinationResourceModel
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	input := api.UpdateDestinationV1Input{
-		Name:    *api.NewNullableString(plan.Name.ValueStringPointer()),
-		Enabled: plan.Enabled.ValueBoolPointer(),
-	}
-
-	// Generate API request body from plan
-	out, _, err := r.client.DestinationsApi.UpdateDestination(ctx, plan.Id.ValueString()).UpdateDestinationV1Input(input).Execute()
-
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Update a destination",
-			err.Error(),
-		)
-		return
-	}
-
-	outDest := out.Data.Destination
-	plan.Id = types.StringValue(outDest.Id)
-	plan.Name = types.StringPointerValue(outDest.Name)
-	plan.SourceId = types.StringValue(outDest.SourceId)
-	plan.Enabled = types.BoolValue(outDest.Enabled)
-	plan.MetadataId = types.StringValue(outDest.Metadata.Id)
-	//plan.Metadata = getDestinationMetadataResource(outDest.Metadata) //TODO: Implement destination metadata handling
-
-	// Set state to fully populated data
-	diags = resp.State.Set(ctx, plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-}
-
-// Delete deletes the resource and removes the Terraform state on success.
-func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// Retrieve values from state
-	var state destinationResourceModel
-	diags := req.State.Get(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	_, _, err := r.client.DestinationsApi.DeleteDestination(ctx, state.Id.ValueString()).Execute()
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Deleting a Destination", "Could not delete a destination, unexpected error: "+err.Error(),
-		)
-		return
-	}
-}
-
-// Configure adds the provider configured client to the resource.
-func (r *destinationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if req.ProviderData == nil {
-		return
-	}
-
-	config, ok := req.ProviderData.(*ClientInfo)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	r.client = config.client
-	r.authContext = config.authContext
-}
-
-func getDestinationMetadataResource(destinationMetadata api.Metadata) *destinationMetadataResourceModel {
-	var state destinationMetadataResourceModel
-
-	state.Id = types.StringValue(destinationMetadata.Id)
-	state.Name = types.StringValue(destinationMetadata.Name)
-	state.Description = types.StringValue(destinationMetadata.Description)
-	state.Slug = types.StringValue(destinationMetadata.Slug)
-	state.Logos = getLogosDestinationMetadata(destinationMetadata.Logos)
-	state.Options = getOptions(destinationMetadata.Options)
-	state.Actions = getActions(destinationMetadata.Actions)
-	state.Categories = getCategories(destinationMetadata.Categories)
-	state.Presets = getPresets(destinationMetadata.Presets)
-	state.Contacts = getContacts(destinationMetadata.Contacts)
-	state.PartnerOwned = getPartnerOwned(destinationMetadata.PartnerOwned)
-	state.SupportedRegions = getSupportedRegions(destinationMetadata.SupportedRegions)
-	state.RegionEndpoints = getRegionEndpoints(destinationMetadata.RegionEndpoints)
-	state.Status = types.StringValue(destinationMetadata.Status)
-	state.Website = types.StringValue(destinationMetadata.Website)
-	state.Components = getComponents(destinationMetadata.Components)
-	state.PreviousNames = getPreviousNames(destinationMetadata.PreviousNames)
-	state.SupportedMethods = getSupportedMethods(destinationMetadata.SupportedMethods)
-	state.SupportedFeatures = getSupportedFeatures(destinationMetadata.SupportedFeatures)
-	state.SupportedPlatforms = getSupportedPlatforms(destinationMetadata.SupportedPlatforms)
-
-	return &state
 }
 
 func destinationMetadataResourceSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Description: "The id of the Destination metadata. Config API note: analogous to `name`.",
-			Computed:    true,
+			Required:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
 		},
 		"name": schema.StringAttribute{
 			Description: "The user-friendly name of the Destination. Config API note: equal to `displayName`.",
@@ -311,15 +94,15 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 			Computed:    true,
 			Attributes: map[string]schema.Attribute{
 				"default": schema.StringAttribute{
-					Required: true,
+					Computed: true,
 				},
 				"mark": schema.StringAttribute{
 					Description: "The logo mark.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"alt": schema.StringAttribute{
 					Description: "The alternative text for this logo.",
-					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -342,7 +125,7 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 					},
 					"description": schema.StringAttribute{
 						Description: "An optional short text description of the field.",
-						Optional:    true,
+						Computed:    true,
 					},
 					//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
 					//"default_value": schema.AnyAttribute{
@@ -351,7 +134,7 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 					//},
 					"label": schema.StringAttribute{
 						Description: "An optional label for this field.",
-						Optional:    true,
+						Computed:    true,
 					},
 				},
 			},
@@ -389,7 +172,7 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 					},
 					"owner": schema.StringAttribute{
 						Description: "The owner of this component. Either 'SEGMENT' or 'PARTNER'.",
-						Optional:    true,
+						Computed:    true,
 					},
 				},
 			},
@@ -400,23 +183,23 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 			Attributes: map[string]schema.Attribute{
 				"cloud_mode_instances": schema.StringAttribute{
 					Description: "This Destination's support level for cloud mode instances.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"device_mode_instances": schema.StringAttribute{
 					Description: "This Destination's support level for device mode instances.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"replay": schema.BoolAttribute{
 					Description: "Whether this Destination supports replays.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"browser_unbundling": schema.BoolAttribute{
 					Description: "Whether this Destination supports browser unbundling.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"browser_unbundling_public": schema.BoolAttribute{
 					Description: "Whether this Destination supports public browser unbundling.",
-					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -426,23 +209,23 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 			Attributes: map[string]schema.Attribute{
 				"pageview": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `pageview` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"identify": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `identify` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"alias": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `alias` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"track": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `track` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"group": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `group` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -452,15 +235,15 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 			Attributes: map[string]schema.Attribute{
 				"browser": schema.BoolAttribute{
 					Description: "Whether this Destination supports browser events.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"server": schema.BoolAttribute{
 					Description: "Whether this Destination supports server events.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"mobile": schema.BoolAttribute{
 					Description: "Whether this Destination supports mobile events.",
-					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -495,7 +278,7 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 					},
 					"default_trigger": schema.StringAttribute{
 						Description: "The default value used as the trigger when connecting this action.",
-						Optional:    true,
+						Computed:    true,
 					},
 					"fields": schema.ListNestedAttribute{
 						Description: "The fields expected in order to perform the action.",
@@ -528,7 +311,7 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 								},
 								"placeholder": schema.StringAttribute{
 									Description: "An example value displayed but not saved.",
-									Optional:    true,
+									Computed:    true,
 								},
 								//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
 								//"default_value": {
@@ -629,4 +412,189 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 			Computed:    true,
 		},
 	}
+}
+
+// Create creates the resource and sets the initial Terraform state.
+func (r *destinationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	// Retrieve values from plan
+	var plan DestinationPlanModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	wrappedMetadataId, err := plan.Metadata.Attributes()["id"].ToTerraformValue(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to decode metadata id",
+			err.Error(),
+		)
+		return
+	}
+
+	var metadataId string
+	err = wrappedMetadataId.As(&metadataId)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to decode metadata id",
+			err.Error(),
+		)
+		return
+	}
+
+	input := api.CreateDestinationV1Input{
+		SourceId:   plan.SourceId.ValueString(),
+		MetadataId: metadataId,
+		Enabled:    plan.Enabled.ValueBoolPointer(),
+		Name:       plan.Name.ValueStringPointer(),
+		Settings:   map[string]interface{}{},
+	}
+
+	// Generate API request body from plan
+	out, _, err := r.client.DestinationsApi.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Create a destination",
+			err.Error(),
+		)
+		return
+	}
+
+	outDest := out.Data.Destination
+
+	var state DestinationStateModel
+	state.Id = types.StringValue(outDest.Id)
+	state.Name = types.StringPointerValue(outDest.Name)
+	state.SourceId = types.StringValue(outDest.SourceId)
+	state.Enabled = types.BoolValue(outDest.Enabled)
+	state.Metadata = GetDestinationMetadata(outDest.Metadata)
+
+	// Set state to fully populated data
+	diags = resp.State.Set(ctx, state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
+// Read refreshes the Terraform state with the latest data.
+func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state DestinationStateModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, state.Id.ValueString()).Execute()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Labels",
+			err.Error(),
+		)
+		return
+	}
+
+	destination := out.Data.Destination
+
+	state.Id = types.StringValue(destination.Id)
+
+	if destination.Name != nil {
+		state.Name = types.StringValue(*destination.Name)
+	}
+
+	state.Enabled = types.BoolValue(destination.Enabled)
+	state.SourceId = types.StringValue(destination.SourceId)
+	state.Metadata = GetDestinationMetadata(destination.Metadata)
+
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
+// Update updates the resource and sets the updated Terraform state on success.
+func (r *destinationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	// Retrieve values from plan
+	var plan DestinationPlanModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	input := api.UpdateDestinationV1Input{
+		Name:    *api.NewNullableString(plan.Name.ValueStringPointer()),
+		Enabled: plan.Enabled.ValueBoolPointer(),
+	}
+
+	// Generate API request body from plan
+	out, _, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.Id.ValueString()).UpdateDestinationV1Input(input).Execute()
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Update a destination",
+			err.Error(),
+		)
+		return
+	}
+
+	outDest := out.Data.Destination
+
+	var state DestinationStateModel
+	state.Id = types.StringValue(outDest.Id)
+	state.Name = types.StringPointerValue(outDest.Name)
+	state.SourceId = types.StringValue(outDest.SourceId)
+	state.Enabled = types.BoolValue(outDest.Enabled)
+	state.Metadata = GetDestinationMetadata(outDest.Metadata)
+
+	// Set state to fully populated data
+	diags = resp.State.Set(ctx, state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
+// Delete deletes the resource and removes the Terraform state on success.
+func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// Retrieve values from state
+	var state DestinationStateModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	_, _, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.Id.ValueString()).Execute()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Deleting a Destination", "Could not delete a destination, unexpected error: "+err.Error(),
+		)
+		return
+	}
+}
+
+// Configure adds the provider configured client to the resource.
+func (r *destinationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	config, ok := req.ProviderData.(*ClientInfo)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.client = config.client
+	r.authContext = config.authContext
 }
