@@ -3,9 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/segmentio/public-api-sdk-go/api"
@@ -23,15 +23,6 @@ func NewDestinationDataSource() datasource.DataSource {
 type destinationDataSource struct {
 	client      *api.APIClient
 	authContext context.Context
-}
-
-type destinationDataSourceModel struct {
-	Id       types.String                        `tfsdk:"id"`
-	Name     types.String                        `tfsdk:"name"`
-	Enabled  types.Bool                          `tfsdk:"enabled"`
-	Metadata *destinationMetadataDataSourceModel `tfsdk:"metadata"`
-	SourceId types.String                        `tfsdk:"source_id"`
-	// TODO: Add Settings
 }
 
 func (d *destinationDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -69,7 +60,7 @@ func (d *destinationDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 }
 
 func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state destinationDataSourceModel
+	var state models.DestinationState
 
 	diags := req.Config.Get(ctx, &state)
 
@@ -78,7 +69,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	response, _, err := d.client.DestinationsApi.GetDestination(d.authContext, state.Id.ValueString()).Execute()
+	response, _, err := d.client.DestinationsApi.GetDestination(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Destination",
@@ -89,48 +80,13 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	destination := response.Data.GetDestination()
 
-	state.Id = types.StringValue(destination.Id)
-
-	if destination.Name != nil {
-		state.Name = types.StringValue(*destination.Name)
-	}
-
-	state.SourceId = types.StringValue(destination.SourceId)
-	state.Enabled = types.BoolValue(destination.Enabled)
-	state.Metadata = getDestinationMetadata(destination.Metadata)
+	state.Fill(&destination)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func getDestinationMetadata(destinationMetadata api.Metadata) *destinationMetadataDataSourceModel {
-	var state destinationMetadataDataSourceModel
-
-	state.Id = types.StringValue(destinationMetadata.Id)
-	state.Name = types.StringValue(destinationMetadata.Name)
-	state.Description = types.StringValue(destinationMetadata.Description)
-	state.Slug = types.StringValue(destinationMetadata.Slug)
-	state.Logos = getLogosDestinationMetadata(destinationMetadata.Logos)
-	state.Options = getOptions(destinationMetadata.Options)
-	state.Actions = getActions(destinationMetadata.Actions)
-	state.Categories = getCategories(destinationMetadata.Categories)
-	state.Presets = getPresets(destinationMetadata.Presets)
-	state.Contacts = getContacts(destinationMetadata.Contacts)
-	state.PartnerOwned = getPartnerOwned(destinationMetadata.PartnerOwned)
-	state.SupportedRegions = getSupportedRegions(destinationMetadata.SupportedRegions)
-	state.RegionEndpoints = getRegionEndpoints(destinationMetadata.RegionEndpoints)
-	state.Status = types.StringValue(destinationMetadata.Status)
-	state.Website = types.StringValue(destinationMetadata.Website)
-	state.Components = getComponents(destinationMetadata.Components)
-	state.PreviousNames = getPreviousNames(destinationMetadata.PreviousNames)
-	state.SupportedMethods = getSupportedMethods(destinationMetadata.SupportedMethods)
-	state.SupportedFeatures = getSupportedFeatures(destinationMetadata.SupportedFeatures)
-	state.SupportedPlatforms = getSupportedPlatforms(destinationMetadata.SupportedPlatforms)
-
-	return &state
 }
 
 func (d *destinationDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
