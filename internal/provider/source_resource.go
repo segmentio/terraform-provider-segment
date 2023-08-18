@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -168,7 +169,7 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 }
 
 func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan SourcePlanModel
+	var plan models.SourcePlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -224,7 +225,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	source := out.Data.Source
 	source.Name = updateOut.Data.Source.Name
 
-	var state SourceStateModel
+	var state models.SourceState
 	state.Fill(api.Source4(source))
 
 	// Set state to fully populated data
@@ -236,7 +237,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 }
 
 func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var config SourceStateModel
+	var config models.SourceState
 	diags := req.State.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -254,7 +255,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	source := out.Data.Source
 
-	var state SourceStateModel
+	var state models.SourceState
 	state.Fill(source)
 
 	diags = resp.State.Set(ctx, &state)
@@ -265,14 +266,14 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 }
 
 func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan SourcePlanModel
+	var plan models.SourcePlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var state SourceStateModel
+	var state models.SourceState
 	diags = req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -304,7 +305,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 }
 
 func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var config SourceStateModel
+	var config models.SourceState
 	diags := req.State.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

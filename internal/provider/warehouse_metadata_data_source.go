@@ -3,8 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
 
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -26,15 +26,6 @@ func NewWarehouseMetadataDataSource() datasource.DataSource {
 type warehouseMetadataDataSource struct {
 	client      *api.APIClient
 	authContext context.Context
-}
-
-type warehouseMetadataDataSourceModel struct {
-	Id          types.String                  `tfsdk:"id"`
-	Name        types.String                  `tfsdk:"name"`
-	Slug        types.String                  `tfsdk:"slug"`
-	Description types.String                  `tfsdk:"description"`
-	Logos       *LogosStateModel              `tfsdk:"logos"`
-	Options     []IntegrationOptionStateModel `tfsdk:"options"`
 }
 
 func warehouseMetadataSchema() map[string]schema.Attribute {
@@ -122,7 +113,7 @@ func (d *warehouseMetadataDataSource) Metadata(_ context.Context, req datasource
 
 // Read refreshes the Terraform state with the latest data.
 func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state warehouseMetadataDataSourceModel
+	var state models.WarehouseMetadataState
 
 	diags := req.Config.Get(ctx, &state)
 
@@ -131,7 +122,7 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 		return
 	}
 
-	response, _, err := d.client.CatalogApi.GetWarehouseMetadata(d.authContext, state.Id.ValueString()).Execute()
+	response, _, err := d.client.CatalogApi.GetWarehouseMetadata(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Warehouse metadata",
@@ -142,63 +133,13 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 
 	warehouseMetadata := response.Data.WarehouseMetadata
 
-	state.Id = types.StringValue(warehouseMetadata.Id)
-	state.Name = types.StringValue(warehouseMetadata.Name)
-	state.Description = types.StringValue(warehouseMetadata.Description)
-	state.Slug = types.StringValue(warehouseMetadata.Slug)
-	state.Logos = getLogos2(warehouseMetadata.Logos)
-	state.Options = getOptions(warehouseMetadata.Options)
+	state.Fill(api.Metadata1(warehouseMetadata))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func getOptions(options []api.IntegrationOptionBeta) []IntegrationOptionStateModel {
-	var integrationOptions []IntegrationOptionStateModel
-
-	for _, opt := range options {
-		integrationOption := IntegrationOptionStateModel{
-			Name:     types.StringValue(opt.Name),
-			Type:     types.StringValue(opt.Type),
-			Required: types.BoolValue(opt.Required),
-		}
-
-		if opt.Description != nil {
-			integrationOption.Description = types.StringValue(*opt.Description)
-		}
-
-		if opt.Label != nil {
-			integrationOption.Label = types.StringValue(*opt.Label)
-		}
-
-		//TODO: Handle defaultValue which is a field of type Any
-		//if opt.DefaultValue != nil {
-		//	integrationOption.Label = types.value(*opt.DefaultValue)
-		//}
-
-		integrationOptions = append(integrationOptions, integrationOption)
-	}
-
-	return integrationOptions
-}
-
-func getLogos2(logos api.Logos2) *LogosStateModel {
-	logosToAdd := LogosStateModel{
-		Default: types.StringValue(logos.Default),
-	}
-
-	if logos.Mark.IsSet() {
-		logosToAdd.Mark = types.StringValue(*logos.Mark.Get())
-	}
-
-	if logos.Alt.IsSet() {
-		logosToAdd.Alt = types.StringValue(*logos.Alt.Get())
-	}
-
-	return &logosToAdd
 }
 
 // Schema defines the schema for the data source.

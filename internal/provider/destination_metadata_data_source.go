@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
@@ -386,7 +387,7 @@ func (d *destinationMetadataDataSource) Schema(_ context.Context, _ datasource.S
 
 // Read refreshes the Terraform state with the latest data.
 func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state DestinationMetadataStateModel
+	var state models.DestinationMetadataState
 
 	diags := req.Config.Get(ctx, &state)
 

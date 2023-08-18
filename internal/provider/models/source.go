@@ -1,11 +1,11 @@
-package provider
+package models
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 )
 
-type SourcePlanModel struct {
+type SourcePlan struct {
 	Enabled     types.Bool   `tfsdk:"enabled"`
 	ID          types.String `tfsdk:"id"`
 	Labels      types.List   `tfsdk:"labels"`
@@ -16,24 +16,24 @@ type SourcePlanModel struct {
 	WriteKeys   types.List   `tfsdk:"write_keys"`
 }
 
-type SourceStateModel struct {
-	Enabled     types.Bool                `tfsdk:"enabled"`
-	ID          types.String              `tfsdk:"id"`
-	Labels      []LabelStateModel         `tfsdk:"labels"`
-	Metadata    *SourceMetadataStateModel `tfsdk:"metadata"`
-	Name        types.String              `tfsdk:"name"`
-	Slug        types.String              `tfsdk:"slug"`
-	WorkspaceID types.String              `tfsdk:"workspace_id"`
-	WriteKeys   []types.String            `tfsdk:"write_keys"`
+type SourceState struct {
+	Enabled     types.Bool           `tfsdk:"enabled"`
+	ID          types.String         `tfsdk:"id"`
+	Labels      []LabelState         `tfsdk:"labels"`
+	Metadata    *SourceMetadataState `tfsdk:"metadata"`
+	Name        types.String         `tfsdk:"name"`
+	Slug        types.String         `tfsdk:"slug"`
+	WorkspaceID types.String         `tfsdk:"workspace_id"`
+	WriteKeys   []types.String       `tfsdk:"write_keys"`
 }
 
-type LabelStateModel struct {
+type LabelState struct {
 	Description types.String `tfsdk:"description"`
 	Key         types.String `tfsdk:"key"`
 	Value       types.String `tfsdk:"value"`
 }
 
-func (s *SourceStateModel) Fill(source api.Source4) {
+func (s *SourceState) Fill(source api.Source4) {
 	s.ID = types.StringValue(source.Id)
 	if source.Name != nil {
 		s.Name = types.StringValue(*source.Name)
@@ -47,8 +47,8 @@ func (s *SourceStateModel) Fill(source api.Source4) {
 	// TODO: Populate settings
 }
 
-func (s *SourceStateModel) getLogos(logos api.Logos1) *LogosStateModel {
-	logosToAdd := LogosStateModel{
+func (s *SourceState) getLogos(logos api.Logos1) *LogosState {
+	logosToAdd := LogosState{
 		Default: types.StringValue(logos.Default),
 	}
 	if logos.Alt.IsSet() {
@@ -61,8 +61,8 @@ func (s *SourceStateModel) getLogos(logos api.Logos1) *LogosStateModel {
 	return &logosToAdd
 }
 
-func (s *SourceStateModel) getMetadata(metadata api.Metadata2) *SourceMetadataStateModel {
-	metadataToAdd := SourceMetadataStateModel{
+func (s *SourceState) getMetadata(metadata api.Metadata2) *SourceMetadataState {
+	metadataToAdd := SourceMetadataState{
 		ID:                 types.StringValue(metadata.Id),
 		Description:        types.StringValue(metadata.Description),
 		IsCloudEventSource: types.BoolValue(metadata.IsCloudEventSource),
@@ -76,7 +76,7 @@ func (s *SourceStateModel) getMetadata(metadata api.Metadata2) *SourceMetadataSt
 	}
 
 	for _, integrationOption := range metadata.Options {
-		integrationOptionToAdd := IntegrationOptionStateModel{
+		integrationOptionToAdd := IntegrationOptionState{
 			Name:     types.StringValue(integrationOption.Name),
 			Type:     types.StringValue(integrationOption.Type),
 			Required: types.BoolValue(integrationOption.Required),
@@ -94,11 +94,11 @@ func (s *SourceStateModel) getMetadata(metadata api.Metadata2) *SourceMetadataSt
 	return &metadataToAdd
 }
 
-func (s *SourceStateModel) getLabels(labels []api.LabelV1) []LabelStateModel {
-	var labelsToAdd []LabelStateModel
+func (s *SourceState) getLabels(labels []api.LabelV1) []LabelState {
+	var labelsToAdd []LabelState
 
 	for _, label := range labels {
-		labelToAdd := LabelStateModel{
+		labelToAdd := LabelState{
 			Key:   types.StringValue(label.Key),
 			Value: types.StringValue(label.Value),
 		}
@@ -113,7 +113,7 @@ func (s *SourceStateModel) getLabels(labels []api.LabelV1) []LabelStateModel {
 	return labelsToAdd
 }
 
-func (s *SourceStateModel) getWriteKeys(writeKeys []string) []types.String {
+func (s *SourceState) getWriteKeys(writeKeys []string) []types.String {
 	var writeKeysToAdd []types.String
 
 	for _, writeKey := range writeKeys {

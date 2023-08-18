@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 
@@ -59,7 +60,7 @@ func (d *destinationDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 }
 
 func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state DestinationStateModel
+	var state models.DestinationState
 
 	diags := req.Config.Get(ctx, &state)
 
@@ -68,7 +69,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	response, _, err := d.client.DestinationsApi.GetDestination(d.authContext, state.Id.ValueString()).Execute()
+	response, _, err := d.client.DestinationsApi.GetDestination(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Destination",

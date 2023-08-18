@@ -3,9 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/segmentio/public-api-sdk-go/api"
@@ -23,14 +23,6 @@ func NewWarehouseDataSource() datasource.DataSource {
 type warehouseDataSource struct {
 	client      *api.APIClient
 	authContext context.Context
-}
-
-type warehouseDataSourceModel struct {
-	Id          types.String                      `tfsdk:"id"`
-	Metadata    *warehouseMetadataDataSourceModel `tfsdk:"metadata"`
-	WorkspaceId types.String                      `tfsdk:"workspace_id"`
-	Enabled     types.Bool                        `tfsdk:"enabled"`
-	// TODO: Add settings
 }
 
 func (d *warehouseDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -64,7 +56,7 @@ func (d *warehouseDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 }
 
 func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state warehouseDataSourceModel
+	var state models.WarehouseState
 
 	diags := req.Config.Get(ctx, &state)
 
@@ -73,7 +65,7 @@ func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, state.Id.ValueString()).Execute()
+	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Warehouse",
@@ -83,28 +75,13 @@ func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	warehouse := response.Data.GetWarehouse()
-
-	state.Id = types.StringValue(warehouse.Id)
-	state.WorkspaceId = types.StringValue(warehouse.WorkspaceId)
-	state.Enabled = types.BoolValue(warehouse.Enabled)
-	state.Metadata = getWarehouseMetadata(warehouse.Metadata)
+	state.Fill(warehouse)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func getWarehouseMetadata(warehouseMetadata api.Metadata1) *warehouseMetadataDataSourceModel {
-	var state warehouseMetadataDataSourceModel
-	state.Id = types.StringValue(warehouseMetadata.Id)
-	state.Name = types.StringValue(warehouseMetadata.Name)
-	state.Description = types.StringValue(warehouseMetadata.Description)
-	state.Slug = types.StringValue(warehouseMetadata.Slug)
-	state.Logos = getLogos2(warehouseMetadata.Logos)
-	state.Options = getOptions(warehouseMetadata.Options)
-	return &state
 }
 
 func (d *warehouseDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

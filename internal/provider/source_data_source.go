@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -180,7 +181,7 @@ func (d *sourceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 }
 
 func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var config SourceStateModel
+	var config models.SourceState
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -198,7 +199,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	source := out.Data.Source
 
-	var state SourceStateModel
+	var state models.SourceState
 	state.Fill(source)
 
 	diags = resp.State.Set(ctx, &state)

@@ -25,7 +25,7 @@ type labelsDataSource struct {
 }
 
 type labelsDataSourceModel struct {
-	Id     types.String           `tfsdk:"id"`
+	ID     types.String           `tfsdk:"id"`
 	Labels []labelDataSourceModel `tfsdk:"labels"`
 }
 
@@ -72,7 +72,7 @@ func (d *labelsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 func (d *labelsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state labelsDataSourceModel
 
-	state.Id = types.StringValue("placeholder")
+	state.ID = types.StringValue("placeholder")
 
 	response, _, err := d.client.LabelsApi.ListLabels(d.authContext).Execute()
 	if err != nil {

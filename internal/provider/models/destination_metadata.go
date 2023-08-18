@@ -1,4 +1,4 @@
-package provider
+package models
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -71,30 +71,30 @@ type Contact struct {
 	IsPrimary types.Bool   `tfsdk:"is_primary"`
 }
 
-type DestinationMetadataStateModel struct {
-	Id                 types.String                  `tfsdk:"id"`
-	Name               types.String                  `tfsdk:"name"`
-	Slug               types.String                  `tfsdk:"slug"`
-	Description        types.String                  `tfsdk:"description"`
-	Logos              *LogosStateModel              `tfsdk:"logos"`
-	Options            []IntegrationOptionStateModel `tfsdk:"options"`
-	Categories         []types.String                `tfsdk:"categories"`
-	Website            types.String                  `tfsdk:"website"`
-	Components         []Component                   `tfsdk:"components"`
-	PreviousNames      []types.String                `tfsdk:"previous_names"`
-	Status             types.String                  `tfsdk:"status"`
-	SupportedFeatures  *SupportedFeature             `tfsdk:"supported_features"`
-	SupportedMethods   *SupportedMethod              `tfsdk:"supported_methods"`
-	SupportedPlatforms *SupportedPlatform            `tfsdk:"supported_platforms"`
-	Actions            []Action                      `tfsdk:"actions"`
-	Presets            []Preset                      `tfsdk:"presets"`
-	Contacts           []Contact                     `tfsdk:"contacts"`
-	PartnerOwned       types.Bool                    `tfsdk:"partner_owned"`
-	SupportedRegions   []types.String                `tfsdk:"supported_regions"`
-	RegionEndpoints    []types.String                `tfsdk:"region_endpoints"`
+type DestinationMetadataState struct {
+	Id                 types.String             `tfsdk:"id"`
+	Name               types.String             `tfsdk:"name"`
+	Slug               types.String             `tfsdk:"slug"`
+	Description        types.String             `tfsdk:"description"`
+	Logos              *LogosState              `tfsdk:"logos"`
+	Options            []IntegrationOptionState `tfsdk:"options"`
+	Categories         []types.String           `tfsdk:"categories"`
+	Website            types.String             `tfsdk:"website"`
+	Components         []Component              `tfsdk:"components"`
+	PreviousNames      []types.String           `tfsdk:"previous_names"`
+	Status             types.String             `tfsdk:"status"`
+	SupportedFeatures  *SupportedFeature        `tfsdk:"supported_features"`
+	SupportedMethods   *SupportedMethod         `tfsdk:"supported_methods"`
+	SupportedPlatforms *SupportedPlatform       `tfsdk:"supported_platforms"`
+	Actions            []Action                 `tfsdk:"actions"`
+	Presets            []Preset                 `tfsdk:"presets"`
+	Contacts           []Contact                `tfsdk:"contacts"`
+	PartnerOwned       types.Bool               `tfsdk:"partner_owned"`
+	SupportedRegions   []types.String           `tfsdk:"supported_regions"`
+	RegionEndpoints    []types.String           `tfsdk:"region_endpoints"`
 }
 
-func (d *DestinationMetadataStateModel) getPartnerOwned(owned *bool) types.Bool {
+func (d *DestinationMetadataState) getPartnerOwned(owned *bool) types.Bool {
 	var partnerOwned types.Bool
 
 	if owned != nil {
@@ -104,7 +104,7 @@ func (d *DestinationMetadataStateModel) getPartnerOwned(owned *bool) types.Bool 
 	return partnerOwned
 }
 
-func (d *DestinationMetadataStateModel) getSupportedPlatforms(platforms api.SupportedPlatforms) *SupportedPlatform {
+func (d *DestinationMetadataState) getSupportedPlatforms(platforms api.SupportedPlatforms) *SupportedPlatform {
 	var supportedPlatform SupportedPlatform
 
 	if platforms.Browser != nil {
@@ -122,7 +122,7 @@ func (d *DestinationMetadataStateModel) getSupportedPlatforms(platforms api.Supp
 	return &supportedPlatform
 }
 
-func (d *DestinationMetadataStateModel) getSupportedFeatures(features api.SupportedFeatures) *SupportedFeature {
+func (d *DestinationMetadataState) getSupportedFeatures(features api.SupportedFeatures) *SupportedFeature {
 	var supportedFeature SupportedFeature
 
 	if features.CloudModeInstances != nil {
@@ -148,7 +148,7 @@ func (d *DestinationMetadataStateModel) getSupportedFeatures(features api.Suppor
 	return &supportedFeature
 }
 
-func (d *DestinationMetadataStateModel) getSupportedMethods(methods api.SupportedMethods) *SupportedMethod {
+func (d *DestinationMetadataState) getSupportedMethods(methods api.SupportedMethods) *SupportedMethod {
 	var supportedMethod SupportedMethod
 
 	if methods.Pageview != nil {
@@ -174,7 +174,7 @@ func (d *DestinationMetadataStateModel) getSupportedMethods(methods api.Supporte
 	return &supportedMethod
 }
 
-func (d *DestinationMetadataStateModel) getPreviousNames(names []string) []types.String {
+func (d *DestinationMetadataState) getPreviousNames(names []string) []types.String {
 	var previousNames []types.String
 
 	for _, name := range names {
@@ -184,7 +184,7 @@ func (d *DestinationMetadataStateModel) getPreviousNames(names []string) []types
 	return previousNames
 }
 
-func (d *DestinationMetadataStateModel) getComponents(components []api.DestinationMetadataComponentV1) []Component {
+func (d *DestinationMetadataState) getComponents(components []api.DestinationMetadataComponentV1) []Component {
 	var componentsToAdd []Component
 
 	for _, c := range components {
@@ -203,7 +203,7 @@ func (d *DestinationMetadataStateModel) getComponents(components []api.Destinati
 	return componentsToAdd
 }
 
-func (d *DestinationMetadataStateModel) getRegionEndpoints(endpoints []string) []types.String {
+func (d *DestinationMetadataState) getRegionEndpoints(endpoints []string) []types.String {
 	var regionEndpoints []types.String
 
 	for _, endpoint := range endpoints {
@@ -213,7 +213,7 @@ func (d *DestinationMetadataStateModel) getRegionEndpoints(endpoints []string) [
 	return regionEndpoints
 }
 
-func (d *DestinationMetadataStateModel) getSupportedRegions(regions []string) []types.String {
+func (d *DestinationMetadataState) getSupportedRegions(regions []string) []types.String {
 	var supportedRegionsToAdd []types.String
 
 	for _, region := range regions {
@@ -223,7 +223,7 @@ func (d *DestinationMetadataStateModel) getSupportedRegions(regions []string) []
 	return supportedRegionsToAdd
 }
 
-func (d *DestinationMetadataStateModel) getContacts(contacts []api.Contact) []Contact {
+func (d *DestinationMetadataState) getContacts(contacts []api.Contact) []Contact {
 	var contactsToAdd []Contact
 
 	for _, c := range contacts {
@@ -240,7 +240,7 @@ func (d *DestinationMetadataStateModel) getContacts(contacts []api.Contact) []Co
 	return contactsToAdd
 }
 
-func (d *DestinationMetadataStateModel) getPresets(presets []api.DestinationMetadataSubscriptionPresetV1) []Preset {
+func (d *DestinationMetadataState) getPresets(presets []api.DestinationMetadataSubscriptionPresetV1) []Preset {
 	var presetsToAdd []Preset
 
 	for _, preset := range presets {
@@ -256,7 +256,7 @@ func (d *DestinationMetadataStateModel) getPresets(presets []api.DestinationMeta
 	return presetsToAdd
 }
 
-func (d *DestinationMetadataStateModel) getActions(actions []api.DestinationMetadataActionV1) []Action {
+func (d *DestinationMetadataState) getActions(actions []api.DestinationMetadataActionV1) []Action {
 	var destinationActionsToAdd []Action
 
 	for _, action := range actions {
@@ -280,7 +280,7 @@ func (d *DestinationMetadataStateModel) getActions(actions []api.DestinationMeta
 	return destinationActionsToAdd
 }
 
-func (d *DestinationMetadataStateModel) getFields(fields []api.DestinationMetadataActionFieldV1) []Field {
+func (d *DestinationMetadataState) getFields(fields []api.DestinationMetadataActionFieldV1) []Field {
 	var fieldsToAdd []Field
 
 	for _, f := range fields {
@@ -307,8 +307,8 @@ func (d *DestinationMetadataStateModel) getFields(fields []api.DestinationMetada
 	return fieldsToAdd
 }
 
-func (d *DestinationMetadataStateModel) getLogosDestinationMetadata(logos api.Logos) *LogosStateModel {
-	logosToAdd := LogosStateModel{
+func (d *DestinationMetadataState) getLogosDestinationMetadata(logos api.Logos) *LogosState {
+	logosToAdd := LogosState{
 		Default: types.StringValue(logos.Default),
 	}
 
@@ -323,7 +323,36 @@ func (d *DestinationMetadataStateModel) getLogosDestinationMetadata(logos api.Lo
 	return &logosToAdd
 }
 
-func (d *DestinationMetadataStateModel) Fill(destinationMetadata api.DestinationMetadata) {
+func getOptions(options []api.IntegrationOptionBeta) []IntegrationOptionState {
+	var integrationOptions []IntegrationOptionState
+
+	for _, opt := range options {
+		integrationOption := IntegrationOptionState{
+			Name:     types.StringValue(opt.Name),
+			Type:     types.StringValue(opt.Type),
+			Required: types.BoolValue(opt.Required),
+		}
+
+		if opt.Description != nil {
+			integrationOption.Description = types.StringValue(*opt.Description)
+		}
+
+		if opt.Label != nil {
+			integrationOption.Label = types.StringValue(*opt.Label)
+		}
+
+		//TODO: Handle defaultValue which is a field of type Any
+		//if opt.DefaultValue != nil {
+		//	integrationOption.Label = types.value(*opt.DefaultValue)
+		//}
+
+		integrationOptions = append(integrationOptions, integrationOption)
+	}
+
+	return integrationOptions
+}
+
+func (d *DestinationMetadataState) Fill(destinationMetadata api.DestinationMetadata) {
 	d.Id = types.StringValue(destinationMetadata.Id)
 	d.Name = types.StringValue(destinationMetadata.Name)
 	d.Description = types.StringValue(destinationMetadata.Description)

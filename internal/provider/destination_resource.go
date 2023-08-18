@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -417,7 +418,7 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 // Create creates the resource and sets the initial Terraform state.
 func (r *destinationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan DestinationPlanModel
+	var plan models.DestinationPlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -464,7 +465,7 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 
 	destination := api.Destination(out.Data.Destination)
 
-	var state DestinationStateModel
+	var state models.DestinationState
 	state.Fill(&destination)
 
 	// Set state to fully populated data
@@ -477,14 +478,14 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 
 // Read refreshes the Terraform state with the latest data.
 func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state DestinationStateModel
+	var state models.DestinationState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, state.Id.ValueString()).Execute()
+	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Labels",
@@ -507,7 +508,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *destinationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Retrieve values from plan
-	var plan DestinationPlanModel
+	var plan models.DestinationPlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -520,7 +521,7 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	// Generate API request body from plan
-	out, _, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.Id.ValueString()).UpdateDestinationV1Input(input).Execute()
+	out, _, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -532,7 +533,7 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 
 	destination := api.Destination(out.Data.Destination)
 
-	var state DestinationStateModel
+	var state models.DestinationState
 	state.Fill(&destination)
 
 	// Set state to fully populated data
@@ -546,14 +547,14 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state DestinationStateModel
+	var state models.DestinationState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, _, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.Id.ValueString()).Execute()
+	_, _, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Deleting a Destination", "Could not delete a destination, unexpected error: "+err.Error(),
