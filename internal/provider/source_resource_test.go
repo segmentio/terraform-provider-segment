@@ -10,6 +10,8 @@ import (
 )
 
 func TestAccSourceResource(t *testing.T) {
+	t.Parallel()
+
 	updated := 0
 	fakeServer := httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {

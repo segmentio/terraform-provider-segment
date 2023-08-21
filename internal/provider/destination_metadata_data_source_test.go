@@ -9,6 +9,8 @@ import (
 )
 
 func TestAccDestinationMetadataDataSource(t *testing.T) {
+	t.Parallel()
+
 	t.Run("happy path", func(t *testing.T) {
 		fakeServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

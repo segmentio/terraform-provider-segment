@@ -9,6 +9,8 @@ import (
 )
 
 func TestAccLabelResource(t *testing.T) {
+	t.Parallel()
+
 	postPayload := `
 {
   "data": {
