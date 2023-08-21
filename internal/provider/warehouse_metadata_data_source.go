@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/segmentio/public-api-sdk-go/api"

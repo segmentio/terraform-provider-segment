@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -200,7 +201,6 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		Enabled:    plan.Enabled.ValueBool(),
 		MetadataId: metadataId,
 	}).Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create a source",
@@ -213,7 +213,6 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	updateOut, _, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
 		Name: plan.Name.ValueStringPointer(),
 	}).Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create a source",

@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -454,7 +455,6 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 
 	// Generate API request body from plan
 	out, _, err := r.client.DestinationsApi.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create a destination",
@@ -522,7 +522,6 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 
 	// Generate API request body from plan
 	out, _, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Update a destination",
