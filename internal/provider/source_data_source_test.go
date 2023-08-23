@@ -47,7 +47,9 @@ func TestAccSourceDataSource(t *testing.T) {
 								],
 								"isCloudEventSource": false
 							},
-							"settings": {},
+							"settings": {
+								"myKey": "myValue"
+							},
 							"labels": [
 								{
 									"key": "my-label-key",
@@ -98,7 +100,7 @@ func TestAccSourceDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_source.test", "metadata.options.0.type", "string"),
 						resource.TestCheckResourceAttr("data.segment_source.test", "metadata.options.0.description", "Your Segment SID"),
 						resource.TestCheckResourceAttr("data.segment_source.test", "metadata.is_cloud_event_source", "false"),
-						resource.TestCheckResourceAttr("data.segment_source.test", "settings.#", "0"),
+						resource.TestCheckResourceAttr("data.segment_source.test", "settings", "{\"myKey\":\"myValue\"}"),
 						resource.TestCheckResourceAttr("data.segment_source.test", "labels.#", "1"),
 						resource.TestCheckResourceAttr("data.segment_source.test", "labels.0.key", "my-label-key"),
 						resource.TestCheckResourceAttr("data.segment_source.test", "labels.0.value", "my-label-value"),

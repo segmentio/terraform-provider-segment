@@ -16,7 +16,7 @@ output "workspace" {
 }
 
 data "segment_source" "example" {
-  id = "0HK6vEPONy"
+  id = "dFwK97Hamo4NspDCEfCr9C"
 }
 
 output "source" {
@@ -30,4 +30,21 @@ resource "segment_destination" "example" {
   metadata = {
     id = "54521fd725e721e32a72eebf"
   }
+}
+
+resource "segment_source" "example2" {
+  metadata = {
+    id = "IqDTy1TpoU"
+  }
+  slug = "dean-test-terraform"
+  enabled = true
+  settings = jsonencode({
+    "mykey": "myvalue",
+    "mylist": [1,2,3]
+  })
+}
+
+
+output "source2" {
+  value = segment_source.example2
 }

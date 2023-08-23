@@ -6,4 +6,7 @@ resource "segment_source" "my_source" {
   metadata = {
     id = "abc123"
   }
+  settings = jsonencode({
+    "token": "xyz321",
+  })
 }

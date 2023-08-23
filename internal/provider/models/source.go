@@ -1,19 +1,23 @@
 package models
 
 import (
+	"encoding/json"
+
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 )
 
 type SourcePlan struct {
-	Enabled     types.Bool   `tfsdk:"enabled"`
-	ID          types.String `tfsdk:"id"`
-	Labels      types.List   `tfsdk:"labels"`
-	Metadata    types.Object `tfsdk:"metadata"`
-	Name        types.String `tfsdk:"name"`
-	Slug        types.String `tfsdk:"slug"`
-	WorkspaceID types.String `tfsdk:"workspace_id"`
-	WriteKeys   types.List   `tfsdk:"write_keys"`
+	Enabled     types.Bool           `tfsdk:"enabled"`
+	ID          types.String         `tfsdk:"id"`
+	Labels      types.List           `tfsdk:"labels"`
+	Metadata    types.Object         `tfsdk:"metadata"`
+	Name        types.String         `tfsdk:"name"`
+	Slug        types.String         `tfsdk:"slug"`
+	WorkspaceID types.String         `tfsdk:"workspace_id"`
+	WriteKeys   types.List           `tfsdk:"write_keys"`
+	Settings    jsontypes.Normalized `tfsdk:"settings"`
 }
 
 type SourceState struct {
@@ -25,6 +29,7 @@ type SourceState struct {
 	Slug        types.String         `tfsdk:"slug"`
 	WorkspaceID types.String         `tfsdk:"workspace_id"`
 	WriteKeys   []types.String       `tfsdk:"write_keys"`
+	Settings    jsontypes.Normalized `tfsdk:"settings"`
 }
 
 type LabelState struct {
@@ -33,7 +38,7 @@ type LabelState struct {
 	Value       types.String `tfsdk:"value"`
 }
 
-func (s *SourceState) Fill(source api.Source4) {
+func (s *SourceState) Fill(source api.Source4) error {
 	s.ID = types.StringValue(source.Id)
 	if source.Name != nil {
 		s.Name = types.StringValue(*source.Name)
@@ -44,7 +49,13 @@ func (s *SourceState) Fill(source api.Source4) {
 	s.WriteKeys = s.getWriteKeys(source.WriteKeys)
 	s.Labels = s.getLabels(source.Labels)
 	s.Metadata = s.getMetadata(source.Metadata)
-	// TODO: Populate settings
+	settings, err := s.getSettings(source.Settings)
+	if err != nil {
+		return err
+	}
+	s.Settings = settings
+
+	return nil
 }
 
 func (s *SourceState) getLogos(logos api.Logos1) *LogosState {
@@ -121,4 +132,17 @@ func (s *SourceState) getWriteKeys(writeKeys []string) []types.String {
 	}
 
 	return writeKeysToAdd
+}
+
+func (s *SourceState) getSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
+	if !settings.IsSet() {
+		return jsontypes.NewNormalizedNull(), nil
+	}
+
+	jsonSettingsString, err := json.Marshal(settings.Get().Get())
+	if err != nil {
+		return jsontypes.NewNormalizedNull(), err
+	}
+
+	return jsontypes.NewNormalizedValue(string(jsonSettingsString)), nil
 }

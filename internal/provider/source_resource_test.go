@@ -49,7 +49,9 @@ func TestAccSourceResource(t *testing.T) {
 								],
 								"isCloudEventSource": false
 							},
-							"settings": {},
+							"settings": {
+								"myKey": "myValue"
+							},
 							"labels": [
 								{
 									"key": "my-label-key",
@@ -100,7 +102,9 @@ func TestAccSourceResource(t *testing.T) {
 								],
 								"isCloudEventSource": false
 							},
-							"settings": {},
+							"settings": {
+								"myKey": "myOtherValue"
+							},
 							"labels": [
 								{
 									"key": "my-label-key",
@@ -138,6 +142,9 @@ func TestAccSourceResource(t *testing.T) {
 							id = "my-metadata-id"
 						}
 						enabled = true
+						settings = jsonencode({
+							"myKey": "myValue"
+						})
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -163,7 +170,7 @@ func TestAccSourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.type", "string"),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.description", "Your Segment SID"),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.is_cloud_event_source", "false"),
-					resource.TestCheckResourceAttr("segment_source.test", "settings.#", "0"),
+					resource.TestCheckResourceAttr("segment_source.test", "settings", "{\"myKey\":\"myValue\"}"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.#", "1"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.0.key", "my-label-key"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.0.value", "my-label-value"),
@@ -195,6 +202,9 @@ func TestAccSourceResource(t *testing.T) {
 							id = "my-metadata-id"
 						}
 						enabled = false
+						settings = jsonencode({
+							"myKey": "myOtherValue"
+						})
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -220,7 +230,7 @@ func TestAccSourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.type", "string"),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.description", "Your Segment SID"),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.is_cloud_event_source", "false"),
-					resource.TestCheckResourceAttr("segment_source.test", "settings.#", "0"),
+					resource.TestCheckResourceAttr("segment_source.test", "settings", "{\"myKey\":\"myOtherValue\"}"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.#", "1"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.0.key", "my-label-key"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.0.value", "my-label-value"),

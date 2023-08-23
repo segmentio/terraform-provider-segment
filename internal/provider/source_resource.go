@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-segment/internal/provider/models"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -131,7 +132,11 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 					},
 				},
 			},
-			// TODO: Support settings
+			"settings": schema.StringAttribute{
+				Required:    true,
+				Description: "The settings associated with the Source.",
+				CustomType:  jsontypes.NormalizedType{},
+			},
 			"workspace_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The id of the Workspace that owns the Source.",
@@ -196,22 +201,19 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	var settings map[string]interface{}
+	diags = plan.Settings.Unmarshal(&settings)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	modelMap := api.NewModelMap(settings)
+
 	out, _, err := r.client.SourcesApi.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
 		Slug:       plan.Slug.ValueString(),
 		Enabled:    plan.Enabled.ValueBool(),
 		MetadataId: metadataId,
-	}).Execute()
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Create a source",
-			err.Error(),
-		)
-		return
-	}
-
-	// This is a workaround for the fact that "name" is allowed to be provided during update but not create
-	updateOut, _, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
-		Name: plan.Name.ValueStringPointer(),
+		Settings:   *api.NewNullableModelMap(modelMap),
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -222,10 +224,32 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	source := out.Data.Source
-	source.Name = updateOut.Data.Source.Name
+
+	if !plan.Name.IsNull() && !plan.Name.IsUnknown() {
+		// This is a workaround for the fact that "name" is allowed to be provided during update but not create
+		updateOut, _, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
+			Name: plan.Name.ValueStringPointer(),
+		}).Execute()
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to Create a source",
+				err.Error(),
+			)
+			return
+		}
+
+		source.Name = updateOut.Data.Source.Name
+	}
 
 	var state models.SourceState
-	state.Fill(api.Source4(source))
+	err = state.Fill(api.Source4(source))
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Create a source",
+			err.Error(),
+		)
+		return
+	}
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -255,7 +279,14 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	source := out.Data.Source
 
 	var state models.SourceState
-	state.Fill(source)
+	err = state.Fill(source)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Source",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -279,10 +310,19 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
+	var settings map[string]interface{}
+	diags = plan.Settings.Unmarshal(&settings)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	modelMap := api.NewModelMap(settings)
+
 	out, _, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
-		Slug:    plan.Slug.ValueStringPointer(),
-		Enabled: plan.Enabled.ValueBoolPointer(),
-		Name:    plan.Name.ValueStringPointer(),
+		Slug:     plan.Slug.ValueStringPointer(),
+		Enabled:  plan.Enabled.ValueBoolPointer(),
+		Name:     plan.Name.ValueStringPointer(),
+		Settings: *api.NewNullableModelMap(modelMap),
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -294,7 +334,14 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	source := out.Data.Source
 
-	state.Fill(api.Source4(source))
+	err = state.Fill(api.Source4(source))
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Update Source",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

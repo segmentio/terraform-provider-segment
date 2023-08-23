@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-segment/internal/provider/models"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -143,7 +144,11 @@ func (d *sourceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 					},
 				},
 			},
-			// TODO: Support settings
+			"settings": schema.StringAttribute{
+				Computed:    true,
+				Description: "The settings associated with the Source.",
+				CustomType:  jsontypes.NormalizedType{},
+			},
 			"workspace_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The id of the Workspace that owns the Source.",
@@ -201,7 +206,14 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	source := out.Data.Source
 
 	var state models.SourceState
-	state.Fill(source)
+	err = state.Fill(source)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Source",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
