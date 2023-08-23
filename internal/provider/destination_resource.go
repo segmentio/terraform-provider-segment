@@ -470,7 +470,7 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	out, _, err := r.client.DestinationsApi.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a destination",
+			"Unable to create Destination",
 			err.Error(),
 		)
 		return
@@ -479,7 +479,14 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	destination := api.Destination(out.Data.Destination)
 
 	var state models.DestinationState
-	state.Fill(&destination)
+	err = state.Fill(&destination)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to create Destination",
+			err.Error(),
+		)
+		return
+	}
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -501,7 +508,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Labels",
+			"Unable to read Destination",
 			err.Error(),
 		)
 		return
@@ -509,7 +516,14 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 
 	destination := out.Data.Destination
 
-	state.Fill(&destination)
+	err = state.Fill(&destination)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to read Destination",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -545,7 +559,7 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	out, _, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update a destination",
+			"Unable to update Destination",
 			err.Error(),
 		)
 		return
@@ -554,7 +568,14 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	destination := api.Destination(out.Data.Destination)
 
 	var state models.DestinationState
-	state.Fill(&destination)
+	err = state.Fill(&destination)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to update Destination",
+			err.Error(),
+		)
+		return
+	}
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -577,7 +598,7 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 	_, _, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Deleting a Destination", "Could not delete a destination, unexpected error: "+err.Error(),
+			"Error deleting Destination", "Could not delete Destination, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -594,7 +615,7 @@ func (r *destinationResource) Configure(_ context.Context, req resource.Configur
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *segment.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return

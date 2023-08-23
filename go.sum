@@ -260,6 +260,8 @@ github.com/russross/blackfriday v1.6.0 h1:KqfZb0pUVN2lYqZUYRddxF4OR8ZMURnJIG5Y3V
 github.com/russross/blackfriday v1.6.0/go.mod h1:ti0ldHuxg49ri4ksnFxlkCfN+hvslNlmVHqNRXXJNAY=
 github.com/segmentio/public-api-sdk-go v0.0.0-20230823173941-d853e2e77c3d h1:juyNrD/+leuVgtgmutRxDT/FQbjUcHqyE3yU0LQ4y+4=
 github.com/segmentio/public-api-sdk-go v0.0.0-20230823173941-d853e2e77c3d/go.mod h1:fDixWBn2itqFvc2v9R89DCfQkkOhA9PSJifl2mTP4Gg=
+github.com/segmentio/public-api-sdk-go v0.0.0-20230823204623-890490778713 h1:9dOCV16yMC4Dlf+Hu1L0sE1EcluiPQ8rzkXdOwjvWMc=
+github.com/segmentio/public-api-sdk-go v0.0.0-20230823204623-890490778713/go.mod h1:fDixWBn2itqFvc2v9R89DCfQkkOhA9PSJifl2mTP4Gg=
 github.com/sergi/go-diff v1.2.0 h1:XU+rvMAioB0UC3q1MFrIQy4Vo5/4VsRDQQXHsEya6xQ=
 github.com/shopspring/decimal v1.2.0/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5gKV8=
