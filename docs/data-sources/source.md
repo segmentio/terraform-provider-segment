@@ -35,6 +35,7 @@ data "segment_source" "my_source" {
 - `enabled` (Boolean) Enable to receive data from the Source.
 - `labels` (Attributes List) A list of labels applied to the Source. (see [below for nested schema](#nestedatt--labels))
 - `metadata` (Attributes) The metadata for the Source. (see [below for nested schema](#nestedatt--metadata))
+- `settings` (String) The settings associated with the Source.
 - `slug` (String) The slug used to identify the Source in the Segment app.
 - `workspace_id` (String) The id of the Workspace that owns the Source.
 - `write_keys` (List of String) The write keys used to send data from the Source. This field is left empty when the current token does not have the 'source admin' permission.

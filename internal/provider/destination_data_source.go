@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-segment/internal/provider/models"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -36,11 +37,11 @@ func (d *destinationDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "The unique identifier of this instance of a Destination. Config API note: analogous to `name`.",
-				Computed:    true,
+				Required:    true,
 			},
 			"name": schema.StringAttribute{
 				Description: "The name of this instance of a Destination. Config API note: equal to `displayName`.",
-				Optional:    true,
+				Computed:    true,
 			},
 			"enabled": schema.BoolAttribute{
 				Description: "Whether this instance of a Destination receives data.",
@@ -55,7 +56,11 @@ func (d *destinationDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Description: "The id of a Source connected to this instance of a Destination. Config API note: analogous to `parent`.",
 				Computed:    true,
 			},
-			// TODO: Settings
+			"settings": schema.StringAttribute{
+				Computed:    true,
+				Description: "The settings associated with the Destination.",
+				CustomType:  jsontypes.NormalizedType{},
+			},
 		},
 	}
 }

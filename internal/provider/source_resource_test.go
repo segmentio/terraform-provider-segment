@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -62,8 +61,6 @@ func TestAccSourceResource(t *testing.T) {
 					}
 				}
 			`
-
-			fmt.Println(req.Method)
 
 			// After we update the source, return the updated source for subsequent calls (first update is part of the create call)
 			if req.Method == http.MethodPatch {

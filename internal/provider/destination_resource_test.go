@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,6 +22,9 @@ func TestAccDestinationResource(t *testing.T) {
 						"id": "my-destination-id",
 						"enabled": true,
 						"sourceId": "my-source-id",
+						"settings": {
+							"myKey": "myValue"
+						},
 						"metadata": {
 							"id": "my-destination-metadata-id",
 							"name": "Destination Metadata",
@@ -132,8 +134,6 @@ func TestAccDestinationResource(t *testing.T) {
 				}
 			}`
 
-			fmt.Println(req.Method)
-
 			// After we update the source, return the updated source for subsequent calls (first update is part of the create call)
 			if req.Method == http.MethodPatch {
 				updated++
@@ -146,6 +146,9 @@ func TestAccDestinationResource(t *testing.T) {
 							"name": "My destination name",
 							"enabled": false,
 							"sourceId": "my-source-id",
+							"settings": {
+								"myKey": "myNewValue"
+							},
 							"metadata": {
 								"id": "my-destination-metadata-id",
 								"name": "Destination Metadata",
@@ -280,12 +283,16 @@ func TestAccDestinationResource(t *testing.T) {
 							metadata = {
 								id = "my-destination-metadata-id"
 							}
+							settings = jsonencode({
+								"myKey": "myValue"
+							})
 						}
 					`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("segment_destination.test", "id", "my-destination-id"),
 					resource.TestCheckResourceAttr("segment_destination.test", "enabled", "true"),
 					resource.TestCheckResourceAttr("segment_destination.test", "source_id", "my-source-id"),
+					resource.TestCheckResourceAttr("segment_destination.test", "settings", "{\"myKey\":\"myValue\"}"),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.id", "my-destination-metadata-id"),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.name", "Destination Metadata"),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.slug", "destination-metadata"),
@@ -371,6 +378,9 @@ func TestAccDestinationResource(t *testing.T) {
 								id = "my-destination-metadata-id"
 							}
 							name = "My destination name"
+							settings = jsonencode({
+								"myKey": "myNewValue"
+							})
 						}
 					`,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -379,6 +389,7 @@ func TestAccDestinationResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_destination.test", "name", "My destination name"),
 					resource.TestCheckResourceAttr("segment_destination.test", "source_id", "my-source-id"),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.id", "my-destination-metadata-id"),
+					resource.TestCheckResourceAttr("segment_destination.test", "settings", "{\"myKey\":\"myNewValue\"}"),
 				),
 			},
 		},

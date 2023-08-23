@@ -21,6 +21,9 @@ resource "segment_source" "my_source" {
   metadata = {
     id = "abc123"
   }
+  settings = jsonencode({
+    "token" : "xyz321",
+  })
 }
 ```
 
@@ -31,6 +34,7 @@ resource "segment_source" "my_source" {
 
 - `enabled` (Boolean) Enable to receive data from the Source.
 - `metadata` (Attributes) The metadata for the Source. (see [below for nested schema](#nestedatt--metadata))
+- `settings` (String) The settings associated with the Source.
 - `slug` (String) The slug used to identify the Source in the Segment app.
 
 ### Optional

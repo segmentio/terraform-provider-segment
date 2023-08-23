@@ -7,6 +7,6 @@ resource "segment_source" "my_source" {
     id = "abc123"
   }
   settings = jsonencode({
-    "token": "xyz321",
+    "token" : "xyz321",
   })
 }

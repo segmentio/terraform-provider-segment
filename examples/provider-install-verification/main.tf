@@ -23,28 +23,36 @@ output "source" {
   value = data.segment_source.example
 }
 
-resource "segment_destination" "example" {
+resource "segment_destination" "example2" {
   name      = "Dean's Terraform Destination"
   enabled   = true
   source_id = data.segment_source.example.id
   metadata = {
     id = "54521fd725e721e32a72eebf"
   }
+  settings = jsonencode({
+    "mykey" : "myvalue",
+    "mylist" : [1, 2, 3]
+  })
+}
+
+data "segment_destination" "example" {
+  id = segment_destination.example2.id
 }
 
 resource "segment_source" "example2" {
   metadata = {
     id = "IqDTy1TpoU"
   }
-  slug = "dean-test-terraform"
+  slug    = "dean-test-terraform"
   enabled = true
   settings = jsonencode({
-    "mykey": "myvalue",
-    "mylist": [1,2,3]
+    "mykey" : "myvalue",
+    "mylist" : [1, 2, 3]
   })
 }
 
 
-output "source2" {
-  value = segment_source.example2
+output "destination" {
+  value = data.segment_destination.example
 }

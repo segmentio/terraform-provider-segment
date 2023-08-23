@@ -23,6 +23,9 @@ func TestAccDestinationDataSource(t *testing.T) {
       "enabled": true,
       "name": "my destination name",
       "sourceId": "source-id",
+	  "settings": {
+		"myKey": "myValue"
+	  },
       "metadata": {
         "id": "destination-metadata-id",
         "name": "Destination Metadata",
@@ -148,7 +151,7 @@ func TestAccDestinationDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_destination" "test" {}`,
+					Config: providerConfig + `data "segment_destination" "test" { id = "destination-id" }`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_destination.test", "id", "destination-id"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "enabled", "true"),
@@ -158,6 +161,7 @@ func TestAccDestinationDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.name", "Destination Metadata"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.slug", "destination-metadata"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.description", "Description."),
+						resource.TestCheckResourceAttr("data.segment_destination.test", "settings", "{\"myKey\":\"myValue\"}"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.logos.default", "default"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.logos.mark", "mark"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.logos.alt", "alt"),
@@ -329,7 +333,11 @@ func TestAccDestinationDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_destination" "test" {}`,
+					Config: providerConfig + `
+						data "segment_destination" "test" {
+							id = "destination-id"
+						}
+					`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_destination.test", "id", "destination-id"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "enabled", "true"),

@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-segment/internal/provider/models"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -65,6 +66,11 @@ func (r *destinationResource) Schema(_ context.Context, _ resource.SchemaRequest
 			"metadata": schema.SingleNestedAttribute{
 				Required:   true,
 				Attributes: destinationMetadataResourceSchema(),
+			},
+			"settings": schema.StringAttribute{
+				Required:    true,
+				Description: "The settings associated with the Destination.",
+				CustomType:  jsontypes.NormalizedType{},
 			},
 		},
 	}
@@ -445,12 +451,19 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	var settings map[string]interface{}
+	diags = plan.Settings.Unmarshal(&settings)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	input := api.CreateDestinationV1Input{
 		SourceId:   plan.SourceId.ValueString(),
 		MetadataId: metadataId,
 		Enabled:    plan.Enabled.ValueBoolPointer(),
 		Name:       plan.Name.ValueStringPointer(),
-		Settings:   map[string]interface{}{},
+		Settings:   settings,
 	}
 
 	// Generate API request body from plan
@@ -515,9 +528,17 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	var settings map[string]interface{}
+	diags = plan.Settings.Unmarshal(&settings)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	input := api.UpdateDestinationV1Input{
-		Name:    *api.NewNullableString(plan.Name.ValueStringPointer()),
-		Enabled: plan.Enabled.ValueBoolPointer(),
+		Name:     *api.NewNullableString(plan.Name.ValueStringPointer()),
+		Enabled:  plan.Enabled.ValueBoolPointer(),
+		Settings: settings,
 	}
 
 	// Generate API request body from plan

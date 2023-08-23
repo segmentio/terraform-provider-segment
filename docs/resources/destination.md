@@ -31,6 +31,7 @@ resource "segment_destination" "my_destination" {
 
 - `enabled` (Boolean)
 - `metadata` (Attributes) (see [below for nested schema](#nestedatt--metadata))
+- `settings` (String) The settings associated with the Destination.
 - `source_id` (String)
 
 ### Optional
