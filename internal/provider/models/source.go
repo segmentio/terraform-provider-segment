@@ -49,7 +49,10 @@ func (s *SourceState) Fill(source api.Source4) error {
 	s.WriteKeys = s.getWriteKeys(source.WriteKeys)
 	s.Labels = s.getLabels(source.Labels)
 	s.Metadata = &SourceMetadataState{}
-	s.Metadata.Fill(api.SourceMetadata(source.Metadata))
+	err := s.Metadata.Fill(api.SourceMetadata(source.Metadata))
+	if err != nil {
+		return err
+	}
 	settings, err := s.getSettings(source.Settings)
 	if err != nil {
 		return err
