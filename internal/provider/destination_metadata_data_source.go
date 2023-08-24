@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-segment/internal/provider/models"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
@@ -53,15 +54,15 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 			Computed:    true,
 			Attributes: map[string]schema.Attribute{
 				"default": schema.StringAttribute{
-					Required: true,
+					Computed: true,
 				},
 				"mark": schema.StringAttribute{
 					Description: "The logo mark.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"alt": schema.StringAttribute{
 					Description: "The alternative text for this logo.",
-					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -84,16 +85,16 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 					},
 					"description": schema.StringAttribute{
 						Description: "An optional short text description of the field.",
-						Optional:    true,
+						Computed:    true,
 					},
-					//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-					//"default_value": schema.AnyAttribute{
-					//	Description: "An optional default value for the field.",
-					//	Optional:    true,
-					//},
+					"default_value": schema.StringAttribute{
+						Description: "An optional default value for the field.",
+						Computed:    true,
+						CustomType:  jsontypes.NormalizedType{},
+					},
 					"label": schema.StringAttribute{
 						Description: "An optional label for this field.",
-						Optional:    true,
+						Computed:    true,
 					},
 				},
 			},
@@ -131,7 +132,7 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 					},
 					"owner": schema.StringAttribute{
 						Description: "The owner of this component. Either 'SEGMENT' or 'PARTNER'.",
-						Optional:    true,
+						Computed:    true,
 					},
 				},
 			},
@@ -142,23 +143,23 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 			Attributes: map[string]schema.Attribute{
 				"cloud_mode_instances": schema.StringAttribute{
 					Description: "This Destination's support level for cloud mode instances.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"device_mode_instances": schema.StringAttribute{
 					Description: "This Destination's support level for device mode instances.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"replay": schema.BoolAttribute{
 					Description: "Whether this Destination supports replays.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"browser_unbundling": schema.BoolAttribute{
 					Description: "Whether this Destination supports browser unbundling.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"browser_unbundling_public": schema.BoolAttribute{
 					Description: "Whether this Destination supports public browser unbundling.",
-					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -168,23 +169,23 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 			Attributes: map[string]schema.Attribute{
 				"pageview": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `pageview` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"identify": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `identify` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"alias": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `alias` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"track": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `track` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"group": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `group` method.",
-					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -194,15 +195,15 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 			Attributes: map[string]schema.Attribute{
 				"browser": schema.BoolAttribute{
 					Description: "Whether this Destination supports browser events.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"server": schema.BoolAttribute{
 					Description: "Whether this Destination supports server events.",
-					Optional:    true,
+					Computed:    true,
 				},
 				"mobile": schema.BoolAttribute{
 					Description: "Whether this Destination supports mobile events.",
-					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -270,14 +271,13 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 								},
 								"placeholder": schema.StringAttribute{
 									Description: "An example value displayed but not saved.",
-									Optional:    true,
+									Computed:    true,
 								},
-								//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-								//"default_value": {
-								//	Type:        schema.TypeAny,
-								//	Description: "A default value that is saved the first time an action is created.",
-								//	Optional:    true,
-								//}
+								"default_value": schema.StringAttribute{
+									Description: "A default value that is saved the first time an action is created.",
+									Computed:    true,
+									CustomType:  jsontypes.NormalizedType{},
+								},
 								"required": schema.BoolAttribute{
 									Description: "Whether this field is required.",
 									Computed:    true,
@@ -286,12 +286,11 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 									Description: "Whether a user can provide multiples of this field.",
 									Computed:    true,
 								},
-								//TODO: This Map field has dynamic values and since there is no equivalent of type Any, this field is excluded.
-								//"choices": schema.MapAttribute{
-								//	ElementType: types.MapType{},
-								//	Description: "A list of machine-readable value/label pairs to populate a static dropdown.",
-								//	Optional:    true,
-								//},
+								"choices": schema.StringAttribute{
+									Description: "A list of machine-readable value/label pairs to populate a static dropdown.",
+									Computed:    true,
+									CustomType:  jsontypes.NormalizedType{},
+								},
 								"dynamic": schema.BoolAttribute{
 									Description: "Whether this field should execute a dynamic request to fetch choices to populate a dropdown. When true, `choices` is ignored.",
 									Computed:    true,
@@ -319,12 +318,11 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 						Description: "The name of the subscription.",
 						Computed:    true,
 					},
-					//TODO: This Map field has dynamic values and since there is no equivalent of type Any, this field is excluded.
-					//"fields": schema.MapAttribute{
-					//	ElementType: types.MapType{},
-					//	Computed:    true,
-					//	Description: "The default settings for action fields.",
-					//},
+					"fields": schema.StringAttribute{
+						Computed:    true,
+						Description: "The default settings for action fields.",
+						CustomType:  jsontypes.NormalizedType{},
+					},
 					"trigger": schema.StringAttribute{
 						Description: "FQL string that describes what events should trigger an action. See https://segment.com/docs/config-api/fql/ for more information regarding Segment's Filter Query Language (FQL).",
 						Computed:    true,
@@ -407,7 +405,14 @@ func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource
 	}
 
 	destinationMetadata := response.Data.DestinationMetadata
-	state.Fill(destinationMetadata)
+	err = state.Fill(destinationMetadata)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Source metadata",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

@@ -125,7 +125,11 @@ func (d *sourceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 									Computed:    true,
 									Description: "An optional short text description of the field.",
 								},
-								// TODO: "default_value": schema.StringAttribute { Computed: true, Description: "An optional default value for the field." },
+								"default_value": schema.StringAttribute{
+									CustomType:  jsontypes.NormalizedType{},
+									Computed:    true,
+									Description: "An optional default value for the field.",
+								},
 								"label": schema.StringAttribute{
 									Computed:    true,
 									Description: "An optional label for this field.",

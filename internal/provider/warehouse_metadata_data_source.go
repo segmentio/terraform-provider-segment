@@ -8,6 +8,7 @@ import (
 
 	"github.com/segmentio/public-api-sdk-go/api"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 )
@@ -56,12 +57,10 @@ func warehouseMetadataSchema() map[string]schema.Attribute {
 					Description: "The default URL for this logo.",
 				},
 				"mark": schema.StringAttribute{
-					Optional:    true,
 					Computed:    true,
 					Description: "The logo mark.",
 				},
 				"alt": schema.StringAttribute{
-					Optional:    true,
 					Computed:    true,
 					Description: "The alternative text for this logo.",
 				},
@@ -85,19 +84,15 @@ func warehouseMetadataSchema() map[string]schema.Attribute {
 						Description: "Whether this is a required option when setting up the Integration.",
 					},
 					"description": schema.StringAttribute{
-						Optional:    true,
 						Computed:    true,
 						Description: "An optional short text description of the field.",
 					},
-					//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-					//"default_value": {
-					//	Type:        schema.TypeAny,
-					//	Optional:    true,
-					//	Computed:    true,
-					//	Description: "An optional default value for the field.",
-					//},
+					"default_value": schema.StringAttribute{
+						CustomType:  jsontypes.NormalizedType{},
+						Computed:    true,
+						Description: "An optional default value for the field.",
+					},
 					"label": schema.StringAttribute{
-						Optional:    true,
 						Computed:    true,
 						Description: "An optional label for this field.",
 					},
@@ -134,7 +129,14 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 
 	warehouseMetadata := response.Data.WarehouseMetadata
 
-	state.Fill(api.Metadata1(warehouseMetadata))
+	err = state.Fill(api.Metadata1(warehouseMetadata))
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Warehouse metadata",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

@@ -91,6 +91,8 @@ Read-Only:
 Read-Only:
 
 - `allow_null` (Boolean) Whether this field allows null values.
+- `choices` (String) A list of machine-readable value/label pairs to populate a static dropdown.
+- `default_value` (String) A default value that is saved the first time an action is created.
 - `description` (String) A human-readable description of this value. You can use Markdown.
 - `dynamic` (Boolean) Whether this field should execute a dynamic request to fetch choices to populate a dropdown. When true, `choices` is ignored.
 - `field_key` (String) A unique machine-readable key for the field. Should ideally match the expected key in the action's API request.
@@ -140,6 +142,7 @@ Read-Only:
 
 Read-Only:
 
+- `default_value` (String) An optional default value for the field.
 - `description` (String) An optional short text description of the field.
 - `label` (String) An optional label for this field.
 - `name` (String) The name identifying this option in the context of a Segment Integration.
@@ -153,6 +156,7 @@ Read-Only:
 Read-Only:
 
 - `action_id` (String) The unique identifier for the Destination Action to trigger.
+- `fields` (String) The default settings for action fields.
 - `name` (String) The name of the subscription.
 - `trigger` (String) FQL string that describes what events should trigger an action. See https://segment.com/docs/config-api/fql/ for more information regarding Segment's Filter Query Language (FQL).
 

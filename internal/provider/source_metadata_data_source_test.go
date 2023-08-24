@@ -16,45 +16,46 @@ func TestAccSourceMetadataDataSource(t *testing.T) {
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("content-type", "application/json")
 				_, _ = w.Write([]byte(`
-				{
-					"data": {
-		"sourceMetadata": {
-			"id": "my-source-metadata-id",
-			"slug": "my-source-metadata-slug",
-			"name": "The name of the source metadata",
-			"categories": [
-				"Payments"
-			],
-			"description": "A description of a source metadata.",
-			"logos": {
-				"default": "default logo",
-				"alt": "alt logo",
-				"mark": "mark logo"
-			},
-			"options": [
-				{
-					"name": "the option name",
-					"required": true,
-					"type": "the option type",
-					"description": "the option description",
-					"label": "the option label"
-				}
-			],
-			"isCloudEventSource": false
-		}
-	}
-}
-			`))
+					{
+						"data": {
+							"sourceMetadata": {
+								"id": "my-source-metadata-id",
+								"slug": "my-source-metadata-slug",
+								"name": "The name of the source metadata",
+								"categories": [
+									"Payments"
+								],
+								"description": "A description of a source metadata.",
+								"logos": {
+									"default": "default logo",
+									"alt": "alt logo",
+									"mark": "mark logo"
+								},
+								"options": [
+									{
+										"name": "the option name",
+										"required": true,
+										"type": "the option type",
+										"description": "the option description",
+										"label": "the option label",
+										"defaultValue": "default"
+									}
+								],
+								"isCloudEventSource": false
+							}
+						}
+					}
+				`))
 			}),
 		)
 		defer fakeServer.Close()
 
 		providerConfig := `
-	provider "segment" {
-		url   = "` + fakeServer.URL + `"
-		token = "abc123"
-	}
-	`
+			provider "segment" {
+				url   = "` + fakeServer.URL + `"
+				token = "abc123"
+			}
+		`
 
 		resource.Test(t, resource.TestCase{
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -79,6 +80,7 @@ func TestAccSourceMetadataDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "options.0.required", "true"),
 						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "options.0.description", "the option description"),
 						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "options.0.label", "the option label"),
+						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "options.0.default_value", "\"default\""),
 					),
 				},
 			},
@@ -90,41 +92,41 @@ func TestAccSourceMetadataDataSource(t *testing.T) {
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("content-type", "application/json")
 				_, _ = w.Write([]byte(`
-				{
-					"data": {
-		"sourceMetadata": {
-			"id": "my-source-metadata-id",
-			"slug": "my-source-metadata-slug",
-			"name": "The name of the source metadata",
-			"categories": [
-				"Payments"
-			],
-			"description": "A description of a source metadata.",
-			"logos": {
-				"default": "default logo"
-			},
-			"options": [
-				{
-					"name": "the option name",
-					"required": true,
-					"type": "the option type"
-				}
-			],
-			"isCloudEventSource": false
-		}
-	}
-}
-			`))
+					{
+						"data": {
+							"sourceMetadata": {
+								"id": "my-source-metadata-id",
+								"slug": "my-source-metadata-slug",
+								"name": "The name of the source metadata",
+								"categories": [
+									"Payments"
+								],
+								"description": "A description of a source metadata.",
+								"logos": {
+									"default": "default logo"
+								},
+								"options": [
+									{
+										"name": "the option name",
+										"required": true,
+										"type": "the option type"
+									}
+								],
+								"isCloudEventSource": false
+							}
+						}
+					}
+				`))
 			}),
 		)
 		defer fakeServer.Close()
 
 		providerConfig := `
-	provider "segment" {
-		url   = "` + fakeServer.URL + `"
-		token = "abc123"
-	}
-	`
+			provider "segment" {
+				url   = "` + fakeServer.URL + `"
+				token = "abc123"
+			}
+		`
 
 		resource.Test(t, resource.TestCase{
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -149,6 +151,7 @@ func TestAccSourceMetadataDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "options.0.required", "true"),
 						resource.TestCheckNoResourceAttr("data.segment_source_metadata.test", "options.0.description"),
 						resource.TestCheckNoResourceAttr("data.segment_source_metadata.test", "options.0.label"),
+						resource.TestCheckNoResourceAttr("data.segment_source_metadata.test", "options.0.default_value"),
 					),
 				},
 			},

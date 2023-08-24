@@ -32,26 +32,21 @@ data "segment_warehouse_metadata" "my_warehouse_metadata" {}
 <a id="nestedatt--logos"></a>
 ### Nested Schema for `logos`
 
-Optional:
-
-- `alt` (String) The alternative text for this logo.
-- `mark` (String) The logo mark.
-
 Read-Only:
 
+- `alt` (String) The alternative text for this logo.
 - `default` (String) The default URL for this logo.
+- `mark` (String) The logo mark.
 
 
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
-
-- `description` (String) An optional short text description of the field.
-- `label` (String) An optional label for this field.
-
 Read-Only:
 
+- `default_value` (String) An optional default value for the field.
+- `description` (String) An optional short text description of the field.
+- `label` (String) An optional label for this field.
 - `name` (String) The name identifying this option in the context of a Segment Integration.
 - `required` (Boolean) Whether this is a required option when setting up the Integration.
 - `type` (String) Defines the type for this option in the schema.

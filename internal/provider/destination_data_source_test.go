@@ -16,125 +16,130 @@ func TestAccDestinationDataSource(t *testing.T) {
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("content-type", "application/json")
 				_, _ = w.Write([]byte(`
-				{
-  "data": {
-    "destination": {
-      "id": "destination-id",
-      "enabled": true,
-      "name": "my destination name",
-      "sourceId": "source-id",
-	  "settings": {
-		"myKey": "myValue"
-	  },
-      "metadata": {
-        "id": "destination-metadata-id",
-        "name": "Destination Metadata",
-        "description": "Description.",
-        "slug": "destination-metadata",
-        "logos": {
-          "default": "default",
-          "mark": "mark",
-          "alt": "alt"
-        },
-        "options": [
-          {
-            "name": "apiKey",
-            "type": "string",
-            "defaultValue": "default",
-            "description": "description",
-            "required": true,
-            "label": "API Key"
-          }
-        ],
-        "status": "PUBLIC",
-        "categories": [
-          "Analytics"
-        ],
-        "website": "https://test.com",
-        "components": [
-          {
-            "code": "https://github.com/master/integrations/integration-name",
-            "owner": "OWNER",
-            "type": "BROWSER"
-          }
-        ],
-        "previousNames": [
-          "destination-metadata"
-        ],
-        "supportedMethods": {
-          "track": true,
-          "pageview": true,
-          "identify": true,
-          "group": true,
-          "alias": false
-        },
-        "supportedPlatforms": {
-          "browser": true,
-          "mobile": true,
-          "server": true
-        },
-        "supportedFeatures": {
-          "cloudModeInstances": "0",
-          "deviceModeInstances": "0",
-          "replay": false,
-          "browserUnbundling": true,
-          "browserUnbundlingPublic": true
-        },
-        "actions": [
-          {
-            "id": "the-id",
-            "slug": "action-slug",
-            "name": "action-name",
-            "description": "action-description",
-            "platform": "action-platform",
-            "hidden": false,
-            "defaultTrigger": "trigger",
-            "fields": [
-              {
-                "id": "field-id",
-                "sort_order": "1234",
-                "fieldKey": "field-key",
-                "label": "field-label",
-                "type": "field-type",
-                "description": "field-description",
-                "placeholder": "field-placeholder",
-                "required": false,
-                "multiple": false,
-                "dynamic": false,
-                "allowNull": false
-              }
-            ]
-          }
-        ],
-        "presets": [
-          {
-            "actionId": "id",
-            "name": "name",
-            "trigger": "trigger"
-          }
-        ],
-        "contacts": [
-          {
-            "name": "Contact Name",
-            "email": "contact@contact.com",
-            "role": "Product Manager",
-            "isPrimary": true
-          }
-        ],
-        "partnerOwned": false,
-        "supportedRegions": [
-          "eu-west-1",
-          "us-west-2"
-        ],
-        "regionEndpoints": [
-          "US",
-          "EU"
-        ]
-      }
-    }
-  }
-}
-			`))
+					{
+						"data": {
+							"destination": {
+								"id": "destination-id",
+								"enabled": true,
+								"name": "my destination name",
+								"sourceId": "source-id",
+								"settings": {
+									"myKey": "myValue"
+								},
+								"metadata": {
+									"id": "destination-metadata-id",
+									"name": "Destination Metadata",
+									"description": "Description.",
+									"slug": "destination-metadata",
+									"logos": {
+										"default": "default",
+										"mark": "mark",
+										"alt": "alt"
+									},
+									"options": [
+										{
+											"name": "apiKey",
+											"type": "string",
+											"defaultValue": "default",
+											"description": "description",
+											"required": true,
+											"label": "API Key",
+											"defaultValue": "default"
+										}
+									],
+									"status": "PUBLIC",
+									"categories": [
+										"Analytics"
+									],
+									"website": "https://test.com",
+									"components": [
+										{
+											"code": "https://github.com/master/integrations/integration-name",
+											"owner": "OWNER",
+											"type": "BROWSER"
+										}
+									],
+									"previousNames": [
+										"destination-metadata"
+									],
+									"supportedMethods": {
+										"track": true,
+										"pageview": true,
+										"identify": true,
+										"group": true,
+										"alias": false
+									},
+									"supportedPlatforms": {
+										"browser": true,
+										"mobile": true,
+										"server": true
+									},
+									"supportedFeatures": {
+										"cloudModeInstances": "0",
+										"deviceModeInstances": "0",
+										"replay": false,
+										"browserUnbundling": true,
+										"browserUnbundlingPublic": true
+									},
+									"actions": [
+										{
+											"id": "the-id",
+											"slug": "action-slug",
+											"name": "action-name",
+											"description": "action-description",
+											"platform": "action-platform",
+											"hidden": false,
+											"defaultTrigger": "trigger",
+											"fields": [
+												{
+													"id": "field-id",
+													"sort_order": "1234",
+													"fieldKey": "field-key",
+													"label": "field-label",
+													"type": "field-type",
+													"description": "field-description",
+													"placeholder": "field-placeholder",
+													"required": false,
+													"multiple": false,
+													"dynamic": false,
+													"allowNull": false,
+													"defaultValue": "default",
+													"choices": [
+														"choice1"
+													]
+												}
+											]
+										}
+									],
+									"presets": [
+										{
+											"actionId": "id",
+											"name": "name",
+											"trigger": "trigger"
+										}
+									],
+									"contacts": [
+										{
+											"name": "Contact Name",
+											"email": "contact@contact.com",
+											"role": "Product Manager",
+											"isPrimary": true
+										}
+									],
+									"partnerOwned": false,
+									"supportedRegions": [
+										"eu-west-1",
+										"us-west-2"
+									],
+									"regionEndpoints": [
+										"US",
+										"EU"
+									]
+								}
+							}
+						}
+					}
+				`))
 			}),
 		)
 		defer fakeServer.Close()
@@ -171,6 +176,7 @@ func TestAccDestinationDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.options.0.required", "true"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.options.0.description", "description"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.options.0.label", "API Key"),
+						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.options.0.default_value", "\"default\""),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.status", "PUBLIC"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.categories.#", "1"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.categories.0", "Analytics"),
@@ -214,6 +220,8 @@ func TestAccDestinationDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.actions.0.fields.0.multiple", "false"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.actions.0.fields.0.dynamic", "false"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.actions.0.fields.0.allow_null", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.actions.0.fields.0.default_value", "\"default\""),
+						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.actions.0.fields.0.choices", "[\"choice1\"]"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.presets.#", "1"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.presets.0.action_id", "id"),
 						resource.TestCheckResourceAttr("data.segment_destination.test", "metadata.presets.0.name", "name"),

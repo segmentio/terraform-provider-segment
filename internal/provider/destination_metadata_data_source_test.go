@@ -93,7 +93,9 @@ func TestAccDestinationMetadataDataSource(t *testing.T) {
             "required": false,
             "multiple": false,
             "dynamic": false,
-            "allowNull": false
+            "allowNull": false,
+			"defaultValue": "default",
+			"choices": "choice1"
           }
         ]
         }
@@ -157,6 +159,7 @@ func TestAccDestinationMetadataDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.required", "true"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.description", "description"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.label", "API Key"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.default_value", "\"default\""),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "status", "PUBLIC"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.#", "1"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.0", "Analytics"),
@@ -200,6 +203,8 @@ func TestAccDestinationMetadataDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.multiple", "false"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.dynamic", "false"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.allow_null", "false"),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.default_value", "\"default\""),
+						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.choices", "\"choice1\""),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.#", "1"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.action_id", "id"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.name", "name"),
@@ -324,6 +329,7 @@ func TestAccDestinationMetadataDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.name", "apiKey"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.type", "string"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "options.0.required", "true"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "options.0.default_value"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "status", "PUBLIC"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.#", "1"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "categories.0", "Analytics"),
@@ -365,6 +371,7 @@ func TestAccDestinationMetadataDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.multiple", "false"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.dynamic", "false"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.allow_null", "false"),
+						resource.TestCheckNoResourceAttr("data.segment_destination_metadata.test", "actions.0.fields.0.default_value"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.#", "1"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.action_id", "id"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "presets.0.name", "name"),

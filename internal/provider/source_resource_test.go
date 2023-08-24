@@ -43,7 +43,8 @@ func TestAccSourceResource(t *testing.T) {
 										"required": true,
 										"type": "string",
 										"defaultValue": "",
-										"description": "Your Segment SID"
+										"description": "Your Segment SID",
+										"defaultValue": "default-sid"
 									}
 								],
 								"isCloudEventSource": false
@@ -94,7 +95,8 @@ func TestAccSourceResource(t *testing.T) {
 										"required": true,
 										"type": "string",
 										"defaultValue": "",
-										"description": "Your Segment SID"
+										"description": "Your Segment SID",
+										"defaultValue": "default-sid"
 									}
 								],
 								"isCloudEventSource": false
@@ -166,6 +168,7 @@ func TestAccSourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.required", "true"),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.type", "string"),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.description", "Your Segment SID"),
+					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.default_value", "\"default-sid\""),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.is_cloud_event_source", "false"),
 					resource.TestCheckResourceAttr("segment_source.test", "settings", "{\"myKey\":\"myValue\"}"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.#", "1"),
@@ -226,6 +229,7 @@ func TestAccSourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.required", "true"),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.type", "string"),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.description", "Your Segment SID"),
+					resource.TestCheckResourceAttr("segment_source.test", "metadata.options.0.default_value", "\"default-sid\""),
 					resource.TestCheckResourceAttr("segment_source.test", "metadata.is_cloud_event_source", "false"),
 					resource.TestCheckResourceAttr("segment_source.test", "settings", "{\"myKey\":\"myOtherValue\"}"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.#", "1"),

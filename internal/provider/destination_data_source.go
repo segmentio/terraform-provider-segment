@@ -86,7 +86,14 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	destination := response.Data.GetDestination()
 
-	state.Fill(&destination)
+	err = state.Fill(&destination)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Destination",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

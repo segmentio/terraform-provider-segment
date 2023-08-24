@@ -28,7 +28,10 @@ type DestinationPlan struct {
 
 func (d *DestinationState) Fill(destination *api.Destination) error {
 	var destinationMetadata DestinationMetadataState
-	destinationMetadata.Fill(api.DestinationMetadata(destination.Metadata))
+	err := destinationMetadata.Fill(api.DestinationMetadata(destination.Metadata))
+	if err != nil {
+		return err
+	}
 
 	d.ID = types.StringValue(destination.Id)
 	d.Name = types.StringPointerValue(destination.Name)

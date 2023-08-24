@@ -48,7 +48,11 @@ func (s *SourceState) Fill(source api.Source4) error {
 	s.WorkspaceID = types.StringValue(source.WorkspaceId)
 	s.WriteKeys = s.getWriteKeys(source.WriteKeys)
 	s.Labels = s.getLabels(source.Labels)
-	s.Metadata = s.getMetadata(source.Metadata)
+	s.Metadata = &SourceMetadataState{}
+	err := s.Metadata.Fill(api.SourceMetadata(source.Metadata))
+	if err != nil {
+		return err
+	}
 	settings, err := s.getSettings(source.Settings)
 	if err != nil {
 		return err
@@ -56,53 +60,6 @@ func (s *SourceState) Fill(source api.Source4) error {
 	s.Settings = settings
 
 	return nil
-}
-
-func (s *SourceState) getLogos(logos api.Logos1) *LogosState {
-	logosToAdd := LogosState{
-		Default: types.StringValue(logos.Default),
-	}
-	if logos.Alt.IsSet() {
-		logosToAdd.Alt = types.StringValue(*logos.Alt.Get())
-	}
-	if logos.Mark.IsSet() {
-		logosToAdd.Mark = types.StringValue(*logos.Mark.Get())
-	}
-
-	return &logosToAdd
-}
-
-func (s *SourceState) getMetadata(metadata api.Metadata2) *SourceMetadataState {
-	metadataToAdd := SourceMetadataState{
-		ID:                 types.StringValue(metadata.Id),
-		Description:        types.StringValue(metadata.Description),
-		IsCloudEventSource: types.BoolValue(metadata.IsCloudEventSource),
-		Logos:              s.getLogos(metadata.Logos),
-		Name:               types.StringValue(metadata.Name),
-		Slug:               types.StringValue(metadata.Slug),
-	}
-
-	for _, metadataCategory := range metadata.Categories {
-		metadataToAdd.Categories = append(metadataToAdd.Categories, types.StringValue(metadataCategory))
-	}
-
-	for _, integrationOption := range metadata.Options {
-		integrationOptionToAdd := IntegrationOptionState{
-			Name:     types.StringValue(integrationOption.Name),
-			Type:     types.StringValue(integrationOption.Type),
-			Required: types.BoolValue(integrationOption.Required),
-		}
-
-		if integrationOption.Description != nil {
-			integrationOptionToAdd.Description = types.StringValue(*integrationOption.Description)
-		}
-
-		// TODO handle integrationOption.DefaultValue (typed as interface{})
-
-		metadataToAdd.Options = append(metadataToAdd.Options, integrationOptionToAdd)
-	}
-
-	return &metadataToAdd
 }
 
 func (s *SourceState) getLabels(labels []api.LabelV1) []LabelState {

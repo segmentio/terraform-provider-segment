@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-segment/internal/provider/models"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -51,7 +52,11 @@ func (d *warehouseDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 				Computed:    true,
 				Description: "When set to true, this Warehouse receives data.",
 			},
-			// TODO: Add settings
+			"settings": schema.StringAttribute{
+				Computed:    true,
+				Description: "The settings associated with this Warehouse.  Common settings are connection-related configuration used to connect to it, for example host, username, and port.",
+				CustomType:  jsontypes.NormalizedType{},
+			},
 		},
 	}
 }
@@ -76,7 +81,14 @@ func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	warehouse := response.Data.GetWarehouse()
-	state.Fill(warehouse)
+	err = state.Fill(warehouse)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Warehouse",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

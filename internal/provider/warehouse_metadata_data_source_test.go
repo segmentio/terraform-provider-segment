@@ -16,41 +16,42 @@ func TestAccWarehouseMetadataDataSource(t *testing.T) {
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("content-type", "application/json")
 				_, _ = w.Write([]byte(`
-				{
-					"data": {
-		"warehouseMetadata": {
-			"id": "my-warehouse-metadata-id",
-			"slug": "my-warehouse-metadata-slug",
-			"name": "The name of the warehouse metadata",
-			"description": "The description of a warehouse metadata",
-			"logos": {
-				"default": "the default value of a logo",
-				"mark": "the mark value of a logo",
-				"alt": "the alt value of a logo"
-			},
-			"options": [
-				{
-					"name": "the option name",
-					"required": true,
-					"type": "the option type",
-					"description": "the option description",
-					"label": "the option label"
-				}
-			]
-		}
-				}
-}
-			`))
+					{
+						"data": {
+							"warehouseMetadata": {
+								"id": "my-warehouse-metadata-id",
+								"slug": "my-warehouse-metadata-slug",
+								"name": "The name of the warehouse metadata",
+								"description": "The description of a warehouse metadata",
+								"logos": {
+									"default": "the default value of a logo",
+									"mark": "the mark value of a logo",
+									"alt": "the alt value of a logo"
+								},
+								"options": [
+									{
+										"name": "the option name",
+										"required": true,
+										"type": "the option type",
+										"description": "the option description",
+										"label": "the option label",
+										"defaultValue": "default"
+									}
+								]
+							}
+						}
+					}
+				`))
 			}),
 		)
 		defer fakeServer.Close()
 
 		providerConfig := `
-	provider "segment" {
-		url   = "` + fakeServer.URL + `"
-		token = "abc123"
-	}
-	`
+			provider "segment" {
+				url   = "` + fakeServer.URL + `"
+				token = "abc123"
+			}
+		`
 
 		resource.Test(t, resource.TestCase{
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -72,6 +73,7 @@ func TestAccWarehouseMetadataDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "options.0.required", "true"),
 						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "options.0.description", "the option description"),
 						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "options.0.label", "the option label"),
+						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "options.0.default_value", "\"default\""),
 					),
 				},
 			},
@@ -83,37 +85,37 @@ func TestAccWarehouseMetadataDataSource(t *testing.T) {
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("content-type", "application/json")
 				_, _ = w.Write([]byte(`
-				{
-					"data": {
-		"warehouseMetadata": {
-			"id": "my-warehouse-metadata-id",
-			"slug": "my-warehouse-metadata-slug",
-			"name": "The name of the warehouse metadata",
-			"description": "The description of a warehouse metadata",
-			"logos": {
-				"default": "the default value of a logo"
-			},
-			"options": [
-				{
-					"name": "the option name",
-					"required": true,
-					"type": "the option type"
-				}
-			]
-		}
-				}
-}
-			`))
+					{
+						"data": {
+							"warehouseMetadata": {
+								"id": "my-warehouse-metadata-id",
+								"slug": "my-warehouse-metadata-slug",
+								"name": "The name of the warehouse metadata",
+								"description": "The description of a warehouse metadata",
+								"logos": {
+									"default": "the default value of a logo"
+								},
+								"options": [
+									{
+										"name": "the option name",
+										"required": true,
+										"type": "the option type"
+									}
+								]
+							}
+						}
+					}
+				`))
 			}),
 		)
 		defer fakeServer.Close()
 
 		providerConfig := `
-	provider "segment" {
-		url   = "` + fakeServer.URL + `"
-		token = "abc123"
-	}
-	`
+			provider "segment" {
+				url   = "` + fakeServer.URL + `"
+				token = "abc123"
+			}
+		`
 
 		resource.Test(t, resource.TestCase{
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -135,6 +137,7 @@ func TestAccWarehouseMetadataDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "options.0.required", "true"),
 						resource.TestCheckNoResourceAttr("data.segment_warehouse_metadata.test", "options.0.description"),
 						resource.TestCheckNoResourceAttr("data.segment_warehouse_metadata.test", "options.0.label"),
+						resource.TestCheckNoResourceAttr("data.segment_warehouse_metadata.test", "options.0.default_value"),
 					),
 				},
 			},

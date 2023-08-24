@@ -135,11 +135,11 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 						Description: "An optional short text description of the field.",
 						Computed:    true,
 					},
-					//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-					//"default_value": schema.AnyAttribute{
-					//	Description: "An optional default value for the field.",
-					//	Optional:    true,
-					//},
+					"default_value": schema.StringAttribute{
+						CustomType:  jsontypes.NormalizedType{},
+						Description: "An optional default value for the field.",
+						Computed:    true,
+					},
 					"label": schema.StringAttribute{
 						Description: "An optional label for this field.",
 						Computed:    true,
@@ -321,12 +321,11 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 									Description: "An example value displayed but not saved.",
 									Computed:    true,
 								},
-								//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-								//"default_value": {
-								//	Type:        schema.TypeAny,
-								//	Description: "A default value that is saved the first time an action is created.",
-								//	Optional:    true,
-								//}
+								"default_value": schema.StringAttribute{
+									CustomType:  jsontypes.NormalizedType{},
+									Description: "A default value that is saved the first time an action is created.",
+									Computed:    true,
+								},
 								"required": schema.BoolAttribute{
 									Description: "Whether this field is required.",
 									Computed:    true,
@@ -335,12 +334,11 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 									Description: "Whether a user can provide multiples of this field.",
 									Computed:    true,
 								},
-								//TODO: This Map field has dynamic values and since there is no equivalent of type Any, this field is excluded.
-								//"choices": schema.MapAttribute{
-								//	ElementType: types.MapType{},
-								//	Description: "A list of machine-readable value/label pairs to populate a static dropdown.",
-								//	Optional:    true,
-								//},
+								"choices": schema.StringAttribute{
+									CustomType:  jsontypes.NormalizedType{},
+									Description: "A list of machine-readable value/label pairs to populate a static dropdown.",
+									Computed:    true,
+								},
 								"dynamic": schema.BoolAttribute{
 									Description: "Whether this field should execute a dynamic request to fetch choices to populate a dropdown. When true, `choices` is ignored.",
 									Computed:    true,
@@ -368,12 +366,11 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 						Description: "The name of the subscription.",
 						Computed:    true,
 					},
-					//TODO: This Map field has dynamic values and since there is no equivalent of type Any, this field is excluded.
-					//"fields": schema.MapAttribute{
-					//	ElementType: types.MapType{},
-					//	Computed:    true,
-					//	Description: "The default settings for action fields.",
-					//},
+					"fields": schema.StringAttribute{
+						CustomType:  jsontypes.NormalizedType{},
+						Computed:    true,
+						Description: "The default settings for action fields.",
+					},
 					"trigger": schema.StringAttribute{
 						Description: "FQL string that describes what events should trigger an action. See https://segment.com/docs/config-api/fql/ for more information regarding Segment's Filter Query Language (FQL).",
 						Computed:    true,
@@ -470,7 +467,7 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	out, _, err := r.client.DestinationsApi.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a destination",
+			"Unable to create Destination",
 			err.Error(),
 		)
 		return
@@ -479,7 +476,14 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	destination := api.Destination(out.Data.Destination)
 
 	var state models.DestinationState
-	state.Fill(&destination)
+	err = state.Fill(&destination)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to create Destination",
+			err.Error(),
+		)
+		return
+	}
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -501,7 +505,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Labels",
+			"Unable to read Destination",
 			err.Error(),
 		)
 		return
@@ -509,7 +513,14 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 
 	destination := out.Data.Destination
 
-	state.Fill(&destination)
+	err = state.Fill(&destination)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to read Destination",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -545,7 +556,7 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	out, _, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update a destination",
+			"Unable to update Destination",
 			err.Error(),
 		)
 		return
@@ -554,7 +565,14 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	destination := api.Destination(out.Data.Destination)
 
 	var state models.DestinationState
-	state.Fill(&destination)
+	err = state.Fill(&destination)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to update Destination",
+			err.Error(),
+		)
+		return
+	}
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -577,7 +595,7 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 	_, _, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Deleting a Destination", "Could not delete a destination, unexpected error: "+err.Error(),
+			"Error deleting Destination", "Could not delete Destination, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -594,7 +612,7 @@ func (r *destinationResource) Configure(_ context.Context, req resource.Configur
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *segment.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return

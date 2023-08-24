@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 )
@@ -17,12 +18,12 @@ type SourceMetadataState struct {
 }
 
 type IntegrationOptionState struct {
-	// TODO: DefaultValue types.String `tfsdk:"default_value"`
-	Description types.String `tfsdk:"description"`
-	Label       types.String `tfsdk:"label"`
-	Name        types.String `tfsdk:"name"`
-	Required    types.Bool   `tfsdk:"required"`
-	Type        types.String `tfsdk:"type"`
+	DefaultValue jsontypes.Normalized `tfsdk:"default_value"`
+	Description  types.String         `tfsdk:"description"`
+	Label        types.String         `tfsdk:"label"`
+	Name         types.String         `tfsdk:"name"`
+	Required     types.Bool           `tfsdk:"required"`
+	Type         types.String         `tfsdk:"type"`
 }
 
 type LogosState struct {
@@ -31,15 +32,21 @@ type LogosState struct {
 	Mark    types.String `tfsdk:"mark"`
 }
 
-func (s *SourceMetadataState) Fill(sourceMetadata api.SourceMetadata) {
+func (s *SourceMetadataState) Fill(sourceMetadata api.SourceMetadata) error {
 	s.ID = types.StringValue(sourceMetadata.Id)
 	s.Name = types.StringValue(sourceMetadata.Name)
 	s.Description = types.StringValue(sourceMetadata.Description)
 	s.Slug = types.StringValue(sourceMetadata.Slug)
 	s.Logos = getLogos(api.Logos(sourceMetadata.Logos))
-	s.Options = getOptions(sourceMetadata.Options)
+	options, err := getOptions(sourceMetadata.Options)
+	if err != nil {
+		return err
+	}
+	s.Options = options
 	s.IsCloudEventSource = types.BoolValue(sourceMetadata.IsCloudEventSource)
 	s.Categories = getCategories(sourceMetadata.Categories)
+
+	return nil
 }
 
 func getCategories(categories []string) []types.String {

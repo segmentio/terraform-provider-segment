@@ -306,6 +306,7 @@ func TestAccDestinationResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.options.0.required", "true"),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.options.0.description", "description"),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.options.0.label", "API Key"),
+					resource.TestCheckResourceAttr("segment_destination.test", "metadata.options.0.default_value", "\"default\""),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.status", "PUBLIC"),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.categories.#", "1"),
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.categories.0", "Analytics"),

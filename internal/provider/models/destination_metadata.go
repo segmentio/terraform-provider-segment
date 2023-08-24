@@ -1,6 +1,9 @@
 package models
 
 import (
+	"encoding/json"
+
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 )
@@ -34,17 +37,19 @@ type SupportedPlatform struct {
 }
 
 type Field struct {
-	Id          types.String  `tfsdk:"id"`
-	SortOrder   types.Float64 `tfsdk:"sort_order"`
-	FieldKey    types.String  `tfsdk:"field_key"`
-	Label       types.String  `tfsdk:"label"`
-	Type        types.String  `tfsdk:"type"`
-	Description types.String  `tfsdk:"description"`
-	Placeholder types.String  `tfsdk:"placeholder"`
-	Required    types.Bool    `tfsdk:"required"`
-	Multiple    types.Bool    `tfsdk:"multiple"`
-	Dynamic     types.Bool    `tfsdk:"dynamic"`
-	AllowNull   types.Bool    `tfsdk:"allow_null"`
+	Id           types.String         `tfsdk:"id"`
+	SortOrder    types.Float64        `tfsdk:"sort_order"`
+	FieldKey     types.String         `tfsdk:"field_key"`
+	Label        types.String         `tfsdk:"label"`
+	Type         types.String         `tfsdk:"type"`
+	Description  types.String         `tfsdk:"description"`
+	Placeholder  types.String         `tfsdk:"placeholder"`
+	Required     types.Bool           `tfsdk:"required"`
+	Multiple     types.Bool           `tfsdk:"multiple"`
+	Dynamic      types.Bool           `tfsdk:"dynamic"`
+	AllowNull    types.Bool           `tfsdk:"allow_null"`
+	DefaultValue jsontypes.Normalized `tfsdk:"default_value"`
+	Choices      jsontypes.Normalized `tfsdk:"choices"`
 }
 
 type Action struct {
@@ -59,9 +64,10 @@ type Action struct {
 }
 
 type Preset struct {
-	ActionId types.String `tfsdk:"action_id"`
-	Name     types.String `tfsdk:"name"`
-	Trigger  types.String `tfsdk:"trigger"`
+	ActionId types.String         `tfsdk:"action_id"`
+	Name     types.String         `tfsdk:"name"`
+	Trigger  types.String         `tfsdk:"trigger"`
+	Fields   jsontypes.Normalized `tfsdk:"fields"`
 }
 
 type Contact struct {
@@ -240,7 +246,7 @@ func (d *DestinationMetadataState) getContacts(contacts []api.Contact) []Contact
 	return contactsToAdd
 }
 
-func (d *DestinationMetadataState) getPresets(presets []api.DestinationMetadataSubscriptionPresetV1) []Preset {
+func (d *DestinationMetadataState) getPresets(presets []api.DestinationMetadataSubscriptionPresetV1) ([]Preset, error) {
 	var presetsToAdd []Preset
 
 	for _, preset := range presets {
@@ -250,13 +256,19 @@ func (d *DestinationMetadataState) getPresets(presets []api.DestinationMetadataS
 			Trigger:  types.StringValue(preset.Trigger),
 		}
 
+		fields, err := json.Marshal(preset.Fields)
+		if err != nil {
+			return []Preset{}, err
+		}
+		presetToAdd.Fields = jsontypes.NewNormalizedValue(string(fields))
+
 		presetsToAdd = append(presetsToAdd, presetToAdd)
 	}
 
-	return presetsToAdd
+	return presetsToAdd, nil
 }
 
-func (d *DestinationMetadataState) getActions(actions []api.DestinationMetadataActionV1) []Action {
+func (d *DestinationMetadataState) getActions(actions []api.DestinationMetadataActionV1) ([]Action, error) {
 	var destinationActionsToAdd []Action
 
 	for _, action := range actions {
@@ -267,8 +279,13 @@ func (d *DestinationMetadataState) getActions(actions []api.DestinationMetadataA
 			Description: types.StringValue(action.Description),
 			Platform:    types.StringValue(action.Platform),
 			Hidden:      types.BoolValue(action.Hidden),
-			Fields:      d.getFields(action.Fields),
 		}
+
+		fields, err := d.getFields(action.Fields)
+		if err != nil {
+			return []Action{}, err
+		}
+		destinationMetadataAction.Fields = fields
 
 		if action.DefaultTrigger.IsSet() {
 			destinationMetadataAction.DefaultTrigger = types.StringValue(*action.DefaultTrigger.Get())
@@ -277,10 +294,10 @@ func (d *DestinationMetadataState) getActions(actions []api.DestinationMetadataA
 		destinationActionsToAdd = append(destinationActionsToAdd, destinationMetadataAction)
 	}
 
-	return destinationActionsToAdd
+	return destinationActionsToAdd, nil
 }
 
-func (d *DestinationMetadataState) getFields(fields []api.DestinationMetadataActionFieldV1) []Field {
+func (d *DestinationMetadataState) getFields(fields []api.DestinationMetadataActionFieldV1) ([]Field, error) {
 	var fieldsToAdd []Field
 
 	for _, f := range fields {
@@ -301,10 +318,24 @@ func (d *DestinationMetadataState) getFields(fields []api.DestinationMetadataAct
 			fieldToAdd.Placeholder = types.StringValue(*f.Placeholder)
 		}
 
+		if f.DefaultValue != nil {
+			defaultValue, err := json.Marshal(f.DefaultValue)
+			if err != nil {
+				return []Field{}, err
+			}
+			fieldToAdd.DefaultValue = jsontypes.NewNormalizedValue(string(defaultValue))
+		}
+
+		choices, err := json.Marshal(f.Choices)
+		if err != nil {
+			return []Field{}, err
+		}
+		fieldToAdd.Choices = jsontypes.NewNormalizedValue(string(choices))
+
 		fieldsToAdd = append(fieldsToAdd, fieldToAdd)
 	}
 
-	return fieldsToAdd
+	return fieldsToAdd, nil
 }
 
 func (d *DestinationMetadataState) getLogosDestinationMetadata(logos api.Logos) *LogosState {
@@ -323,7 +354,7 @@ func (d *DestinationMetadataState) getLogosDestinationMetadata(logos api.Logos) 
 	return &logosToAdd
 }
 
-func getOptions(options []api.IntegrationOptionBeta) []IntegrationOptionState {
+func getOptions(options []api.IntegrationOptionBeta) ([]IntegrationOptionState, error) {
 	var integrationOptions []IntegrationOptionState
 
 	for _, opt := range options {
@@ -341,27 +372,42 @@ func getOptions(options []api.IntegrationOptionBeta) []IntegrationOptionState {
 			integrationOption.Label = types.StringValue(*opt.Label)
 		}
 
-		//TODO: Handle defaultValue which is a field of type Any
-		//if opt.DefaultValue != nil {
-		//	integrationOption.Label = types.value(*opt.DefaultValue)
-		//}
+		if opt.DefaultValue != nil {
+			defaultValue, err := json.Marshal(opt.DefaultValue)
+			if err != nil {
+				return []IntegrationOptionState{}, err
+			}
+			integrationOption.DefaultValue = jsontypes.NewNormalizedValue(string(defaultValue))
+		}
 
 		integrationOptions = append(integrationOptions, integrationOption)
 	}
 
-	return integrationOptions
+	return integrationOptions, nil
 }
 
-func (d *DestinationMetadataState) Fill(destinationMetadata api.DestinationMetadata) {
+func (d *DestinationMetadataState) Fill(destinationMetadata api.DestinationMetadata) error {
 	d.Id = types.StringValue(destinationMetadata.Id)
 	d.Name = types.StringValue(destinationMetadata.Name)
 	d.Description = types.StringValue(destinationMetadata.Description)
 	d.Slug = types.StringValue(destinationMetadata.Slug)
 	d.Logos = d.getLogosDestinationMetadata(destinationMetadata.Logos)
-	d.Options = getOptions(destinationMetadata.Options)
-	d.Actions = d.getActions(destinationMetadata.Actions)
+	options, err := getOptions(destinationMetadata.Options)
+	if err != nil {
+		return err
+	}
+	d.Options = options
+	actions, err := d.getActions(destinationMetadata.Actions)
+	if err != nil {
+		return err
+	}
+	d.Actions = actions
 	d.Categories = getCategories(destinationMetadata.Categories)
-	d.Presets = d.getPresets(destinationMetadata.Presets)
+	presets, err := d.getPresets(destinationMetadata.Presets)
+	if err != nil {
+		return err
+	}
+	d.Presets = presets
 	d.Contacts = d.getContacts(destinationMetadata.Contacts)
 	d.PartnerOwned = d.getPartnerOwned(destinationMetadata.PartnerOwned)
 	d.SupportedRegions = d.getSupportedRegions(destinationMetadata.SupportedRegions)
@@ -373,4 +419,6 @@ func (d *DestinationMetadataState) Fill(destinationMetadata api.DestinationMetad
 	d.SupportedMethods = d.getSupportedMethods(destinationMetadata.SupportedMethods)
 	d.SupportedFeatures = d.getSupportedFeatures(destinationMetadata.SupportedFeatures)
 	d.SupportedPlatforms = d.getSupportedPlatforms(destinationMetadata.SupportedPlatforms)
+
+	return nil
 }
