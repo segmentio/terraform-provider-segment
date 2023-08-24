@@ -27,6 +27,7 @@ data "segment_warehouse" "my_warehouse" {
 - `enabled` (Boolean) When set to true, this Warehouse receives data.
 - `id` (String) The id of the Warehouse.
 - `metadata` (Attributes) The metadata for the Warehouse. (see [below for nested schema](#nestedatt--metadata))
+- `settings` (String) The settings associated with this Warehouse.  Common settings are connection-related configuration used to connect to it, for example host, username, and port.
 - `workspace_id` (String) The id of the Workspace that owns this Warehouse.
 
 <a id="nestedatt--metadata"></a>
