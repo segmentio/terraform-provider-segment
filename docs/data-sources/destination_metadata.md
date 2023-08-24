@@ -63,19 +63,18 @@ Read-Only:
 <a id="nestedatt--actions--fields"></a>
 ### Nested Schema for `actions.fields`
 
-Optional:
-
-- `placeholder` (String) An example value displayed but not saved.
-
 Read-Only:
 
 - `allow_null` (Boolean) Whether this field allows null values.
+- `choices` (String) A list of machine-readable value/label pairs to populate a static dropdown.
+- `default_value` (String) A default value that is saved the first time an action is created.
 - `description` (String) A human-readable description of this value. You can use Markdown.
 - `dynamic` (Boolean) Whether this field should execute a dynamic request to fetch choices to populate a dropdown. When true, `choices` is ignored.
 - `field_key` (String) A unique machine-readable key for the field. Should ideally match the expected key in the action's API request.
 - `id` (String) The primary key of the field.
 - `label` (String) A human-readable label for this value.
 - `multiple` (Boolean) Whether a user can provide multiples of this field.
+- `placeholder` (String) An example value displayed but not saved.
 - `required` (Boolean) Whether this field is required.
 - `sort_order` (Number) The order this particular field is (used in the UI for displaying the fields in a specified order).
 - `type` (String) The data type for this value.
@@ -85,13 +84,10 @@ Read-Only:
 <a id="nestedatt--components"></a>
 ### Nested Schema for `components`
 
-Optional:
-
-- `owner` (String) The owner of this component. Either 'SEGMENT' or 'PARTNER'.
-
 Read-Only:
 
 - `code` (String) Link to the repository hosting the code for this component.
+- `owner` (String) The owner of this component. Either 'SEGMENT' or 'PARTNER'.
 - `type` (String) The component type.
 
 
@@ -109,26 +105,21 @@ Read-Only:
 <a id="nestedatt--logos"></a>
 ### Nested Schema for `logos`
 
-Required:
-
-- `default` (String)
-
-Optional:
+Read-Only:
 
 - `alt` (String) The alternative text for this logo.
+- `default` (String)
 - `mark` (String) The logo mark.
 
 
 <a id="nestedatt--options"></a>
 ### Nested Schema for `options`
 
-Optional:
-
-- `description` (String) An optional short text description of the field.
-- `label` (String) An optional label for this field.
-
 Read-Only:
 
+- `default_value` (String) An optional default value for the field.
+- `description` (String) An optional short text description of the field.
+- `label` (String) An optional label for this field.
 - `name` (String) The name identifying this option in the context of a Segment Integration.
 - `required` (Boolean) Whether this is a required option when setting up the Integration.
 - `type` (String) Defines the type for this option in the schema.
@@ -140,6 +131,7 @@ Read-Only:
 Read-Only:
 
 - `action_id` (String) The unique identifier for the Destination Action to trigger.
+- `fields` (String) The default settings for action fields.
 - `name` (String) The name of the subscription.
 - `trigger` (String) FQL string that describes what events should trigger an action. See https://segment.com/docs/config-api/fql/ for more information regarding Segment's Filter Query Language (FQL).
 
@@ -147,7 +139,7 @@ Read-Only:
 <a id="nestedatt--supported_features"></a>
 ### Nested Schema for `supported_features`
 
-Optional:
+Read-Only:
 
 - `browser_unbundling` (Boolean) Whether this Destination supports browser unbundling.
 - `browser_unbundling_public` (Boolean) Whether this Destination supports public browser unbundling.
@@ -159,7 +151,7 @@ Optional:
 <a id="nestedatt--supported_methods"></a>
 ### Nested Schema for `supported_methods`
 
-Optional:
+Read-Only:
 
 - `alias` (Boolean) Identifies if the Destination supports the `alias` method.
 - `group` (Boolean) Identifies if the Destination supports the `group` method.
@@ -171,7 +163,7 @@ Optional:
 <a id="nestedatt--supported_platforms"></a>
 ### Nested Schema for `supported_platforms`
 
-Optional:
+Read-Only:
 
 - `browser` (Boolean) Whether this Destination supports browser events.
 - `mobile` (Boolean) Whether this Destination supports mobile events.
