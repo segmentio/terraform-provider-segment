@@ -6,6 +6,7 @@ import (
 
 	"terraform-provider-segment/internal/provider/models"
 
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 
@@ -56,7 +57,14 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	sourceMetadata := response.Data.SourceMetadata
-	state.Fill(sourceMetadata)
+	err = state.Fill(sourceMetadata)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Source metadata",
+			err.Error(),
+		)
+		return
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -121,18 +129,15 @@ func sourceMetadataSchema() map[string]schema.Attribute {
 						Description: "Whether this is a required option when setting up the Integration.",
 					},
 					"description": schema.StringAttribute{
-						Optional:    true,
 						Computed:    true,
 						Description: "An optional short text description of the field.",
 					},
-					//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-					//"default_value": {
-					//	Type:        schema.TypeAny,
-					//	Optional:    true,
-					//	Computed:    true,
-					//	Description: "An optional default value for the field.",
+					"default_value": schema.StringAttribute{
+						CustomType:  jsontypes.NormalizedType{},
+						Computed:    true,
+						Description: "An optional default value for the field.",
+					},
 					"label": schema.StringAttribute{
-						Optional:    true,
 						Computed:    true,
 						Description: "An optional label for this field.",
 					},

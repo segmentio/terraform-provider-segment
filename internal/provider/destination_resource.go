@@ -135,11 +135,11 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 						Description: "An optional short text description of the field.",
 						Computed:    true,
 					},
-					//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-					//"default_value": schema.AnyAttribute{
-					//	Description: "An optional default value for the field.",
-					//	Optional:    true,
-					//},
+					"default_value": schema.StringAttribute{
+						CustomType:  jsontypes.NormalizedType{},
+						Description: "An optional default value for the field.",
+						Computed:    true,
+					},
 					"label": schema.StringAttribute{
 						Description: "An optional label for this field.",
 						Computed:    true,
@@ -321,12 +321,11 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 									Description: "An example value displayed but not saved.",
 									Computed:    true,
 								},
-								//TODO: There is no equivalent of schema.AnyAttribute, therefore this field is ignored.
-								//"default_value": {
-								//	Type:        schema.TypeAny,
-								//	Description: "A default value that is saved the first time an action is created.",
-								//	Optional:    true,
-								//}
+								"default_value": schema.StringAttribute{
+									CustomType:  jsontypes.NormalizedType{},
+									Description: "A default value that is saved the first time an action is created.",
+									Computed:    true,
+								},
 								"required": schema.BoolAttribute{
 									Description: "Whether this field is required.",
 									Computed:    true,
@@ -335,12 +334,11 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 									Description: "Whether a user can provide multiples of this field.",
 									Computed:    true,
 								},
-								//TODO: This Map field has dynamic values and since there is no equivalent of type Any, this field is excluded.
-								//"choices": schema.MapAttribute{
-								//	ElementType: types.MapType{},
-								//	Description: "A list of machine-readable value/label pairs to populate a static dropdown.",
-								//	Optional:    true,
-								//},
+								"choices": schema.StringAttribute{
+									CustomType:  jsontypes.NormalizedType{},
+									Description: "A list of machine-readable value/label pairs to populate a static dropdown.",
+									Computed:    true,
+								},
 								"dynamic": schema.BoolAttribute{
 									Description: "Whether this field should execute a dynamic request to fetch choices to populate a dropdown. When true, `choices` is ignored.",
 									Computed:    true,
@@ -368,12 +366,11 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 						Description: "The name of the subscription.",
 						Computed:    true,
 					},
-					//TODO: This Map field has dynamic values and since there is no equivalent of type Any, this field is excluded.
-					//"fields": schema.MapAttribute{
-					//	ElementType: types.MapType{},
-					//	Computed:    true,
-					//	Description: "The default settings for action fields.",
-					//},
+					"fields": schema.StringAttribute{
+						CustomType:  jsontypes.NormalizedType{},
+						Computed:    true,
+						Description: "The default settings for action fields.",
+					},
 					"trigger": schema.StringAttribute{
 						Description: "FQL string that describes what events should trigger an action. See https://segment.com/docs/config-api/fql/ for more information regarding Segment's Filter Query Language (FQL).",
 						Computed:    true,

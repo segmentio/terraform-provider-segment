@@ -16,46 +16,49 @@ func TestAccWarehouseDataSource(t *testing.T) {
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("content-type", "application/json")
 				_, _ = w.Write([]byte(`
-				{
-  "data": {
-    "warehouse": {
-      "id": "warehouse-id",
-      "workspaceId": "workspace-id",
-      "enabled": false,
-      "metadata": {
-        "id": "my-warehouse-metadata-id",
-        "slug": "my-warehouse-metadata-slug",
-        "name": "The name of the warehouse metadata",
-        "description": "The description of a warehouse metadata",
-        "logos": {
-          "default": "the default value of a logo",
-          "mark": "the mark value of a logo",
-          "alt": "the alt value of a logo"
-        },
-        "options": [
-          {
-            "name": "the option name",
-            "required": true,
-            "type": "the option type",
-            "description": "the option description",
-            "label": "the option label"
-          }
-        ]
-      }
-    }
-  }
-}
-			`))
+					{
+						"data": {
+							"warehouse": {
+								"id": "warehouse-id",
+								"workspaceId": "workspace-id",
+								"enabled": false,
+								"settings": {
+									"myKey": "myValue"
+								},
+								"metadata": {
+									"id": "my-warehouse-metadata-id",
+									"slug": "my-warehouse-metadata-slug",
+									"name": "The name of the warehouse metadata",
+									"description": "The description of a warehouse metadata",
+									"logos": {
+										"default": "the default value of a logo",
+										"mark": "the mark value of a logo",
+										"alt": "the alt value of a logo"
+									},
+									"options": [
+										{
+											"name": "the option name",
+											"required": true,
+											"type": "the option type",
+											"description": "the option description",
+											"label": "the option label"
+										}
+									]
+								}
+							}
+						}
+					}
+				`))
 			}),
 		)
 		defer fakeServer.Close()
 
 		providerConfig := `
-	provider "segment" {
-		url   = "` + fakeServer.URL + `"
-		token = "abc123"
-	}
-	`
+			provider "segment" {
+				url   = "` + fakeServer.URL + `"
+				token = "abc123"
+			}
+		`
 
 		resource.Test(t, resource.TestCase{
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -80,6 +83,7 @@ func TestAccWarehouseDataSource(t *testing.T) {
 						resource.TestCheckResourceAttr("data.segment_warehouse.test", "metadata.options.0.required", "true"),
 						resource.TestCheckResourceAttr("data.segment_warehouse.test", "metadata.options.0.description", "the option description"),
 						resource.TestCheckResourceAttr("data.segment_warehouse.test", "metadata.options.0.label", "the option label"),
+						resource.TestCheckResourceAttr("data.segment_warehouse.test", "settings", "{\"myKey\":\"myValue\"}"),
 					),
 				},
 			},

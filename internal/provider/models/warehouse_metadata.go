@@ -14,11 +14,17 @@ type WarehouseMetadataState struct {
 	Options     []IntegrationOptionState `tfsdk:"options"`
 }
 
-func (w *WarehouseMetadataState) Fill(warehouseMetadata api.Metadata1) {
+func (w *WarehouseMetadataState) Fill(warehouseMetadata api.Metadata1) error {
 	w.ID = types.StringValue(warehouseMetadata.Id)
 	w.Name = types.StringValue(warehouseMetadata.Name)
 	w.Description = types.StringValue(warehouseMetadata.Description)
 	w.Slug = types.StringValue(warehouseMetadata.Slug)
 	w.Logos = getLogos(api.Logos(warehouseMetadata.Logos))
-	w.Options = getOptions(warehouseMetadata.Options)
+	options, err := getOptions(warehouseMetadata.Options)
+	if err != nil {
+		return err
+	}
+	w.Options = options
+
+	return nil
 }
