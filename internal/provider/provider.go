@@ -145,6 +145,7 @@ func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resou
 		NewLabelResource,
 		NewDestinationResource,
 		NewSourceResource,
+		NewWarehouseResource,
 	}
 }
 

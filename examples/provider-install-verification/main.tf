@@ -51,8 +51,3 @@ resource "segment_source" "example2" {
     "mylist" : [1, 2, 3]
   })
 }
-
-
-output "destination" {
-  value = data.segment_destination.example
-}

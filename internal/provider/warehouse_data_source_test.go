@@ -65,7 +65,7 @@ func TestAccWarehouseDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_warehouse" "test" {}`,
+					Config: providerConfig + `data "segment_warehouse" "test" { id = "warehouse-id" }`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_warehouse.test", "id", "warehouse-id"),
 						resource.TestCheckResourceAttr("data.segment_warehouse.test", "workspace_id", "workspace-id"),

@@ -12,71 +12,63 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	"github.com/segmentio/public-api-sdk-go/api"
 )
 
 var (
-	_ resource.Resource                = &sourceResource{}
-	_ resource.ResourceWithConfigure   = &sourceResource{}
-	_ resource.ResourceWithImportState = &sourceResource{}
+	_ resource.Resource                = &warehouseResource{}
+	_ resource.ResourceWithConfigure   = &warehouseResource{}
+	_ resource.ResourceWithImportState = &warehouseResource{}
 )
 
-func NewSourceResource() resource.Resource {
-	return &sourceResource{}
+func NewWarehouseResource() resource.Resource {
+	return &warehouseResource{}
 }
 
-type sourceResource struct {
+type warehouseResource struct {
 	client      *api.APIClient
 	authContext context.Context
 }
 
-func (r *sourceResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_source"
+func (d *warehouseResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_warehouse"
 }
 
-func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (d *warehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "The warehouse",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "The id of the Source.",
-			},
-			"slug": schema.StringAttribute{
-				Required:    true,
-				Description: "The slug used to identify the Source in the Segment app.",
-			},
-			"name": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The name of the Source.",
+				Description: "The id of the Warehouse.",
 			},
 			"metadata": schema.SingleNestedAttribute{
-				Description: "The metadata for the Source.",
+				Description: "The metadata for the Warehouse.",
 				Required:    true,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
-						Required: true,
+						Required:    true,
+						Description: "The id of this object.",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
-						Description: "The id for this Source metadata in the Segment catalog.",
 					},
 					"name": schema.StringAttribute{
 						Computed:    true,
-						Description: "The user-friendly name of this Source.",
+						Description: "The name of this object.",
 					},
 					"slug": schema.StringAttribute{
 						Computed:    true,
-						Description: "The slug that identifies this Source in the Segment app.",
+						Description: "A human-readable, unique identifier for object.",
 					},
 					"description": schema.StringAttribute{
 						Computed:    true,
-						Description: "The description of this Source.",
+						Description: "A description, in English, of this object.",
 					},
 					"logos": schema.SingleNestedAttribute{
-						Description: "The logos for this Source.",
 						Computed:    true,
+						Description: "Logo information for this object.",
 						Attributes: map[string]schema.Attribute{
 							"default": schema.StringAttribute{
 								Computed:    true,
@@ -94,7 +86,7 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 					},
 					"options": schema.ListNestedAttribute{
 						Computed:    true,
-						Description: "Options for this Source.",
+						Description: "The Integration options for this object.",
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
@@ -103,7 +95,7 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 								},
 								"type": schema.StringAttribute{
 									Computed:    true,
-									Description: "Defines the type for this option in the schema. Types are most commonly strings, but may also represent other primitive types, such as booleans, and numbers, as well as complex types, such as objects and arrays.",
+									Description: "Defines the type for this option in the schema.",
 								},
 								"required": schema.BoolAttribute{
 									Computed:    true,
@@ -125,61 +117,33 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 							},
 						},
 					},
-					"categories": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
-						Description: "A list of categories this Source belongs to.",
-					},
-					"is_cloud_event_source": schema.BoolAttribute{
-						Computed:    true,
-						Description: "True if this is a Cloud Event Source.",
-					},
 				},
 			},
-			"settings": schema.StringAttribute{
-				Required:    true,
-				Description: "The settings associated with the Source.",
-				CustomType:  jsontypes.NormalizedType{},
+			"name": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "An optional human-readable name for this Warehouse.",
 			},
 			"workspace_id": schema.StringAttribute{
 				Computed:    true,
-				Description: "The id of the Workspace that owns the Source.",
+				Description: "The id of the Workspace that owns this Warehouse.",
 			},
 			"enabled": schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "When set to true, this Warehouse receives data.",
+			},
+			"settings": schema.StringAttribute{
 				Required:    true,
-				Description: "Enable to receive data from the Source.",
-			},
-			"write_keys": schema.ListAttribute{
-				Computed:    true,
-				ElementType: types.StringType,
-				Description: "The write keys used to send data from the Source. This field is left empty when the current token does not have the 'source admin' permission.",
-			},
-			"labels": schema.ListNestedAttribute{
-				Computed:    true,
-				Description: "A list of labels applied to the Source.",
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"key": schema.StringAttribute{
-							Computed:    true,
-							Description: "The key that represents the name of this label.",
-						},
-						"value": schema.StringAttribute{
-							Computed:    true,
-							Description: "The value associated with the key of this label.",
-						},
-						"description": schema.StringAttribute{
-							Computed:    true,
-							Description: "An optional description of the purpose of this label.",
-						},
-					},
-				},
+				Description: "The settings associated with this Warehouse.  Common settings are connection-related configuration used to connect to it, for example host, username, and port.",
+				CustomType:  jsontypes.NormalizedType{},
 			},
 		},
 	}
 }
 
-func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan models.SourcePlan
+func (r *warehouseResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan models.WarehousePlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -213,47 +177,39 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 	modelMap := api.NewModelMap(settings)
 
-	out, _, err := r.client.SourcesApi.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
-		Slug:       plan.Slug.ValueString(),
-		Enabled:    plan.Enabled.ValueBool(),
+	name := plan.Name.ValueStringPointer()
+	if *name == "" {
+		name = nil
+	}
+
+	out, _, err := r.client.WarehousesApi.CreateWarehouse(r.authContext).CreateWarehouseV1Input(api.CreateWarehouseV1Input{
+		Enabled:    plan.Enabled.ValueBoolPointer(),
 		MetadataId: metadataId,
 		Settings:   *api.NewNullableModelMap(modelMap),
+		Name:       name,
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a source",
+			"Unable to create Warehouse",
 			err.Error(),
 		)
 		return
 	}
 
-	source := out.Data.Source
+	warehouse := out.Data.GetWarehouse()
 
-	if !plan.Name.IsNull() && !plan.Name.IsUnknown() {
-		// This is a workaround for the fact that "name" is allowed to be provided during update but not create
-		updateOut, _, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
-			Name: plan.Name.ValueStringPointer(),
-		}).Execute()
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Unable to Create a source",
-				err.Error(),
-			)
-			return
-		}
-
-		source.Name = updateOut.Data.Source.Name
-	}
-
-	var state models.SourceState
-	err = state.Fill(api.Source4(source))
+	var state models.WarehouseState
+	err = state.Fill(api.Warehouse(warehouse))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a source",
+			"Unable to create Warehouse",
 			err.Error(),
 		)
 		return
 	}
+
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	state.Settings = plan.Settings
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -263,30 +219,30 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 }
 
-func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var config models.SourceState
-	diags := req.State.Get(ctx, &config)
+func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state models.WarehouseState
+
+	diags := req.State.Get(ctx, &state)
+
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	out, _, err := r.client.SourcesApi.GetSource(r.authContext, config.ID.ValueString()).Execute()
+	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source",
+			"Unable to read Warehouse",
 			err.Error(),
 		)
 		return
 	}
 
-	source := out.Data.Source
-
-	var state models.SourceState
-	err = state.Fill(source)
+	warehouse := response.Data.GetWarehouse()
+	err = state.Fill(warehouse)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source",
+			"Unable to read Warehouse",
 			err.Error(),
 		)
 		return
@@ -299,15 +255,15 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 }
 
-func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan models.SourcePlan
+func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan models.WarehousePlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var state models.SourceState
+	var state models.WarehouseState
 	diags = req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -322,30 +278,32 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 	modelMap := api.NewModelMap(settings)
 
-	out, _, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
-		Slug:     plan.Slug.ValueStringPointer(),
+	out, _, err := r.client.WarehousesApi.UpdateWarehouse(r.authContext, state.ID.ValueString()).UpdateWarehouseV1Input(api.UpdateWarehouseV1Input{
 		Enabled:  plan.Enabled.ValueBoolPointer(),
-		Name:     plan.Name.ValueStringPointer(),
 		Settings: *api.NewNullableModelMap(modelMap),
+		Name:     *api.NewNullableString(plan.Name.ValueStringPointer()),
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Source",
+			"Unable to update Warehouse",
 			err.Error(),
 		)
 		return
 	}
 
-	source := out.Data.Source
+	warehouse := out.Data.GetWarehouse()
 
-	err = state.Fill(api.Source4(source))
+	err = state.Fill(api.Warehouse(warehouse))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Source",
+			"Unable to update Warehouse",
 			err.Error(),
 		)
 		return
 	}
+
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	state.Settings = plan.Settings
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -354,30 +312,30 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 }
 
-func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var config models.SourceState
+func (r *warehouseResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var config models.WarehouseState
 	diags := req.State.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, _, err := r.client.SourcesApi.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
+	_, _, err := r.client.WarehousesApi.DeleteWarehouse(r.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Delete Source",
+			"Unable to delete Warehouse",
 			err.Error(),
 		)
 		return
 	}
 }
 
-func (r *sourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *warehouseResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (r *sourceResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (d *warehouseResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -392,6 +350,6 @@ func (r *sourceResource) Configure(_ context.Context, req resource.ConfigureRequ
 		return
 	}
 
-	r.client = config.client
-	r.authContext = config.authContext
+	d.client = config.client
+	d.authContext = config.authContext
 }

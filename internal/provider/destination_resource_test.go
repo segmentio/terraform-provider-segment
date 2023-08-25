@@ -368,7 +368,22 @@ func TestAccDestinationResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_destination.test", "metadata.region_endpoints.1", "EU"),
 				),
 			},
-
+			// ImportState testing
+			{
+				ResourceName: "segment_destination.test",
+				Config: providerConfig + `
+					resource "segment_destination" "test" {
+						slug = "my-destination-slug"
+						name = "My destination name"
+						metadata = {
+							id = "my-metadata-id"
+						}
+						enabled = true
+					}
+				`,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			// Update and Read testing
 			{
 				Config: providerConfig + `
