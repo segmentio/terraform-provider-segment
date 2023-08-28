@@ -24,6 +24,7 @@ website/node_modules
 *.iml
 *.test
 *.iml
+examples/provider-install-verification
 
 website/vendor
 

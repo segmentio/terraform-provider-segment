@@ -40,7 +40,7 @@ data "segment_destination" "example" {
   id = segment_destination.example2.id
 }
 
-resource "segment_source" "example2" {
+resource "segment_source" "example" {
   metadata = {
     id = "IqDTy1TpoU"
   }
@@ -50,4 +50,24 @@ resource "segment_source" "example2" {
     "mykey" : "myvalue",
     "mylist" : [1, 2, 3]
   })
+}
+
+resource "segment_warehouse" "example" {
+  settings = jsonencode({
+    username : "segment",
+    password : "0WDc1ky5YEpbNsr8N8DM",
+    database : "qa",
+    hostname : "warehouses-qa-redshift.cxz7mja8ukuc.us-west-2.redshift.amazonaws.com",
+    port : "5439"
+  })
+  name = "My Terraform Warehouse!"
+  metadata = {
+    id = "aea3c55dsz"
+  }
+  enabled = true
+}
+
+resource "segment_source_warehouse_connection" "example" {
+  source_id    = data.segment_source.example.id
+  warehouse_id = segment_warehouse.example.id
 }
