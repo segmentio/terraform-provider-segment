@@ -7,6 +7,7 @@ import (
 	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -19,8 +20,9 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource              = &destinationResource{}
-	_ resource.ResourceWithConfigure = &destinationResource{}
+	_ resource.Resource                = &destinationResource{}
+	_ resource.ResourceWithConfigure   = &destinationResource{}
+	_ resource.ResourceWithImportState = &destinationResource{}
 )
 
 // NewDestinationResource is a helper function to simplify the provider implementation.
@@ -601,6 +603,11 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 }
 
+func (r *destinationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
 // Configure adds the provider configured client to the resource.
 func (r *destinationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
@@ -611,8 +618,8 @@ func (r *destinationResource) Configure(_ context.Context, req resource.Configur
 
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *segment.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected ClientInfo, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return

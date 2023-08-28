@@ -36,8 +36,12 @@ func (d *warehouseDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 		Description: "The warehouse",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed:    true,
+				Required:    true,
 				Description: "The id of the Warehouse.",
+			},
+			"name": schema.StringAttribute{
+				Computed:    true,
+				Description: "An optional human-readable name for this Warehouse.",
 			},
 			"metadata": schema.SingleNestedAttribute{
 				Description: "The metadata for the Warehouse.",
