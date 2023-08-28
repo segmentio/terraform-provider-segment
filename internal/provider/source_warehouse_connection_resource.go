@@ -166,7 +166,7 @@ func (r *sourceWarehouseConnectionResource) Delete(ctx context.Context, req reso
 	_, _, err := r.client.WarehousesApi.RemoveSourceConnectionFromWarehouse(r.authContext, config.WarehouseID.ValueString(), config.SourceID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Warehouse",
+			"Unable to remove Source connection from Warehouse",
 			err.Error(),
 		)
 		return
