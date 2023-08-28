@@ -115,7 +115,7 @@ func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to read Warehouse",
+				"Unable to read Source-Warehouse connection",
 				err.Error(),
 			)
 			return
@@ -166,7 +166,7 @@ func (r *sourceWarehouseConnectionResource) Delete(ctx context.Context, req reso
 	_, _, err := r.client.WarehousesApi.RemoveSourceConnectionFromWarehouse(r.authContext, config.WarehouseID.ValueString(), config.SourceID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to remove Source connection from Warehouse",
+			"Unable to remove Source-Warehouse connection",
 			err.Error(),
 		)
 		return
