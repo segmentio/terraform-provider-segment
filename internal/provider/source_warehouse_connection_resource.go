@@ -48,7 +48,7 @@ func (d *sourceWarehouseConnectionResource) Schema(_ context.Context, _ resource
 			},
 			"source_id": schema.StringAttribute{
 				Required:    true,
-				Description: "The id of the Warehouse.",
+				Description: "The id of the Source.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -112,7 +112,6 @@ func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 			Cursor: &paginationNext,
 			Count:  200,
 		}).Execute()
-
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to read Source-Warehouse connection",

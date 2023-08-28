@@ -25,7 +25,7 @@ resource "segment_warehouse" "example" {
 
 ### Required
 
-- `source_id` (String) The id of the Warehouse.
+- `source_id` (String) The id of the Source.
 - `warehouse_id` (String) The id of the Warehouse.
 
 ### Read-Only
