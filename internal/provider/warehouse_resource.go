@@ -220,16 +220,16 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 }
 
 func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state models.WarehouseState
+	var config models.WarehouseState
 
-	diags := req.State.Get(ctx, &state)
+	diags := req.State.Get(ctx, &config)
 
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, state.ID.ValueString()).Execute()
+	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Warehouse",
@@ -237,6 +237,8 @@ func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 		)
 		return
 	}
+
+	var state models.WarehouseState
 
 	warehouse := response.Data.GetWarehouse()
 	err = state.Fill(warehouse)

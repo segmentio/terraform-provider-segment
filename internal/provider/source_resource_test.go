@@ -187,6 +187,9 @@ func TestAccSourceResource(t *testing.T) {
 							id = "my-metadata-id"
 						}
 						enabled = true
+						settings = jsonencode({
+							"myKey": "myValue"
+						})
 					}
 				`,
 				ImportState:       true,

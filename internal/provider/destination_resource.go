@@ -487,6 +487,9 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	state.Settings = plan.Settings
+
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -497,14 +500,14 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 
 // Read refreshes the Terraform state with the latest data.
 func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state models.DestinationState
-	diags := req.State.Get(ctx, &state)
+	var config models.DestinationState
+	diags := req.State.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, state.ID.ValueString()).Execute()
+	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Destination",
@@ -515,6 +518,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 
 	destination := out.Data.Destination
 
+	var state models.DestinationState
 	err = state.Fill(&destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -575,6 +579,9 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 		)
 		return
 	}
+
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	state.Settings = plan.Settings
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
