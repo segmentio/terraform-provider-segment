@@ -229,7 +229,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	source := out.Data.Source
 
-	if !plan.Name.IsNull() && !plan.Name.IsUnknown() {
+	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && plan.Name.ValueString() != "" {
 		// This is a workaround for the fact that "name" is allowed to be provided during update but not create
 		updateOut, _, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
 			Name: plan.Name.ValueStringPointer(),
@@ -295,9 +295,6 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
-	state.Settings = config.Settings
-
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -328,10 +325,15 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 	modelMap := api.NewModelMap(settings)
 
+	var name *string
+	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && plan.Name.ValueString() != "" {
+		name = plan.Name.ValueStringPointer()
+	}
+
 	out, _, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
 		Slug:     plan.Slug.ValueStringPointer(),
 		Enabled:  plan.Enabled.ValueBoolPointer(),
-		Name:     plan.Name.ValueStringPointer(),
+		Name:     name,
 		Settings: *api.NewNullableModelMap(modelMap),
 	}).Execute()
 	if err != nil {
