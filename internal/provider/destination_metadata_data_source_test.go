@@ -144,7 +144,7 @@ func TestAccDestinationMetadataDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_destination_metadata" "test" {}`,
+					Config: providerConfig + `data "segment_destination_metadata" "test" { id = "destination-metadata-id" }`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "id", "destination-metadata-id"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "name", "Destination Metadata"),
@@ -318,7 +318,7 @@ func TestAccDestinationMetadataDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_destination_metadata" "test" {}`,
+					Config: providerConfig + `data "segment_destination_metadata" "test" { id = "destination-metadata-id" }`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "id", "destination-metadata-id"),
 						resource.TestCheckResourceAttr("data.segment_destination_metadata.test", "name", "Destination Metadata"),

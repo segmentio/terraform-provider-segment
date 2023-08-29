@@ -37,6 +37,10 @@ data "segment_destination" "my_destination" {
 <a id="nestedatt--metadata"></a>
 ### Nested Schema for `metadata`
 
+Required:
+
+- `id` (String) The id of the Destination metadata. Config API note: analogous to `name`.
+
 Read-Only:
 
 - `actions` (Attributes List) Actions available for the Destination. (see [below for nested schema](#nestedatt--metadata--actions))
@@ -44,7 +48,6 @@ Read-Only:
 - `components` (Attributes List) A list of components this Destination provides. (see [below for nested schema](#nestedatt--metadata--components))
 - `contacts` (Attributes List) Contact info for Integration Owners. (see [below for nested schema](#nestedatt--metadata--contacts))
 - `description` (String) The description of the Destination.
-- `id` (String) The id of the Destination metadata. Config API note: analogous to `name`.
 - `logos` (Attributes) The Destination's logos. (see [below for nested schema](#nestedatt--metadata--logos))
 - `name` (String) The user-friendly name of the Destination. Config API note: equal to `displayName`.
 - `options` (Attributes List) Options configured for the Destination. (see [below for nested schema](#nestedatt--metadata--options))

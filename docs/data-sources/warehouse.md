@@ -37,10 +37,13 @@ data "segment_warehouse" "my_warehouse" {
 <a id="nestedatt--metadata"></a>
 ### Nested Schema for `metadata`
 
+Required:
+
+- `id` (String) The id of this object.
+
 Read-Only:
 
 - `description` (String) A description, in English, of this object.
-- `id` (String) The id of this object.
 - `logos` (Attributes) Logo information for this object. (see [below for nested schema](#nestedatt--metadata--logos))
 - `name` (String) The name of this object.
 - `options` (Attributes List) The Integration options for this object. (see [below for nested schema](#nestedatt--metadata--options))

@@ -58,7 +58,7 @@ func TestAccWarehouseMetadataDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_warehouse_metadata" "test" {}`,
+					Config: providerConfig + `data "segment_warehouse_metadata" "test" { id = "my-warehouse-metadata-id" }`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "id", "my-warehouse-metadata-id"),
 						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "name", "The name of the warehouse metadata"),
@@ -122,7 +122,7 @@ func TestAccWarehouseMetadataDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_warehouse_metadata" "test" {}`,
+					Config: providerConfig + `data "segment_warehouse_metadata" "test" { id = "my-warehouse-metadata-id" }`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "id", "my-warehouse-metadata-id"),
 						resource.TestCheckResourceAttr("data.segment_warehouse_metadata.test", "name", "The name of the warehouse metadata"),

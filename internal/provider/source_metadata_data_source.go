@@ -76,7 +76,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 func sourceMetadataSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Computed:    true,
+			Required:    true,
 			Description: "The id for this Source metadata in the Segment catalog. Config API note: analogous to `name`.",
 		},
 		"name": schema.StringAttribute{
