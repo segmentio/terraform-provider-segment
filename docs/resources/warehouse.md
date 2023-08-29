@@ -13,7 +13,7 @@ The warehouse
 ## Example Usage
 
 ```terraform
-# Configures a specific source
+# Configures a specific warehouse
 resource "segment_warehouse" "example" {
   metadata = {
     id = "abc123"
