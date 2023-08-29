@@ -255,6 +255,9 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	state.Settings = plan.Settings
+
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -291,6 +294,9 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		)
 		return
 	}
+
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	state.Settings = config.Settings
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -346,6 +352,9 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		)
 		return
 	}
+
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	state.Settings = plan.Settings
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
