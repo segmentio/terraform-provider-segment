@@ -52,7 +52,7 @@ func (p *segmentProvider) Schema(ctx context.Context, req provider.SchemaRequest
 				Description: "The Public API url. If not set, the PUBLIC_API_URL environment variable will be used, or a default of 'api.segmentapis.com'.",
 			},
 			"token": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "The Public API token. If not set, the PUBLIC_API_TOKEN environment variable will be used.",
 			},
@@ -98,7 +98,7 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 		url = config.Url.ValueString()
 	}
 
-	if !config.Token.IsNull() {
+	if !config.Token.IsNull() && !config.Token.IsUnknown() {
 		token = config.Token.ValueString()
 	}
 
