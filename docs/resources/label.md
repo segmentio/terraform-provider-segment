@@ -28,8 +28,10 @@ resource "segment_label" "test" {
   description = "dev environment"
 }
 
-output "dev_label" {
-  value = segment_label.test
+resource "segment_label" "import_label" {
+  key         = "key"
+  value       = "value"
+  description = "description"
 }
 ```
 
