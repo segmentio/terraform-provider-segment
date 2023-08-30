@@ -176,7 +176,7 @@ func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	_, _, err := r.client.LabelsApi.DeleteLabel(ctx, state.Key.ValueString(), state.Value.ValueString()).Execute()
+	_, _, err := r.client.LabelsApi.DeleteLabel(r.authContext, state.Key.ValueString(), state.Value.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Deleting a Label", "Could not delete a label, unexpected error: "+err.Error(),
