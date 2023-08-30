@@ -33,7 +33,7 @@ type warehouseMetadataDataSource struct {
 func warehouseMetadataSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
-			Computed:    true,
+			Required:    true,
 			Description: "The id of this object.",
 		},
 		"name": schema.StringAttribute{

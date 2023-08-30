@@ -35,7 +35,7 @@ func destinationMetadataSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Description: "The id of the Destination metadata. Config API note: analogous to `name`.",
-			Computed:    true,
+			Required:    true,
 		},
 		"name": schema.StringAttribute{
 			Description: "The user-friendly name of the Destination. Config API note: equal to `displayName`.",

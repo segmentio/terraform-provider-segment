@@ -62,7 +62,7 @@ func TestAccSourceMetadataDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_source_metadata" "test" {}`,
+					Config: providerConfig + `data "segment_source_metadata" "test" { id = "my-source-metadata-id" }`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "id", "my-source-metadata-id"),
 						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "name", "The name of the source metadata"),
@@ -133,7 +133,7 @@ func TestAccSourceMetadataDataSource(t *testing.T) {
 			Steps: []resource.TestStep{
 				// Read testing
 				{
-					Config: providerConfig + `data "segment_source_metadata" "test" {}`,
+					Config: providerConfig + `data "segment_source_metadata" "test" { id = "my-source-metadata-id" }`,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "id", "my-source-metadata-id"),
 						resource.TestCheckResourceAttr("data.segment_source_metadata.test", "name", "The name of the source metadata"),
