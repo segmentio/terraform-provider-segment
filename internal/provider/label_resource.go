@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -16,8 +18,9 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource              = &labelResource{}
-	_ resource.ResourceWithConfigure = &labelResource{}
+	_ resource.Resource                = &labelResource{}
+	_ resource.ResourceWithConfigure   = &labelResource{}
+	_ resource.ResourceWithImportState = &labelResource{}
 )
 
 // NewLabelResource is a helper function to simplify the provider implementation.
@@ -36,6 +39,23 @@ type labelResourceModel struct {
 	Key         types.String `tfsdk:"key"`
 	Value       types.String `tfsdk:"value"`
 	Description types.String `tfsdk:"description"`
+}
+
+func (r *labelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	idParts := strings.Split(req.ID, ",")
+
+	if len(idParts) != 3 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: key,value,description. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id(idParts[0], idParts[1]))...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("key"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("value"), idParts[1])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("description"), idParts[2])...)
 }
 
 // Metadata returns the resource type name.
@@ -207,5 +227,5 @@ func (r *labelResource) Configure(_ context.Context, req resource.ConfigureReque
 }
 
 func id(key string, value string) string {
-	return fmt.Sprintf("label:%s:%s", key, value)
+	return fmt.Sprintf("%s:%s", key, value)
 }
