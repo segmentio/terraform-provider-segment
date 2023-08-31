@@ -330,6 +330,16 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		name = plan.Name.ValueStringPointer()
 	}
 
+	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
+	existingSource, _, _ := r.client.SourcesApi.GetSource(r.authContext, state.ID.ValueString()).Execute()
+	existingSettings := existingSource.Data.GetSource().Settings.Get().Get()
+
+	for key := range existingSettings {
+		if settings[key] == nil {
+			settings[key] = nil
+		}
+	}
+
 	out, _, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
 		Slug:     plan.Slug.ValueStringPointer(),
 		Enabled:  plan.Enabled.ValueBoolPointer(),
