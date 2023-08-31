@@ -330,21 +330,14 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		name = plan.Name.ValueStringPointer()
 	}
 
-	if settings != nil {
-		// the default behavior of updating settings is to upsert. However, we want to replace, therefore we set each setting to nil first and then set with the requested settings.
-		source, _, _ := r.client.SourcesApi.GetSource(r.authContext, state.ID.ValueString()).Execute()
+	// The default behavior of updating settings is to upsert. However, to eliminate settings tha are no longer necessary, nil is assigned nil to fields that are no longer found in the resource.
+	existingSource, _, _ := r.client.SourcesApi.GetSource(r.authContext, state.ID.ValueString()).Execute()
+	existingSettings := existingSource.Data.GetSource().Settings.Get().Get()
 
-		existingSettings := source.Data.Source.Settings.Get().Get()
-
-		emptySettings := make(map[string]interface{})
-
-		for key := range existingSettings {
-			emptySettings[key] = nil
+	for key := range existingSettings {
+		if settings[key] == nil {
+			settings[key] = nil
 		}
-
-		_, _, _ = r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
-			Settings: *api.NewNullableModelMap(api.NewModelMap(emptySettings)),
-		}).Execute()
 	}
 
 	out, _, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
