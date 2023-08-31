@@ -280,7 +280,7 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 	modelMap := api.NewModelMap(settings)
 
-	// The default behavior of updating settings is to upsert. However, to eliminate settings tha are no longer necessary, nil is assigned nil to fields that are no longer found in the resource.
+	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
 	existingWarehouse, _, _ := r.client.WarehousesApi.GetWarehouse(r.authContext, state.ID.ValueString()).Execute()
 	existingSettings := existingWarehouse.Data.GetWarehouse().Settings.Get().Get()
 
