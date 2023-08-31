@@ -21,6 +21,10 @@ resource "segment_destination" "my_destination" {
   metadata = {
     id = "dm123"
   }
+
+  settings = jsonencode({
+    "apiKey" : "xyz123"
+  })
 }
 ```
 

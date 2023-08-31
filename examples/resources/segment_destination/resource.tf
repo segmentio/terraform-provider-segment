@@ -8,6 +8,6 @@ resource "segment_destination" "my_destination" {
   }
 
   settings = jsonencode({
-    "apiKey": "xyz123"
+    "apiKey" : "xyz123"
   })
 }
