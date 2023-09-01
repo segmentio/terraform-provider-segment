@@ -53,27 +53,41 @@ Required:
 
 - `id` (String) The id of the Destination metadata. Config API note: analogous to `name`.
 
+Optional:
+
+- `contacts` (Attributes List) Contact info for Integration Owners. (see [below for nested schema](#nestedatt--metadata--contacts))
+- `partner_owned` (Boolean) Partner Owned flag.
+- `region_endpoints` (List of String) The list of regional endpoints for this Destination.
+- `supported_regions` (List of String) A list of supported regions for this Destination.
+
 Read-Only:
 
 - `actions` (Attributes List) Actions available for the Destination. (see [below for nested schema](#nestedatt--metadata--actions))
 - `categories` (List of String) A list of categories with which the Destination is associated.
 - `components` (Attributes List) A list of components this Destination provides. (see [below for nested schema](#nestedatt--metadata--components))
-- `contacts` (Attributes List) Contact info for Integration Owners. (see [below for nested schema](#nestedatt--metadata--contacts))
 - `description` (String) The description of the Destination.
 - `logos` (Attributes) The Destination's logos. (see [below for nested schema](#nestedatt--metadata--logos))
 - `name` (String) The user-friendly name of the Destination. Config API note: equal to `displayName`.
 - `options` (Attributes List) Options configured for the Destination. (see [below for nested schema](#nestedatt--metadata--options))
-- `partner_owned` (Boolean) Partner Owned flag.
 - `presets` (Attributes List) Predefined Destination subscriptions that can optionally be applied when connecting a new instance of the Destination. (see [below for nested schema](#nestedatt--metadata--presets))
 - `previous_names` (List of String) A list of names previously used by the Destination.
-- `region_endpoints` (List of String) The list of regional endpoints for this Destination.
 - `slug` (String) The slug used to identify the Destination in the Segment app.
 - `status` (String) Support status of the Destination.
 - `supported_features` (Attributes) Features that this Destination supports. (see [below for nested schema](#nestedatt--metadata--supported_features))
 - `supported_methods` (Attributes) Methods that this Destination supports. (see [below for nested schema](#nestedatt--metadata--supported_methods))
 - `supported_platforms` (Attributes) Platforms from which the Destination receives events. (see [below for nested schema](#nestedatt--metadata--supported_platforms))
-- `supported_regions` (List of String) A list of supported regions for this Destination.
 - `website` (String) A website URL for this Destination.
+
+<a id="nestedatt--metadata--contacts"></a>
+### Nested Schema for `metadata.contacts`
+
+Read-Only:
+
+- `email` (String) Email of this contact.
+- `is_primary` (Boolean) Whether this is a primary contact.
+- `name` (String) Name of this contact.
+- `role` (String) Role of this contact.
+
 
 <a id="nestedatt--metadata--actions"></a>
 ### Nested Schema for `metadata.actions`
@@ -118,17 +132,6 @@ Read-Only:
 - `code` (String) Link to the repository hosting the code for this component.
 - `owner` (String) The owner of this component. Either 'SEGMENT' or 'PARTNER'.
 - `type` (String) The component type.
-
-
-<a id="nestedatt--metadata--contacts"></a>
-### Nested Schema for `metadata.contacts`
-
-Read-Only:
-
-- `email` (String) Email of this contact.
-- `is_primary` (Boolean) Whether this is a primary contact.
-- `name` (String) Name of this contact.
-- `role` (String) Role of this contact.
 
 
 <a id="nestedatt--metadata--logos"></a>
