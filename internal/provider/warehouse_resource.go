@@ -282,8 +282,6 @@ func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	state.Name = config.Name
-
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
