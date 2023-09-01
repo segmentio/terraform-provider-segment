@@ -3,7 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
-
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -42,10 +44,16 @@ func (d *warehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The id of the Warehouse.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"metadata": schema.SingleNestedAttribute{
 				Description: "The metadata for the Warehouse.",
 				Required:    true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Required:    true,
@@ -57,18 +65,30 @@ func (d *warehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 					"name": schema.StringAttribute{
 						Computed:    true,
 						Description: "The name of this object.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"slug": schema.StringAttribute{
 						Computed:    true,
 						Description: "A human-readable, unique identifier for object.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"description": schema.StringAttribute{
 						Computed:    true,
 						Description: "A description, in English, of this object.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"logos": schema.SingleNestedAttribute{
 						Computed:    true,
 						Description: "Logo information for this object.",
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default": schema.StringAttribute{
 								Computed:    true,
@@ -87,6 +107,9 @@ func (d *warehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 					"options": schema.ListNestedAttribute{
 						Computed:    true,
 						Description: "The Integration options for this object.",
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
+						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
@@ -123,15 +146,24 @@ func (d *warehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Optional:    true,
 				Computed:    true,
 				Description: "An optional human-readable name for this Warehouse.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"workspace_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The id of the Workspace that owns this Warehouse.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"enabled": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "When set to true, this Warehouse receives data.",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"settings": schema.StringAttribute{
 				Required:    true,
