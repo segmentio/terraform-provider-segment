@@ -595,6 +595,9 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	state.Settings = config.Settings
+
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
