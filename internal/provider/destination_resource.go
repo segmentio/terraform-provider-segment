@@ -567,14 +567,14 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 
 // Read refreshes the Terraform state with the latest data.
 func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var config models.DestinationState
-	diags := req.State.Get(ctx, &config)
+	var previousState models.DestinationState
+	diags := req.State.Get(ctx, &previousState)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, config.ID.ValueString()).Execute()
+	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, previousState.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Destination",
@@ -593,6 +593,11 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 			err.Error(),
 		)
 		return
+	}
+
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
+		state.Settings = previousState.Settings
 	}
 
 	diags = resp.State.Set(ctx, &state)
