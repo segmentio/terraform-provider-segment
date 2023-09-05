@@ -384,7 +384,8 @@ func TestAccDestinationResource(t *testing.T) {
 						})
 					}
 				`,
-				ImportState: true,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			// Update and Read testing
 			{
