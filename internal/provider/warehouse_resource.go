@@ -3,10 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-segment/internal/provider/models"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
-	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -252,16 +253,16 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 }
 
 func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var config models.WarehouseState
+	var previousState models.WarehouseState
 
-	diags := req.State.Get(ctx, &config)
+	diags := req.State.Get(ctx, &previousState)
 
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, config.ID.ValueString()).Execute()
+	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, previousState.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Warehouse",
@@ -282,7 +283,10 @@ func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	state.Settings = config.Settings
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
+		state.Settings = previousState.Settings
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
