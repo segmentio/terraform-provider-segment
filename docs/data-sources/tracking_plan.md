@@ -26,14 +26,11 @@ data "segment_tracking_plan" "example" {
 
 - `id` (String) The Tracking Plan's identifier.
 
-### Optional
-
-- `name` (String) The Tracking Plan's name.
-
 ### Read-Only
 
 - `created_at` (String) The timestamp of this Tracking Plan's creation.
 - `description` (String) The Tracking Plan's description.
+- `name` (String) The Tracking Plan's name.
 - `slug` (String) URL-friendly slug of this Tracking Plan.
 - `type` (String) The Tracking Plan's type.
 - `updated_at` (String) The timestamp of the last change to the Tracking Plan.
