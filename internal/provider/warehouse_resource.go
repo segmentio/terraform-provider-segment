@@ -215,7 +215,7 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 		name = nil
 	}
 
-	out, _, err := r.client.WarehousesApi.CreateWarehouse(r.authContext).CreateWarehouseV1Input(api.CreateWarehouseV1Input{
+	out, body, err := r.client.WarehousesApi.CreateWarehouse(r.authContext).CreateWarehouseV1Input(api.CreateWarehouseV1Input{
 		Enabled:    plan.Enabled.ValueBoolPointer(),
 		MetadataId: metadataId,
 		Settings:   *api.NewNullableModelMap(modelMap),
@@ -224,7 +224,7 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Warehouse",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -262,11 +262,11 @@ func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, previousState.ID.ValueString()).Execute()
+	response, body, err := d.client.WarehousesApi.GetWarehouse(d.authContext, previousState.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Warehouse",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -319,7 +319,14 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 	modelMap := api.NewModelMap(settings)
 
 	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
-	existingWarehouse, _, _ := r.client.WarehousesApi.GetWarehouse(r.authContext, state.ID.ValueString()).Execute()
+	existingWarehouse, body, err := r.client.WarehousesApi.GetWarehouse(r.authContext, state.ID.ValueString()).Execute()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to update Warehouse",
+			getError(err, body.Body),
+		)
+		return
+	}
 	existingSettings := existingWarehouse.Data.GetWarehouse().Settings.Get().Get()
 
 	for key := range existingSettings {
@@ -328,7 +335,7 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 		}
 	}
 
-	out, _, err := r.client.WarehousesApi.UpdateWarehouse(r.authContext, state.ID.ValueString()).UpdateWarehouseV1Input(api.UpdateWarehouseV1Input{
+	out, body, err := r.client.WarehousesApi.UpdateWarehouse(r.authContext, state.ID.ValueString()).UpdateWarehouseV1Input(api.UpdateWarehouseV1Input{
 		Enabled:  plan.Enabled.ValueBoolPointer(),
 		Settings: *api.NewNullableModelMap(modelMap),
 		Name:     *api.NewNullableString(plan.Name.ValueStringPointer()),
@@ -336,7 +343,7 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Warehouse",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -370,11 +377,11 @@ func (r *warehouseResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	_, _, err := r.client.WarehousesApi.DeleteWarehouse(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.WarehousesApi.DeleteWarehouse(r.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Warehouse",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}

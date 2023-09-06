@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
@@ -533,11 +534,11 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	// Generate API request body from plan
-	out, _, err := r.client.DestinationsApi.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
+	out, body, err := r.client.DestinationsApi.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Destination",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -574,11 +575,11 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, previousState.ID.ValueString()).Execute()
+	out, body, err := r.client.DestinationsApi.GetDestination(r.authContext, previousState.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Destination",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -631,11 +632,11 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	// Generate API request body from plan
-	out, _, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
+	out, body, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Destination",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -673,10 +674,10 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, _, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
+	_, body, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error deleting Destination", "Could not delete Destination, unexpected error: "+err.Error(),
+			"Error deleting Destination", "Could not delete Destination, unexpected error: "+getError(err, body.Body),
 		)
 		return
 	}

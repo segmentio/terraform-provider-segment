@@ -72,11 +72,11 @@ func (r *sourceWarehouseConnectionResource) Create(ctx context.Context, req reso
 		return
 	}
 
-	_, _, err := r.client.WarehousesApi.AddConnectionFromSourceToWarehouse(r.authContext, plan.WarehouseID.ValueString(), plan.SourceID.ValueString()).Execute()
+	_, body, err := r.client.WarehousesApi.AddConnectionFromSourceToWarehouse(r.authContext, plan.WarehouseID.ValueString(), plan.SourceID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create connection between Source and Warehouse",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -108,14 +108,14 @@ func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 	paginationNext := "MA=="
 
 	for paginationNext != "" {
-		response, _, err := d.client.SourcesApi.ListConnectedWarehousesFromSource(d.authContext, state.SourceID.ValueString()).Pagination(api.PaginationInput{
+		response, body, err := d.client.SourcesApi.ListConnectedWarehousesFromSource(d.authContext, state.SourceID.ValueString()).Pagination(api.PaginationInput{
 			Cursor: &paginationNext,
 			Count:  200,
 		}).Execute()
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to read Source-Warehouse connection",
-				err.Error(),
+				getError(err, body.Body),
 			)
 			return
 		}
@@ -162,11 +162,11 @@ func (r *sourceWarehouseConnectionResource) Delete(ctx context.Context, req reso
 		return
 	}
 
-	_, _, err := r.client.WarehousesApi.RemoveSourceConnectionFromWarehouse(r.authContext, config.WarehouseID.ValueString(), config.SourceID.ValueString()).Execute()
+	_, body, err := r.client.WarehousesApi.RemoveSourceConnectionFromWarehouse(r.authContext, config.WarehouseID.ValueString(), config.SourceID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to remove Source-Warehouse connection",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}

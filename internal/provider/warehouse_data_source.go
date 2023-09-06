@@ -75,11 +75,11 @@ func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	response, _, err := d.client.WarehousesApi.GetWarehouse(d.authContext, state.ID.ValueString()).Execute()
+	response, body, err := d.client.WarehousesApi.GetWarehouse(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Warehouse",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}

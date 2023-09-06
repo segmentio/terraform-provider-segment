@@ -47,11 +47,11 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	response, _, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, state.ID.ValueString()).Execute()
+	response, body, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}

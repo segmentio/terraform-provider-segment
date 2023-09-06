@@ -118,11 +118,11 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 		return
 	}
 
-	response, _, err := d.client.CatalogApi.GetWarehouseMetadata(d.authContext, state.ID.ValueString()).Execute()
+	response, body, err := d.client.CatalogApi.GetWarehouseMetadata(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Warehouse metadata",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
