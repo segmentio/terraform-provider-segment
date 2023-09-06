@@ -221,7 +221,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a source",
+			"Unable to create Source",
 			err.Error(),
 		)
 		return
@@ -236,7 +236,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		}).Execute()
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to Create a source",
+				"Unable to create Source",
 				err.Error(),
 			)
 			return
@@ -249,7 +249,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	err = state.Fill(api.Source4(source))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a source",
+			"Unable to create Source",
 			err.Error(),
 		)
 		return
@@ -277,7 +277,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	out, _, err := r.client.SourcesApi.GetSource(r.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source",
+			"Unable to read Source",
 			err.Error(),
 		)
 		return
@@ -289,7 +289,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	err = state.Fill(source)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source",
+			"Unable to read Source",
 			err.Error(),
 		)
 		return
@@ -348,7 +348,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Source",
+			"Unable to update Source",
 			err.Error(),
 		)
 		return
@@ -359,7 +359,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	err = state.Fill(api.Source4(source))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Source",
+			"Unable to update Source",
 			err.Error(),
 		)
 		return
@@ -386,7 +386,7 @@ func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	_, _, err := r.client.SourcesApi.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Delete Source",
+			"Unable to delete Source",
 			err.Error(),
 		)
 		return

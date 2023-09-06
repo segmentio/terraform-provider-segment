@@ -60,7 +60,6 @@ func (d *trackingPlanDataSource) Schema(_ context.Context, _ datasource.SchemaRe
 				Description: "URL-friendly slug of this Tracking Plan.",
 			},
 			"name": schema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "The Tracking Plan's name.",
 			},
@@ -92,11 +91,11 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	out, _, err := d.client.TrackingPlansApi.GetTrackingPlan(d.authContext, config.ID.ValueString()).Execute()
+	out, body, err := d.client.TrackingPlansApi.GetTrackingPlan(d.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -104,7 +103,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 	trackingPlan := out.Data.GetTrackingPlan()
 
 	var state models.TrackingPlanState
-	err = state.Fill(&trackingPlan)
+	err = state.Fill(trackingPlan)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",

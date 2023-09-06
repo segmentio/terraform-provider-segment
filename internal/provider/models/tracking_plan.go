@@ -15,7 +15,7 @@ type TrackingPlanState struct {
 	CreatedAt   types.String `tfsdk:"created_at"`
 }
 
-func (t *TrackingPlanState) Fill(trackingPlan *api.TrackingPlan) error {
+func (t *TrackingPlanState) Fill(trackingPlan api.TrackingPlan) error {
 	t.ID = types.StringValue(trackingPlan.Id)
 	if trackingPlan.Name != nil {
 		t.Name = types.StringValue(*trackingPlan.Name)
