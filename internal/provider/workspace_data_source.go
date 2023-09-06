@@ -57,11 +57,11 @@ func (d *workspaceDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 func (d *workspaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state workspaceDataSourceModel
 
-	workspace, _, err := d.client.WorkspacesApi.GetWorkspace(d.authContext).Execute()
+	workspace, body, err := d.client.WorkspacesApi.GetWorkspace(d.authContext).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Workspace",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}

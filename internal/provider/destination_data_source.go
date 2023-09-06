@@ -75,11 +75,11 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	response, _, err := d.client.DestinationsApi.GetDestination(d.authContext, state.ID.ValueString()).Execute()
+	response, body, err := d.client.DestinationsApi.GetDestination(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Destination",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}

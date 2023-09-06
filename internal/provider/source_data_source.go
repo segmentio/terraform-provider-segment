@@ -198,11 +198,11 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	out, _, err := d.client.SourcesApi.GetSource(d.authContext, config.ID.ValueString()).Execute()
+	out, body, err := d.client.SourcesApi.GetSource(d.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}

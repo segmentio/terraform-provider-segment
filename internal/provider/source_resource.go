@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
@@ -255,7 +256,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 	modelMap := api.NewModelMap(settings)
 
-	out, _, err := r.client.SourcesApi.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
+	out, body, err := r.client.SourcesApi.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
 		Slug:       plan.Slug.ValueString(),
 		Enabled:    plan.Enabled.ValueBool(),
 		MetadataId: metadataId,
@@ -263,8 +264,8 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a source",
-			err.Error(),
+			"Unable to create Source",
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -273,13 +274,13 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && plan.Name.ValueString() != "" {
 		// This is a workaround for the fact that "name" is allowed to be provided during update but not create
-		updateOut, _, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
+		updateOut, body, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
 			Name: plan.Name.ValueStringPointer(),
 		}).Execute()
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to Create a source",
-				err.Error(),
+				"Unable to create Source",
+				getError(err, body.Body),
 			)
 			return
 		}
@@ -291,7 +292,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	err = state.Fill(api.Source4(source))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a source",
+			"Unable to create Source",
 			err.Error(),
 		)
 		return
@@ -316,11 +317,11 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	out, _, err := r.client.SourcesApi.GetSource(r.authContext, config.ID.ValueString()).Execute()
+	out, body, err := r.client.SourcesApi.GetSource(r.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source",
-			err.Error(),
+			"Unable to read Source",
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -331,7 +332,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	err = state.Fill(source)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source",
+			"Unable to read Source",
 			err.Error(),
 		)
 		return
@@ -373,7 +374,14 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
-	existingSource, _, _ := r.client.SourcesApi.GetSource(r.authContext, state.ID.ValueString()).Execute()
+	existingSource, body, err := r.client.SourcesApi.GetSource(r.authContext, state.ID.ValueString()).Execute()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to update Source",
+			getError(err, body.Body),
+		)
+		return
+	}
 	existingSettings := existingSource.Data.GetSource().Settings.Get().Get()
 
 	for key := range existingSettings {
@@ -382,7 +390,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 	}
 
-	out, _, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
+	out, body, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
 		Slug:     plan.Slug.ValueStringPointer(),
 		Enabled:  plan.Enabled.ValueBoolPointer(),
 		Name:     name,
@@ -390,8 +398,8 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Source",
-			err.Error(),
+			"Unable to update Source",
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -401,7 +409,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	err = state.Fill(api.Source4(source))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Source",
+			"Unable to update Source",
 			err.Error(),
 		)
 		return
@@ -425,11 +433,11 @@ func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	_, _, err := r.client.SourcesApi.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.SourcesApi.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Delete Source",
-			err.Error(),
+			"Unable to delete Source",
+			getError(err, body.Body),
 		)
 		return
 	}

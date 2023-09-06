@@ -3,8 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -114,13 +115,13 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	label.Description = types.String.ValueStringPointer(plan.Description)
 
 	// Generate API request body from plan
-	out, _, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
+	out, body, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
 		Label: label,
 	}).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create a label",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -151,11 +152,11 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	response, _, err := r.client.LabelsApi.ListLabels(r.authContext).Execute()
+	response, body, err := r.client.LabelsApi.ListLabels(r.authContext).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Labels",
-			err.Error(),
+			getError(err, body.Body),
 		)
 		return
 	}
@@ -196,10 +197,10 @@ func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	_, _, err := r.client.LabelsApi.DeleteLabel(r.authContext, state.Key.ValueString(), state.Value.ValueString()).Execute()
+	_, body, err := r.client.LabelsApi.DeleteLabel(r.authContext, state.Key.ValueString(), state.Value.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Deleting a Label", "Could not delete a label, unexpected error: "+err.Error(),
+			"Error Deleting a Label", "Could not delete a label, unexpected error: "+getError(err, body.Body),
 		)
 		return
 	}
