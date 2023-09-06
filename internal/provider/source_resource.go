@@ -3,6 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 
 	"terraform-provider-segment/internal/provider/models"
 
@@ -41,6 +44,9 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The id of the Source.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"slug": schema.StringAttribute{
 				Required:    true,
@@ -50,10 +56,16 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				Optional:    true,
 				Computed:    true,
 				Description: "The name of the Source.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"metadata": schema.SingleNestedAttribute{
 				Description: "The metadata for the Source.",
 				Required:    true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Required: true,
@@ -65,18 +77,30 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 					"name": schema.StringAttribute{
 						Computed:    true,
 						Description: "The user-friendly name of this Source.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"slug": schema.StringAttribute{
 						Computed:    true,
 						Description: "The slug that identifies this Source in the Segment app.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"description": schema.StringAttribute{
 						Computed:    true,
 						Description: "The description of this Source.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"logos": schema.SingleNestedAttribute{
 						Description: "The logos for this Source.",
 						Computed:    true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default": schema.StringAttribute{
 								Computed:    true,
@@ -95,6 +119,9 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 					"options": schema.ListNestedAttribute{
 						Computed:    true,
 						Description: "Options for this Source.",
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
+						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
@@ -128,11 +155,17 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 					"categories": schema.ListAttribute{
 						Computed:    true,
 						ElementType: types.StringType,
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
+						},
 						Description: "A list of categories this Source belongs to.",
 					},
 					"is_cloud_event_source": schema.BoolAttribute{
 						Computed:    true,
 						Description: "True if this is a Cloud Event Source.",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 			},
@@ -142,7 +175,10 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				CustomType:  jsontypes.NormalizedType{},
 			},
 			"workspace_id": schema.StringAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 				Description: "The id of the Workspace that owns the Source.",
 			},
 			"enabled": schema.BoolAttribute{
@@ -152,11 +188,17 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 			"write_keys": schema.ListAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 				Description: "The write keys used to send data from the Source. This field is left empty when the current token does not have the 'source admin' permission.",
 			},
 			"labels": schema.ListNestedAttribute{
 				Computed:    true,
 				Description: "A list of labels applied to the Source.",
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"key": schema.StringAttribute{

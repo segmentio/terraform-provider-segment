@@ -3,6 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 
 	"terraform-provider-segment/internal/provider/models"
 
@@ -55,6 +58,9 @@ func (r *destinationResource) Schema(_ context.Context, _ resource.SchemaRequest
 			"name": schema.StringAttribute{
 				Optional: true,
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"enabled": schema.BoolAttribute{
 				Required: true,
@@ -90,18 +96,30 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 		"name": schema.StringAttribute{
 			Description: "The user-friendly name of the Destination. Config API note: equal to `displayName`.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"description": schema.StringAttribute{
 			Description: "The description of the Destination.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"slug": schema.StringAttribute{
 			Description: "The slug used to identify the Destination in the Segment app.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"logos": schema.SingleNestedAttribute{
 			Description: "The Destination's logos.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+			},
 			Attributes: map[string]schema.Attribute{
 				"default": schema.StringAttribute{
 					Computed: true,
@@ -119,6 +137,9 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 		"options": schema.ListNestedAttribute{
 			Description: "Options configured for the Destination.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
 					"name": schema.StringAttribute{
@@ -152,24 +173,39 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 		"status": schema.StringAttribute{
 			Description: "Support status of the Destination.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"previous_names": schema.ListAttribute{
 			ElementType: types.StringType,
 			Description: "A list of names previously used by the Destination.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"categories": schema.ListAttribute{
 			ElementType: types.StringType,
 			Description: "A list of categories with which the Destination is associated.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"website": schema.StringAttribute{
 			Description: "A website URL for this Destination.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"components": schema.ListNestedAttribute{
 			Description: "A list of components this Destination provides.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
 					"type": schema.StringAttribute{
@@ -190,6 +226,9 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 		"supported_features": schema.SingleNestedAttribute{
 			Description: "Features that this Destination supports.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+			},
 			Attributes: map[string]schema.Attribute{
 				"cloud_mode_instances": schema.StringAttribute{
 					Description: "This Destination's support level for cloud mode instances.",
@@ -216,6 +255,9 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 		"supported_methods": schema.SingleNestedAttribute{
 			Description: "Methods that this Destination supports.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+			},
 			Attributes: map[string]schema.Attribute{
 				"pageview": schema.BoolAttribute{
 					Description: "Identifies if the Destination supports the `pageview` method.",
@@ -242,6 +284,9 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 		"supported_platforms": schema.SingleNestedAttribute{
 			Description: "Platforms from which the Destination receives events.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+			},
 			Attributes: map[string]schema.Attribute{
 				"browser": schema.BoolAttribute{
 					Description: "Whether this Destination supports browser events.",
@@ -260,6 +305,9 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 		"actions": schema.ListNestedAttribute{
 			Description: "Actions available for the Destination.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
@@ -358,6 +406,9 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 		"presets": schema.ListNestedAttribute{
 			Description: "Predefined Destination subscriptions that can optionally be applied when connecting a new instance of the Destination.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
 					"action_id": schema.StringAttribute{
@@ -403,20 +454,36 @@ func destinationMetadataResourceSchema() map[string]schema.Attribute {
 			},
 			Description: "Contact info for Integration Owners.",
 			Computed:    true,
+			Optional:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"partner_owned": schema.BoolAttribute{
 			Description: "Partner Owned flag.",
 			Computed:    true,
+			Optional:    true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"supported_regions": schema.ListAttribute{
 			ElementType: types.StringType,
 			Description: "A list of supported regions for this Destination.",
 			Computed:    true,
+			Optional:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"region_endpoints": schema.ListAttribute{
 			ElementType: types.StringType,
 			Description: "The list of regional endpoints for this Destination.",
 			Computed:    true,
+			Optional:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 		},
 	}
 }
@@ -500,14 +567,14 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 
 // Read refreshes the Terraform state with the latest data.
 func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var config models.DestinationState
-	diags := req.State.Get(ctx, &config)
+	var previousState models.DestinationState
+	diags := req.State.Get(ctx, &previousState)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, config.ID.ValueString()).Execute()
+	out, _, err := r.client.DestinationsApi.GetDestination(r.authContext, previousState.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Destination",
@@ -526,6 +593,11 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 			err.Error(),
 		)
 		return
+	}
+
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
+		state.Settings = previousState.Settings
 	}
 
 	diags = resp.State.Set(ctx, &state)
