@@ -45,11 +45,11 @@ func (p *segmentProvider) Metadata(ctx context.Context, req provider.MetadataReq
 
 func (p *segmentProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The Segment provider.",
+		Description: "Use the Segment provider to manage resources in your [Segment workspace](https://segment.com/docs/). This provider is built on top of Segment's [Public API](https://segment.com/docs/api/public-api/), so you must configure the provider with the proper Public API token before you can use it.",
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
 				Optional:    true,
-				Description: "The Public API url. If not set, the PUBLIC_API_URL environment variable will be used, or a default of 'api.segmentapis.com'.",
+				Description: "The Public API url. Defaults to 'api.segmentapis.com', but can be overwritten by supplying it as an input to the provider or as a PUBLIC_API_URL environment variable.",
 			},
 			"token": schema.StringAttribute{
 				Optional:    true,

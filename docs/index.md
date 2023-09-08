@@ -3,12 +3,12 @@
 page_title: "segment Provider"
 subcategory: ""
 description: |-
-  The Segment provider.
+  Use the Segment provider to manage resources in your Segment workspace https://segment.com/docs/. This provider is built on top of Segment's Public API https://segment.com/docs/api/public-api/, so you must configure the provider with the proper Public API token before you can use it.
 ---
 
 # segment Provider
 
-The Segment provider.
+Use the Segment provider to manage resources in your [Segment workspace](https://segment.com/docs/). This provider is built on top of Segment's [Public API](https://segment.com/docs/api/public-api/), so you must configure the provider with the proper Public API token before you can use it.
 
 ## Example Usage
 
@@ -24,4 +24,4 @@ provider "segment" {}
 ### Optional
 
 - `token` (String, Sensitive) The Public API token. If not set, the PUBLIC_API_TOKEN environment variable will be used.
-- `url` (String) The Public API url. If not set, the PUBLIC_API_URL environment variable will be used, or a default of 'api.segmentapis.com'.
+- `url` (String) The Public API url. Defaults to 'api.segmentapis.com', but can be overwritten by supplying it as an input to the provider or as a PUBLIC_API_URL environment variable.

@@ -13,25 +13,11 @@ A label associated with the current Workspace.
 ## Example Usage
 
 ```terraform
-terraform {
-  required_providers {
-    segment = {
-      source  = "registry.terraform.io/hashicorp/segment"
-      version = "0.0.1"
-    }
-  }
-}
-
-resource "segment_label" "test" {
+# Configures a label
+resource "segment_label" "dev" {
   key         = "environment"
   value       = "dev"
   description = "dev environment"
-}
-
-resource "segment_label" "import_label" {
-  key         = "key"
-  value       = "value"
-  description = "description"
 }
 ```
 
