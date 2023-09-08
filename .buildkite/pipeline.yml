@@ -1,5 +1,4 @@
 env:
-  BUILDKITE_ANALYTICS_TOKEN: 'yQUB1TqMV4cuQdtasqAiFq3T'
   BUILDKITE_IMAGE_GO_NODE: 'control-plane-ci-agent:node18.7-go19' #control-plane-ci-agent image contains both node and go
 steps:
   - label: '🐕  Snyk'
