@@ -162,6 +162,7 @@ func (p *segmentProvider) DataSources(ctx context.Context) []func() datasource.D
 		NewDestinationDataSource,
 		NewWarehouseDataSource,
 		NewTrackingPlanDataSource,
+		NewTrackingPlanRulesDataSource,
 	}
 }
 
