@@ -57,7 +57,7 @@ func (d *trackingPlanRulesDataSource) Schema(_ context.Context, _ datasource.Sch
 			},
 			"rules": schema.SetNestedAttribute{
 				Computed:    true,
-				Description: `The list of Tracking Plan rules.`,
+				Description: `The list of Tracking Plan rules. Currently limited to 200 rules.`,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"type": schema.StringAttribute{
