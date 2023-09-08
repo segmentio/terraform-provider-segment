@@ -148,6 +148,7 @@ func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resou
 		NewWarehouseResource,
 		NewSourceWarehouseConnectionResource,
 		NewTrackingPlanResource,
+		NewTrackingPlanRulesResource,
 	}
 }
 
