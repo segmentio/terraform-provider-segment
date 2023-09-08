@@ -28,7 +28,7 @@ data "segment_tracking_plan_rules" "example" {
 
 ### Read-Only
 
-- `rules` (Attributes Set) The list of Tracking Plan rules. (see [below for nested schema](#nestedatt--rules))
+- `rules` (Attributes Set) The list of Tracking Plan rules. Currently limited to 200 rules. (see [below for nested schema](#nestedatt--rules))
 
 <a id="nestedatt--rules"></a>
 ### Nested Schema for `rules`
