@@ -27,7 +27,3 @@ resource "segment_warehouse" "example" {
 
 - `source_id` (String) The id of the Source.
 - `warehouse_id` (String) The id of the Warehouse.
-
-### Read-Only
-
-- `id` (String) The Terraform generated id for this connection

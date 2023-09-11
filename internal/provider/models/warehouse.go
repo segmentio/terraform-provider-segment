@@ -12,7 +12,7 @@ type WarehouseState struct {
 	ID          types.String            `tfsdk:"id"`
 	Metadata    *WarehouseMetadataState `tfsdk:"metadata"`
 	Name        types.String            `tfsdk:"name"`
-	WorkspaceId types.String            `tfsdk:"workspace_id"`
+	WorkspaceID types.String            `tfsdk:"workspace_id"`
 	Enabled     types.Bool              `tfsdk:"enabled"`
 	Settings    jsontypes.Normalized    `tfsdk:"settings"`
 }
@@ -21,7 +21,7 @@ type WarehousePlan struct {
 	ID          types.String         `tfsdk:"id"`
 	Metadata    types.Object         `tfsdk:"metadata"`
 	Name        types.String         `tfsdk:"name"`
-	WorkspaceId types.String         `tfsdk:"workspace_id"`
+	WorkspaceID types.String         `tfsdk:"workspace_id"`
 	Enabled     types.Bool           `tfsdk:"enabled"`
 	Settings    jsontypes.Normalized `tfsdk:"settings"`
 }
@@ -34,7 +34,7 @@ func (w *WarehouseState) Fill(warehouse api.Warehouse) error {
 	}
 
 	w.ID = types.StringValue(warehouse.Id)
-	w.WorkspaceId = types.StringValue(warehouse.WorkspaceId)
+	w.WorkspaceID = types.StringValue(warehouse.WorkspaceId)
 	w.Enabled = types.BoolValue(warehouse.Enabled)
 	w.Metadata = &warehouseMetadata
 	settings, err := w.getSettings(warehouse.Settings)

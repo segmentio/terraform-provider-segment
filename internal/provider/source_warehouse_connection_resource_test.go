@@ -117,7 +117,6 @@ func TestAccSourceWarehouseConnectionResource(t *testing.T) {
 						}
 					`,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("segment_source_warehouse_connection.test", "id", "swconn:my-source-id:my-warehouse-id"),
 					resource.TestCheckResourceAttr("segment_source_warehouse_connection.test", "source_id", "my-source-id"),
 					resource.TestCheckResourceAttr("segment_source_warehouse_connection.test", "warehouse_id", "my-warehouse-id"),
 				),
@@ -131,7 +130,6 @@ func TestAccSourceWarehouseConnectionResource(t *testing.T) {
 						}
 					`,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("segment_source_warehouse_connection.test", "id", "swconn:my-new-source-id:my-new-warehouse-id"),
 					resource.TestCheckResourceAttr("segment_source_warehouse_connection.test", "source_id", "my-new-source-id"),
 					resource.TestCheckResourceAttr("segment_source_warehouse_connection.test", "warehouse_id", "my-new-warehouse-id"),
 				),

@@ -13,7 +13,7 @@ type DestinationState struct {
 	Name     types.String              `tfsdk:"name"`
 	Enabled  types.Bool                `tfsdk:"enabled"`
 	Metadata *DestinationMetadataState `tfsdk:"metadata"`
-	SourceId types.String              `tfsdk:"source_id"`
+	SourceID types.String              `tfsdk:"source_id"`
 	Settings jsontypes.Normalized      `tfsdk:"settings"`
 }
 
@@ -22,7 +22,7 @@ type DestinationPlan struct {
 	Name     types.String         `tfsdk:"name"`
 	Enabled  types.Bool           `tfsdk:"enabled"`
 	Metadata types.Object         `tfsdk:"metadata"`
-	SourceId types.String         `tfsdk:"source_id"`
+	SourceID types.String         `tfsdk:"source_id"`
 	Settings jsontypes.Normalized `tfsdk:"settings"`
 }
 
@@ -35,7 +35,7 @@ func (d *DestinationState) Fill(destination *api.Destination) error {
 
 	d.ID = types.StringValue(destination.Id)
 	d.Name = types.StringPointerValue(destination.Name)
-	d.SourceId = types.StringValue(destination.SourceId)
+	d.SourceID = types.StringValue(destination.SourceId)
 	d.Enabled = types.BoolValue(destination.Enabled)
 	d.Metadata = &destinationMetadata
 	settings, err := d.getSettings(destination.Settings)

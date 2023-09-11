@@ -79,7 +79,7 @@ resource "segment_label" "test" {
 				ResourceName:      "segment_label.test",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateId:     "environment,dev,dev environment",
+				ImportStateId:     "environment:dev",
 			},
 		},
 	})
