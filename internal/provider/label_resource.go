@@ -66,7 +66,7 @@ func (r *labelResource) Metadata(_ context.Context, req resource.MetadataRequest
 // Schema defines the schema for the resource.
 func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "A label associated with the current Workspace. To import a label into Terraform, use the following format: '<key>:<value>'",
+		Description: "A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
