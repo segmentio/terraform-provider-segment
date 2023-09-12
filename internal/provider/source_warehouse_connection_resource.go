@@ -28,7 +28,6 @@ type sourceWarehouseConnectionResource struct {
 }
 
 type sourceWarehouseConnectionState struct {
-	ID          types.String `tfsdk:"id"`
 	SourceID    types.String `tfsdk:"source_id"`
 	WarehouseID types.String `tfsdk:"warehouse_id"`
 }
@@ -40,12 +39,7 @@ func (d *sourceWarehouseConnectionResource) Metadata(_ context.Context, req reso
 func (d *sourceWarehouseConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Represents a connection between a source and a warehouse",
-
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed:    true,
-				Description: "The Terraform generated id for this connection",
-			},
 			"source_id": schema.StringAttribute{
 				Required:    true,
 				Description: "The id of the Source.",
@@ -82,7 +76,6 @@ func (r *sourceWarehouseConnectionResource) Create(ctx context.Context, req reso
 	}
 
 	state := sourceWarehouseConnectionState{
-		ID:          types.StringValue(fmt.Sprintf("swconn:%s:%s", plan.SourceID.ValueString(), plan.WarehouseID.ValueString())),
 		SourceID:    plan.SourceID,
 		WarehouseID: plan.WarehouseID,
 	}
@@ -140,7 +133,6 @@ func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 	}
 
 	diags = resp.State.Set(ctx, &sourceWarehouseConnectionState{
-		ID:          state.ID,
 		SourceID:    types.StringValue("not_found"),
 		WarehouseID: types.StringValue("not_found"),
 	})

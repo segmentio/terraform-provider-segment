@@ -36,27 +36,26 @@ type labelResource struct {
 }
 
 type labelResourceModel struct {
-	Id          types.String `tfsdk:"id"`
+	ID          types.String `tfsdk:"id"`
 	Key         types.String `tfsdk:"key"`
 	Value       types.String `tfsdk:"value"`
 	Description types.String `tfsdk:"description"`
 }
 
 func (r *labelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	idParts := strings.Split(req.ID, ",")
+	idParts := strings.Split(req.ID, ":")
 
-	if len(idParts) != 3 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" {
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: key,value,description. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: <key>:<value>. Got: %q", req.ID),
 		)
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id(idParts[0], idParts[1]))...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("key"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("value"), idParts[1])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("description"), idParts[2])...)
 }
 
 // Metadata returns the resource type name.
@@ -67,10 +66,11 @@ func (r *labelResource) Metadata(_ context.Context, req resource.MetadataRequest
 // Schema defines the schema for the resource.
 func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "A label associated with the current Workspace.",
+		Description: "A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The unique identifier for this label.",
 			},
 			"key": schema.StringAttribute{
 				Description: "The key that represents the name of this label.",
@@ -129,10 +129,10 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	outLabel := out.Data.Label
 	plan.Key = types.StringValue(outLabel.Key)
 	plan.Value = types.StringValue(outLabel.Value)
-	plan.Id = types.StringValue(id(outLabel.Key, outLabel.Value))
+	plan.ID = types.StringValue(id(outLabel.Key, outLabel.Value))
 
 	if outLabel.Description != nil {
-		plan.Description = types.StringPointerValue(outLabel.Description)
+		plan.Description = types.StringValue(*outLabel.Description)
 	}
 
 	// Set state to fully populated data
@@ -172,7 +172,10 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	state.Key = types.StringValue(label.Key)
 	state.Value = types.StringValue(label.Value)
-	state.Id = types.StringValue(id(label.Key, label.Value))
+	if label.Description != nil {
+		state.Description = types.StringValue(*label.Description)
+	}
+	state.ID = types.StringValue(id(label.Key, label.Value))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

@@ -37,7 +37,7 @@ type SupportedPlatform struct {
 }
 
 type Field struct {
-	Id           types.String         `tfsdk:"id"`
+	ID           types.String         `tfsdk:"id"`
 	SortOrder    types.Float64        `tfsdk:"sort_order"`
 	FieldKey     types.String         `tfsdk:"field_key"`
 	Label        types.String         `tfsdk:"label"`
@@ -53,7 +53,7 @@ type Field struct {
 }
 
 type Action struct {
-	Id             types.String `tfsdk:"id"`
+	ID             types.String `tfsdk:"id"`
 	Name           types.String `tfsdk:"name"`
 	Slug           types.String `tfsdk:"slug"`
 	Description    types.String `tfsdk:"description"`
@@ -64,7 +64,7 @@ type Action struct {
 }
 
 type Preset struct {
-	ActionId types.String         `tfsdk:"action_id"`
+	ActionID types.String         `tfsdk:"action_id"`
 	Name     types.String         `tfsdk:"name"`
 	Trigger  types.String         `tfsdk:"trigger"`
 	Fields   jsontypes.Normalized `tfsdk:"fields"`
@@ -78,7 +78,7 @@ type Contact struct {
 }
 
 type DestinationMetadataState struct {
-	Id                 types.String             `tfsdk:"id"`
+	ID                 types.String             `tfsdk:"id"`
 	Name               types.String             `tfsdk:"name"`
 	Slug               types.String             `tfsdk:"slug"`
 	Description        types.String             `tfsdk:"description"`
@@ -251,7 +251,7 @@ func (d *DestinationMetadataState) getPresets(presets []api.DestinationMetadataS
 
 	for _, preset := range presets {
 		presetToAdd := Preset{
-			ActionId: types.StringValue(preset.ActionId),
+			ActionID: types.StringValue(preset.ActionId),
 			Name:     types.StringValue(preset.Name),
 			Trigger:  types.StringValue(preset.Trigger),
 		}
@@ -273,7 +273,7 @@ func (d *DestinationMetadataState) getActions(actions []api.DestinationMetadataA
 
 	for _, action := range actions {
 		destinationMetadataAction := Action{
-			Id:          types.StringValue(action.Id),
+			ID:          types.StringValue(action.Id),
 			Slug:        types.StringValue(action.Slug),
 			Name:        types.StringValue(action.Name),
 			Description: types.StringValue(action.Description),
@@ -302,7 +302,7 @@ func (d *DestinationMetadataState) getFields(fields []api.DestinationMetadataAct
 
 	for _, f := range fields {
 		fieldToAdd := Field{
-			Id:          types.StringValue(f.Id),
+			ID:          types.StringValue(f.Id),
 			SortOrder:   types.Float64Value(float64(f.SortOrder)),
 			FieldKey:    types.StringValue(f.FieldKey),
 			Label:       types.StringValue(f.Label),
@@ -387,7 +387,7 @@ func getOptions(options []api.IntegrationOptionBeta) ([]IntegrationOptionState, 
 }
 
 func (d *DestinationMetadataState) Fill(destinationMetadata api.DestinationMetadata) error {
-	d.Id = types.StringValue(destinationMetadata.Id)
+	d.ID = types.StringValue(destinationMetadata.Id)
 	d.Name = types.StringValue(destinationMetadata.Name)
 	d.Description = types.StringValue(destinationMetadata.Description)
 	d.Slug = types.StringValue(destinationMetadata.Slug)

@@ -526,7 +526,7 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	input := api.CreateDestinationV1Input{
-		SourceId:   plan.SourceId.ValueString(),
+		SourceId:   plan.SourceID.ValueString(),
 		MetadataId: metadataId,
 		Enabled:    plan.Enabled.ValueBoolPointer(),
 		Name:       plan.Name.ValueStringPointer(),

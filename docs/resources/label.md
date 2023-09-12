@@ -3,12 +3,12 @@
 page_title: "segment_label Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  A label associated with the current Workspace.
+  A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'
 ---
 
 # segment_label (Resource)
 
-A label associated with the current Workspace.
+A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'
 
 ## Example Usage
 
@@ -35,4 +35,4 @@ resource "segment_label" "dev" {
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The unique identifier for this label.
