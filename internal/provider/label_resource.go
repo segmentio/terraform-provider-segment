@@ -121,7 +121,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create a label",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -156,7 +156,7 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Labels",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -203,7 +203,7 @@ func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	_, body, err := r.client.LabelsApi.DeleteLabel(r.authContext, state.Key.ValueString(), state.Value.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Deleting a Label", "Could not delete a label, unexpected error: "+getError(err, body.Body),
+			"Error Deleting a Label", "Could not delete a label, unexpected error: "+getError(err, body),
 		)
 		return
 	}

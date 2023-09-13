@@ -538,7 +538,7 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Destination",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -579,7 +579,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Destination",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -636,7 +636,7 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Destination",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -677,7 +677,7 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 	_, body, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error deleting Destination", "Could not delete Destination, unexpected error: "+getError(err, body.Body),
+			"Error deleting Destination", "Could not delete Destination, unexpected error: "+getError(err, body),
 		)
 		return
 	}

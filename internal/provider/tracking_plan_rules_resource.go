@@ -114,7 +114,7 @@ func (r *trackingPlanRulesResource) Create(ctx context.Context, req resource.Cre
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Tracking Plan rules",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -152,7 +152,7 @@ func (r *trackingPlanRulesResource) Read(ctx context.Context, req resource.ReadR
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to get Tracking Plan rules",
-				getError(err, body.Body),
+				getError(err, body),
 			)
 			return
 		}
@@ -191,7 +191,7 @@ func (r *trackingPlanRulesResource) Delete(ctx context.Context, req resource.Del
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Tracking Plan rules",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
