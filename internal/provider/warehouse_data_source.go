@@ -79,7 +79,7 @@ func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Warehouse",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

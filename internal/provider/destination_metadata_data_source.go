@@ -399,7 +399,7 @@ func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

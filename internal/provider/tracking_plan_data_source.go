@@ -95,7 +95,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

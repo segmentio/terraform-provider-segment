@@ -61,7 +61,7 @@ func (d *workspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Workspace",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

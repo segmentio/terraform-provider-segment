@@ -122,7 +122,7 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Warehouse metadata",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

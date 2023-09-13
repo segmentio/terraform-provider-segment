@@ -109,7 +109,7 @@ func (d *trackingPlanRulesDataSource) Read(ctx context.Context, req datasource.R
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get Tracking Plan rules",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
