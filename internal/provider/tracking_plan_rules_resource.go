@@ -155,7 +155,7 @@ func (r *trackingPlanRulesResource) Read(ctx context.Context, req resource.ReadR
 	} else {
 
 		if config.TrackingPlanID.ValueString() == "" {
-			resp.Diagnostics.AddError("Unable to get Tracking Plan rules", "ID is empty")
+			resp.Diagnostics.AddError("Unable to read Tracking Plan rules", "ID is empty")
 			return
 		}
 
