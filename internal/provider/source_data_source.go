@@ -208,7 +208,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

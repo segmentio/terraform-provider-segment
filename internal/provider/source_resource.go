@@ -265,7 +265,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Source",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -280,7 +280,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to create Source",
-				getError(err, body.Body),
+				getError(err, body),
 			)
 			return
 		}
@@ -327,7 +327,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Source",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -384,7 +384,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Source",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -405,7 +405,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Source",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -443,7 +443,7 @@ func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Source",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

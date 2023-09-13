@@ -79,7 +79,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Destination",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

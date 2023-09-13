@@ -93,7 +93,7 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Tracking Plan",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -136,7 +136,7 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -192,7 +192,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Tracking Plan",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -201,7 +201,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -237,7 +237,7 @@ func (r *trackingPlanResource) Delete(ctx context.Context, req resource.DeleteRe
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Tracking Plan",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

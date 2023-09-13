@@ -224,7 +224,7 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Warehouse",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -272,7 +272,7 @@ func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Warehouse",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -329,7 +329,7 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Warehouse",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -349,7 +349,7 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Warehouse",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -387,7 +387,7 @@ func (r *warehouseResource) Delete(ctx context.Context, req resource.DeleteReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Warehouse",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}

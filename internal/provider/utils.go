@@ -4,10 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"net/http"
 )
 
-func getError(err error, body io.ReadCloser) string {
-	parsedBody, readErr := io.ReadAll(body)
+func getError(err error, body *http.Response) string {
+	if body == nil {
+		return err.Error()
+	}
+	parsedBody, readErr := io.ReadAll(body.Body)
 	if readErr != nil {
 		return err.Error()
 	}

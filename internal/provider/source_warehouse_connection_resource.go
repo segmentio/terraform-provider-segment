@@ -75,7 +75,7 @@ func (r *sourceWarehouseConnectionResource) Create(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create connection between Source and Warehouse",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
@@ -117,7 +117,7 @@ func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to read Source-Warehouse connection",
-				getError(err, body.Body),
+				getError(err, body),
 			)
 			return
 		}
@@ -172,7 +172,7 @@ func (r *sourceWarehouseConnectionResource) Delete(ctx context.Context, req reso
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to remove Source-Warehouse connection",
-			getError(err, body.Body),
+			getError(err, body),
 		)
 		return
 	}
