@@ -108,6 +108,11 @@ func (r *trackingPlanRulesResource) Create(ctx context.Context, req resource.Cre
 		replaceRules = append(replaceRules, apiRule)
 	}
 
+	if plan.TrackingPlanID.ValueString() == "" {
+		resp.Diagnostics.AddError("Unable to create Tracking Plan rules", "ID is empty")
+		return
+	}
+
 	_, body, err := r.client.TrackingPlansApi.ReplaceRulesInTrackingPlan(r.authContext, plan.TrackingPlanID.ValueString()).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
 		Rules: replaceRules,
 	}).Execute()
@@ -148,6 +153,12 @@ func (r *trackingPlanRulesResource) Read(ctx context.Context, req resource.ReadR
 		config.Rules.ElementsAs(ctx, &rules, false)
 		state.Rules = rules
 	} else {
+
+		if config.TrackingPlanID.ValueString() == "" {
+			resp.Diagnostics.AddError("Unable to get Tracking Plan rules", "ID is empty")
+			return
+		}
+
 		out, body, err := r.client.TrackingPlansApi.ListRulesFromTrackingPlan(r.authContext, config.TrackingPlanID.ValueString()).Pagination(*api.NewPaginationInput(200)).Execute()
 		if err != nil {
 			resp.Diagnostics.AddError(

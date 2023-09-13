@@ -118,6 +118,12 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 		return
 	}
 
+	id := state.ID.ValueString()
+	if id == "" {
+		resp.Diagnostics.AddError("Unable to read Warehouse metadata", "ID is empty")
+		return
+	}
+
 	response, body, err := d.client.CatalogApi.GetWarehouseMetadata(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(

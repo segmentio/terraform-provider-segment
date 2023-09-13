@@ -262,6 +262,12 @@ func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
+	id := previousState.ID.ValueString()
+	if id == "" {
+		resp.Diagnostics.AddError("Unable to read Warehouse", "ID is empty")
+		return
+	}
+
 	response, body, err := d.client.WarehousesApi.GetWarehouse(d.authContext, previousState.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(

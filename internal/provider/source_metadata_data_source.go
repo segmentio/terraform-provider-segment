@@ -47,7 +47,13 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	response, body, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, state.ID.ValueString()).Execute()
+	id := state.ID.ValueString()
+	if id == "" {
+		resp.Diagnostics.AddError("Unable to read Source Metadata", "ID is empty")
+		return
+	}
+
+	response, body, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, id).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",
@@ -60,7 +66,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	err = state.Fill(sourceMetadata)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source metadata",
+			"Unable to read Source Metadata",
 			err.Error(),
 		)
 		return
