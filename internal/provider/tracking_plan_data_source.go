@@ -91,7 +91,13 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	out, body, err := d.client.TrackingPlansApi.GetTrackingPlan(d.authContext, config.ID.ValueString()).Execute()
+	id := config.ID.ValueString()
+	if id == "" {
+		resp.Diagnostics.AddError("Unable to read Tracking Plan", "ID is empty")
+		return
+	}
+
+	out, body, err := d.client.TrackingPlansApi.GetTrackingPlan(d.authContext, id).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",

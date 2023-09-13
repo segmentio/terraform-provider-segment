@@ -105,6 +105,11 @@ func (d *trackingPlanRulesDataSource) Read(ctx context.Context, req datasource.R
 		return
 	}
 
+	if config.TrackingPlanID.ValueString() == "" {
+		resp.Diagnostics.AddError("Unable to read Tracking Plan rules", "ID is empty")
+		return
+	}
+
 	out, body, err := d.client.TrackingPlansApi.ListRulesFromTrackingPlan(d.authContext, config.TrackingPlanID.ValueString()).Pagination(*api.NewPaginationInput(200)).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -118,7 +123,7 @@ func (d *trackingPlanRulesDataSource) Read(ctx context.Context, req datasource.R
 	err = state.Fill(out.Data.GetRules(), config.TrackingPlanID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to get Tracking Plan rules",
+			"Unable to read Tracking Plan rules",
 			err.Error(),
 		)
 		return

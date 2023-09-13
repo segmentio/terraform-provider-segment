@@ -75,6 +75,12 @@ func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
+	id := state.ID.ValueString()
+	if id == "" {
+		resp.Diagnostics.AddError("Unable to read Warehouse", "ID is empty")
+		return
+	}
+
 	response, body, err := d.client.WarehousesApi.GetWarehouse(d.authContext, state.ID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(

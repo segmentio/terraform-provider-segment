@@ -317,7 +317,13 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	out, body, err := r.client.SourcesApi.GetSource(r.authContext, config.ID.ValueString()).Execute()
+	id := config.ID.ValueString()
+	if id == "" {
+		resp.Diagnostics.AddError("Unable to read Source", "ID is empty")
+		return
+	}
+
+	out, body, err := r.client.SourcesApi.GetSource(r.authContext, id).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Source",

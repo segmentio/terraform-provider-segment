@@ -66,6 +66,11 @@ func (r *sourceWarehouseConnectionResource) Create(ctx context.Context, req reso
 		return
 	}
 
+	if plan.WarehouseID.String() == "" || plan.SourceID.String() == "" {
+		resp.Diagnostics.AddError("Unable to create connection between Source and Warehouse", "At least one ID is empty")
+		return
+	}
+
 	_, body, err := r.client.WarehousesApi.AddConnectionFromSourceToWarehouse(r.authContext, plan.WarehouseID.ValueString(), plan.SourceID.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -101,6 +106,10 @@ func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 	paginationNext := "MA=="
 
 	for paginationNext != "" {
+		if state.SourceID.String() == "" {
+			resp.Diagnostics.AddError("Unable to read Source-Warehouse connection", "At least one ID is empty")
+			return
+		}
 		response, body, err := d.client.SourcesApi.ListConnectedWarehousesFromSource(d.authContext, state.SourceID.ValueString()).Pagination(api.PaginationInput{
 			Cursor: &paginationNext,
 			Count:  200,
@@ -151,6 +160,11 @@ func (r *sourceWarehouseConnectionResource) Delete(ctx context.Context, req reso
 	diags := req.State.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if config.WarehouseID.String() == "" || config.SourceID.String() == "" {
+		resp.Diagnostics.AddError("Unable to remove Source-Warehouse connection", "At least one ID is empty")
 		return
 	}
 
