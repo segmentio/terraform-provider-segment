@@ -31,6 +31,22 @@ data "segment_tracking_plan" "example" {
 - `created_at` (String) The timestamp of this Tracking Plan's creation.
 - `description` (String) The Tracking Plan's description.
 - `name` (String) The Tracking Plan's name.
+- `rules` (Attributes Set) The list of Tracking Plan rules. Currently limited to 200 rules. (see [below for nested schema](#nestedatt--rules))
 - `slug` (String) URL-friendly slug of this Tracking Plan.
 - `type` (String) The Tracking Plan's type.
 - `updated_at` (String) The timestamp of the last change to the Tracking Plan.
+
+<a id="nestedatt--rules"></a>
+### Nested Schema for `rules`
+
+Read-Only:
+
+- `created_at` (String) The timestamp of this rule's creation.
+- `deprecated_at` (String) The timestamp of this rule's deprecation.
+- `json_schema` (String) JSON Schema of this rule.
+- `key` (String) Key to this rule (free-form string like 'Button clicked').
+- `type` (String) The type for this Tracking Plan rule.
+
+							Enum: "COMMON" "GROUP" "IDENTIFY" "PAGE" "SCREEN" "TRACK"
+- `updated_at` (String) The timestamp of this rule's last change.
+- `version` (Number) Version of this rule.

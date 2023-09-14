@@ -79,12 +79,50 @@ func (d *trackingPlanDataSource) Schema(_ context.Context, _ datasource.SchemaRe
 				Computed:    true,
 				Description: "The timestamp of this Tracking Plan's creation.",
 			},
+			"rules": schema.SetNestedAttribute{
+				Computed:    true,
+				Description: `The list of Tracking Plan rules. Currently limited to 200 rules.`,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.StringAttribute{
+							Computed: true,
+							Description: `The type for this Tracking Plan rule.
+
+							Enum: "COMMON" "GROUP" "IDENTIFY" "PAGE" "SCREEN" "TRACK"`,
+						},
+						"key": schema.StringAttribute{
+							Computed:    true,
+							Description: "Key to this rule (free-form string like 'Button clicked').",
+						},
+						"json_schema": schema.StringAttribute{
+							Computed:    true,
+							Description: "JSON Schema of this rule.",
+						},
+						"version": schema.Float64Attribute{
+							Computed:    true,
+							Description: "Version of this rule.",
+						},
+						"created_at": schema.StringAttribute{
+							Computed:    true,
+							Description: "The timestamp of this rule's creation.",
+						},
+						"updated_at": schema.StringAttribute{
+							Computed:    true,
+							Description: "The timestamp of this rule's last change.",
+						},
+						"deprecated_at": schema.StringAttribute{
+							Computed:    true,
+							Description: "The timestamp of this rule's deprecation.",
+						},
+					},
+				},
+			},
 		},
 	}
 }
 
 func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var config models.TrackingPlanState
+	var config models.TrackingPlanDSState
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -108,8 +146,17 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	trackingPlan := out.Data.GetTrackingPlan()
 
-	var state models.TrackingPlanState
-	err = state.Fill(trackingPlan)
+	rulesOut, body, err := d.client.TrackingPlansApi.ListRulesFromTrackingPlan(d.authContext, id).Pagination(*api.NewPaginationInput(200)).Execute()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to get Tracking Plan rules",
+			getError(err, body),
+		)
+		return
+	}
+
+	var state models.TrackingPlanDSState
+	err = state.Fill(trackingPlan, &rulesOut.Data.Rules)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",

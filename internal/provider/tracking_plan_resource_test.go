@@ -11,12 +11,77 @@ import (
 func TestAccTrackingPlanResource(t *testing.T) {
 	t.Parallel()
 
+	updatedRules := 0
 	updated := 0
 	fakeServer := httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			w.Header().Set("content-type", "application/json")
+			payload := ""
 
-			payload := `
+			// Rules requests
+			if req.URL.Path == "/tracking-plans/my-tracking-plan-id/rules" {
+				payload = `
+				{
+					"data": {
+						"rules": [
+							{
+								"key": "Add Rule",
+								"type": "TRACK",
+								"version": 1,
+								"jsonSchema": {
+									"properties": {
+										"context": {},
+										"traits": {},
+										"properties": {}
+									}
+								},
+								"createdAt": "2023-09-08T19:02:55.000Z",
+								"updatedAt": "2023-09-08T19:02:55.000Z",
+								"deprecatedAt": "0001-01-01T00:00:00.000Z"
+							}
+						],
+						"pagination": {
+							"current": "MA==",
+							"totalEntries": 1
+						}
+					}
+				}
+			`
+
+				// After we update the source, return the updated source for subsequent calls (first update is part of the create call)
+				if req.Method == http.MethodPost {
+					updatedRules++
+				}
+				if updatedRules > 1 {
+					payload = `
+					{
+						"data": {
+							"rules": [
+								{
+									"type": "IDENTIFY",
+									"version": 2,
+									"jsonSchema": {
+										"properties": {
+											"context": {},
+											"traits": {},
+											"properties": {}
+										}
+									},
+									"createdAt": "2023-09-08T19:02:55.000Z",
+									"updatedAt": "2023-09-08T19:02:55.000Z",
+									"deprecatedAt": "0001-01-01T00:00:00.000Z"
+								}
+							],
+							"pagination": {
+								"current": "MA==",
+								"totalEntries": 1
+							}
+						}
+					}
+				`
+				}
+			} else if req.URL.Path == "/tracking-plans/my-tracking-plan-id" || req.URL.Path == "/tracking-plans" { // Tracking Plan requests
+				payload = `
 				{
 					"data": {
 						"trackingPlan": {
@@ -33,12 +98,11 @@ func TestAccTrackingPlanResource(t *testing.T) {
 				}
 			`
 
-			// After we update the source, return the updated source for subsequent calls (first update is part of the create call)
-			if req.Method == http.MethodPatch {
-				updated++
-			}
-			if updated > 0 {
-				payload = `
+				if req.Method == http.MethodPatch {
+					updated++
+				}
+				if updated > 0 {
+					payload = `
 					{
 						"data": {
 							"trackingPlan": {
@@ -54,6 +118,11 @@ func TestAccTrackingPlanResource(t *testing.T) {
 						}
 					}
 				`
+				}
+			} else {
+				payload = `{
+				"data": {}
+				}`
 			}
 
 			_, _ = w.Write([]byte(payload))
@@ -78,6 +147,20 @@ func TestAccTrackingPlanResource(t *testing.T) {
 						name = "My Tracking Plan"
 						type = "LIVE"
 						description = "My Tracking Plan Description"
+						rules = [
+							{
+								key     = "Add Rule"
+								type    = "TRACK"
+								version = 1
+								json_schema = jsonencode({									
+									"properties": {
+										"context": {},
+										"traits": {},
+										"properties": {}
+									}
+								})
+							  }
+						]
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -88,6 +171,11 @@ func TestAccTrackingPlanResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_tracking_plan.test", "type", "LIVE"),
 					resource.TestCheckResourceAttr("segment_tracking_plan.test", "updated_at", "2021-11-16T00:06:19.000Z"),
 					resource.TestCheckResourceAttr("segment_tracking_plan.test", "created_at", "2021-11-16T00:06:19.000Z"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.#", "1"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.0.key", "Add Rule"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.0.type", "TRACK"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.0.version", "1"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.0.json_schema", "{\"properties\":{\"context\":{},\"properties\":{},\"traits\":{}}}"),
 				),
 			},
 			// ImportState testing
@@ -98,6 +186,20 @@ func TestAccTrackingPlanResource(t *testing.T) {
 						name = "My Tracking Plan"
 						type = "LIVE"
 						description = "My Tracking Plan Description"
+						rules = [
+							{
+								key     = "Add Rule"
+								type    = "TRACK"
+								version = 1
+								json_schema = jsonencode({									
+									"properties": {
+										"context": {},
+										"traits": {},
+										"properties": {}
+									}
+								})
+							  }
+						]
 					}
 				`,
 				ImportState:       true,
@@ -110,6 +212,13 @@ func TestAccTrackingPlanResource(t *testing.T) {
 						name = "My New Tracking Plan"
 						type = "LIVE"
 						description = "My New Tracking Plan Description"
+						rules = [
+							{
+								type    = "IDENTIFY"
+								version = 2
+								json_schema = jsonencode({})
+							}
+						]
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -120,6 +229,11 @@ func TestAccTrackingPlanResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_tracking_plan.test", "type", "LIVE"),
 					resource.TestCheckResourceAttr("segment_tracking_plan.test", "updated_at", "2021-11-16T00:06:19.000Z"),
 					resource.TestCheckResourceAttr("segment_tracking_plan.test", "created_at", "2021-11-16T00:06:19.000Z"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.#", "1"),
+					resource.TestCheckNoResourceAttr("segment_tracking_plan.test", "rules.0.key"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.0.type", "IDENTIFY"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.0.version", "2"),
+					resource.TestCheckResourceAttr("segment_tracking_plan.test", "rules.0.json_schema", "{}"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
