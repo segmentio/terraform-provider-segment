@@ -15,8 +15,23 @@ description: |-
 ```terraform
 # Configures a specific tracking plan
 resource "segment_tracking_plan" "my_tracking_plan" {
-  name = "my-tracking-plan"
-  type = "LIVE"
+  name        = "my-tracking-plan"
+  type        = "LIVE"
+  description = "My Tracking Plan Description"
+  rules = [
+    {
+      key     = "Add Rule"
+      type    = "TRACK"
+      version = 1
+      json_schema = jsonencode({
+        "properties" : {
+          "context" : {},
+          "traits" : {},
+          "properties" : {}
+        }
+      })
+    }
+  ]
 }
 ```
 
@@ -26,6 +41,12 @@ resource "segment_tracking_plan" "my_tracking_plan" {
 ### Required
 
 - `name` (String) The Tracking Plan's name.
+- `rules` (Attributes Set) The list of Tracking Plan rules. 
+				
+Due to Terraform resource limitations, this list might not show an exact representation of how the Tracking Plan interprets each rule.
+To see an exact representation of this Tracking Plan's rules, please use the data source.
+
+This field is currently limited to 200 items. (see [below for nested schema](#nestedatt--rules))
 - `type` (String) The Tracking Plan's type.
 
 ### Optional
@@ -38,3 +59,18 @@ resource "segment_tracking_plan" "my_tracking_plan" {
 - `id` (String) The Tracking Plan's identifier.
 - `slug` (String) URL-friendly slug of this Tracking Plan.
 - `updated_at` (String) The timestamp of the last change to the Tracking Plan.
+
+<a id="nestedatt--rules"></a>
+### Nested Schema for `rules`
+
+Required:
+
+- `json_schema` (String) JSON Schema of this rule.
+- `type` (String) The type for this Tracking Plan rule.
+
+							Enum: "COMMON" "GROUP" "IDENTIFY" "PAGE" "SCREEN" "TRACK"
+- `version` (Number) Version of this rule.
+
+Optional:
+
+- `key` (String) Key to this rule (free-form string like 'Button clicked').

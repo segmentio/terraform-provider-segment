@@ -148,7 +148,6 @@ func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resou
 		NewWarehouseResource,
 		NewSourceWarehouseConnectionResource,
 		NewTrackingPlanResource,
-		NewTrackingPlanRulesResource,
 	}
 }
 
@@ -162,7 +161,6 @@ func (p *segmentProvider) DataSources(ctx context.Context) []func() datasource.D
 		NewDestinationDataSource,
 		NewWarehouseDataSource,
 		NewTrackingPlanDataSource,
-		NewTrackingPlanRulesDataSource,
 	}
 }
 
