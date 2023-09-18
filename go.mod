@@ -9,8 +9,10 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.19.0
 	github.com/hashicorp/terraform-plugin-testing v1.5.1
 	github.com/segmentio/public-api-sdk-go v0.0.0-20230823204623-890490778713
-	gotest.tools/gotestsum v1.10.1
+	gotest.tools/gotestsum v1.11.0
 )
+
+require github.com/bitfield/gotestdox v0.2.1 // indirect
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -73,11 +75,11 @@ require (
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/oauth2 v0.11.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/term v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/tools v0.6.0 // indirect
+	golang.org/x/tools v0.11.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230803162519-f966b187b2e5 // indirect
 	google.golang.org/grpc v1.57.0 // indirect
