@@ -7,11 +7,11 @@ assignees: ''
 
 ---
 
-** Description **
+**Description **
 
 <!-- Please add a clear and concise description of what the bug is -->
 
-** To Reproduce **
+**To Reproduce **
 
 Example Terraform code that triggers the issue:
 
