@@ -13,7 +13,7 @@ generate:
 
 # Reformats the code (using gofumpt)
 fmt:
-	@go run mvdan.cc/gofumpt@latest -l -w .
+	@go run mvdan.cc/gofumpt@latest -extra -l -w .
 .PHONY: fmt
 
 GOLANGCI_LINT_VERSION='1.53.3'

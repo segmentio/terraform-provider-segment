@@ -237,6 +237,6 @@ func (r *labelResource) Configure(_ context.Context, req resource.ConfigureReque
 	r.authContext = config.authContext
 }
 
-func id(key string, value string) string {
+func id(key, value string) string {
 	return fmt.Sprintf("%s:%s", key, value)
 }
