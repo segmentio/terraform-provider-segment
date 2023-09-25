@@ -8,6 +8,7 @@ deps:
 
 # Generates documentation
 generate:
+	@go install .
 	@go generate ./...
 .PHONY: generate
 
