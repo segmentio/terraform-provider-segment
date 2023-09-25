@@ -132,26 +132,31 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 	id := config.ID.ValueString()
 	if id == "" {
 		resp.Diagnostics.AddError("Unable to read Tracking Plan", "ID is empty")
+
 		return
 	}
 
 	out, body, err := d.client.TrackingPlansApi.GetTrackingPlan(d.authContext, id).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",
 			getError(err, body),
 		)
+
 		return
 	}
 
 	trackingPlan := out.Data.GetTrackingPlan()
 
-	rulesOut, body, err := d.client.TrackingPlansApi.ListRulesFromTrackingPlan(d.authContext, id).Pagination(*api.NewPaginationInput(200)).Execute()
+	rulesOut, body, err := d.client.TrackingPlansApi.ListRulesFromTrackingPlan(d.authContext, id).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get Tracking Plan rules",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -162,6 +167,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 			"Unable to read Tracking Plan",
 			err.Error(),
 		)
+
 		return
 	}
 

@@ -39,9 +39,9 @@ func TestAccLabelResource(t *testing.T) {
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("content-type", "application/json")
 			switch r.Method {
-			case "POST":
+			case http.MethodPost:
 				_, _ = w.Write([]byte(postPayload))
-			case "GET":
+			case http.MethodGet:
 				_, _ = w.Write([]byte(getPayload))
 			}
 		}),

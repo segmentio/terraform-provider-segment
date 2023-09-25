@@ -55,7 +55,7 @@ func (w *WarehouseState) Fill(warehouse api.Warehouse) error {
 	return nil
 }
 
-func (s *WarehouseState) getSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
+func (w *WarehouseState) getSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
 	if !settings.IsSet() {
 		return jsontypes.NewNormalizedNull(), nil
 	}

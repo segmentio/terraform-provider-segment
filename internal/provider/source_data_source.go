@@ -201,15 +201,18 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	id := config.ID.ValueString()
 	if id == "" {
 		resp.Diagnostics.AddError("Unable to read Source", "ID is empty")
+
 		return
 	}
 
 	out, body, err := d.client.SourcesApi.GetSource(d.authContext, id).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -222,6 +225,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			"Unable to Read Source",
 			err.Error(),
 		)
+
 		return
 	}
 

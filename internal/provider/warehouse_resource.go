@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -34,11 +35,11 @@ type warehouseResource struct {
 	authContext context.Context
 }
 
-func (d *warehouseResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *warehouseResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_warehouse"
 }
 
-func (d *warehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *warehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "The warehouse",
 		Attributes: map[string]schema.Attribute{
@@ -183,22 +184,24 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	wrappedMetadataId, err := plan.Metadata.Attributes()["id"].ToTerraformValue(ctx)
+	wrappedMetadataID, err := plan.Metadata.Attributes()["id"].ToTerraformValue(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to decode metadata id",
 			err.Error(),
 		)
+
 		return
 	}
 
-	var metadataId string
-	err = wrappedMetadataId.As(&metadataId)
+	var metadataID string
+	err = wrappedMetadataID.As(&metadataID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to decode metadata id",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -217,15 +220,17 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 
 	out, body, err := r.client.WarehousesApi.CreateWarehouse(r.authContext).CreateWarehouseV1Input(api.CreateWarehouseV1Input{
 		Enabled:    plan.Enabled.ValueBoolPointer(),
-		MetadataId: metadataId,
+		MetadataId: metadataID,
 		Settings:   *api.NewNullableModelMap(modelMap),
 		Name:       name,
 	}).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Warehouse",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -238,6 +243,7 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 			"Unable to create Warehouse",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -252,7 +258,7 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 	}
 }
 
-func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var previousState models.WarehouseState
 
 	diags := req.State.Get(ctx, &previousState)
@@ -265,15 +271,18 @@ func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 	id := previousState.ID.ValueString()
 	if id == "" {
 		resp.Diagnostics.AddError("Unable to read Warehouse", "ID is empty")
+
 		return
 	}
 
-	response, body, err := d.client.WarehousesApi.GetWarehouse(d.authContext, previousState.ID.ValueString()).Execute()
+	response, body, err := r.client.WarehousesApi.GetWarehouse(r.authContext, previousState.ID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Warehouse",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -286,6 +295,7 @@ func (d *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 			"Unable to read Warehouse",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -326,11 +336,13 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 
 	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
 	existingWarehouse, body, err := r.client.WarehousesApi.GetWarehouse(r.authContext, state.ID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Warehouse",
 			getError(err, body),
 		)
+
 		return
 	}
 	existingSettings := existingWarehouse.Data.GetWarehouse().Settings.Get().Get()
@@ -346,11 +358,13 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 		Settings: *api.NewNullableModelMap(modelMap),
 		Name:     *api.NewNullableString(plan.Name.ValueStringPointer()),
 	}).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Warehouse",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -362,6 +376,7 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 			"Unable to update Warehouse",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -384,11 +399,13 @@ func (r *warehouseResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	_, body, err := r.client.WarehousesApi.DeleteWarehouse(r.authContext, config.ID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Warehouse",
 			getError(err, body),
 		)
+
 		return
 	}
 }
@@ -398,7 +415,7 @@ func (r *warehouseResource) ImportState(ctx context.Context, req resource.Import
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (d *warehouseResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *warehouseResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -413,6 +430,6 @@ func (d *warehouseResource) Configure(_ context.Context, req resource.ConfigureR
 		return
 	}
 
-	d.client = config.client
-	d.authContext = config.authContext
+	r.client = config.client
+	r.authContext = config.authContext
 }

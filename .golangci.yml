@@ -7,21 +7,30 @@ issues:
 linters:
   disable-all: true
   enable:
+    - bodyclose
     - durationcheck
     - errcheck
     - exportloopref
     - forcetypeassert
     - godot
     - gofmt
+    - gomnd
     - gosimple
+    - govet
     - ineffassign
     - makezero
     - misspell
     - nilerr
+    - nlreturn
+    - paralleltest
     - predeclared
+    - revive
     - staticcheck
     - tenv
     - unconvert
     - unparam
     - unused
+    - usestdlibvars
     - vet
+    - wastedassign
+    - wrapcheck

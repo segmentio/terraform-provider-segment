@@ -47,7 +47,7 @@ func (d *DestinationState) Fill(destination *api.Destination) error {
 	return nil
 }
 
-func (s *DestinationState) getSettings(settings map[string]interface{}) (jsontypes.Normalized, error) {
+func (d *DestinationState) getSettings(settings map[string]interface{}) (jsontypes.Normalized, error) {
 	jsonSettingsString, err := json.Marshal(settings)
 	if err != nil {
 		return jsontypes.NewNormalizedNull(), err

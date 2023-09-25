@@ -20,5 +20,6 @@ func getError(err error, body *http.Response) string {
 	if jsonErr != nil {
 		return err.Error()
 	}
+
 	return err.Error() + "\n" + formattedBody.String()
 }

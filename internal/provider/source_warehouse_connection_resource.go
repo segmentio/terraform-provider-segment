@@ -32,11 +32,11 @@ type sourceWarehouseConnectionState struct {
 	WarehouseID types.String `tfsdk:"warehouse_id"`
 }
 
-func (d *sourceWarehouseConnectionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *sourceWarehouseConnectionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_source_warehouse_connection"
 }
 
-func (d *sourceWarehouseConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *sourceWarehouseConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Represents a connection between a source and a warehouse",
 		Attributes: map[string]schema.Attribute{
@@ -68,15 +68,18 @@ func (r *sourceWarehouseConnectionResource) Create(ctx context.Context, req reso
 
 	if plan.WarehouseID.String() == "" || plan.SourceID.String() == "" {
 		resp.Diagnostics.AddError("Unable to create connection between Source and Warehouse", "At least one ID is empty")
+
 		return
 	}
 
 	_, body, err := r.client.WarehousesApi.AddConnectionFromSourceToWarehouse(r.authContext, plan.WarehouseID.ValueString(), plan.SourceID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create connection between Source and Warehouse",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -93,7 +96,7 @@ func (r *sourceWarehouseConnectionResource) Create(ctx context.Context, req reso
 	}
 }
 
-func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *sourceWarehouseConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state sourceWarehouseConnectionState
 
 	diags := req.State.Get(ctx, &state)
@@ -108,17 +111,20 @@ func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 	for paginationNext != "" {
 		if state.SourceID.String() == "" {
 			resp.Diagnostics.AddError("Unable to read Source-Warehouse connection", "At least one ID is empty")
+
 			return
 		}
-		response, body, err := d.client.SourcesApi.ListConnectedWarehousesFromSource(d.authContext, state.SourceID.ValueString()).Pagination(api.PaginationInput{
+		response, body, err := r.client.SourcesApi.ListConnectedWarehousesFromSource(r.authContext, state.SourceID.ValueString()).Pagination(api.PaginationInput{
 			Cursor: &paginationNext,
-			Count:  200,
+			Count:  MaxPageSize,
 		}).Execute()
+		defer body.Body.Close()
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to read Source-Warehouse connection",
 				getError(err, body),
 			)
+
 			return
 		}
 
@@ -151,7 +157,7 @@ func (d *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 	}
 }
 
-func (r *sourceWarehouseConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *sourceWarehouseConnectionResource) Update(context.Context, resource.UpdateRequest, *resource.UpdateResponse) {
 	// All fields force replacement
 }
 
@@ -165,20 +171,23 @@ func (r *sourceWarehouseConnectionResource) Delete(ctx context.Context, req reso
 
 	if config.WarehouseID.String() == "" || config.SourceID.String() == "" {
 		resp.Diagnostics.AddError("Unable to remove Source-Warehouse connection", "At least one ID is empty")
+
 		return
 	}
 
 	_, body, err := r.client.WarehousesApi.RemoveSourceConnectionFromWarehouse(r.authContext, config.WarehouseID.ValueString(), config.SourceID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to remove Source-Warehouse connection",
 			getError(err, body),
 		)
+
 		return
 	}
 }
 
-func (d *sourceWarehouseConnectionResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *sourceWarehouseConnectionResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -193,6 +202,6 @@ func (d *sourceWarehouseConnectionResource) Configure(_ context.Context, req res
 		return
 	}
 
-	d.client = config.client
-	d.authContext = config.authContext
+	r.client = config.client
+	r.authContext = config.authContext
 }

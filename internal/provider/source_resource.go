@@ -229,22 +229,24 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	wrappedMetadataId, err := plan.Metadata.Attributes()["id"].ToTerraformValue(ctx)
+	wrappedMetadataID, err := plan.Metadata.Attributes()["id"].ToTerraformValue(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to decode metadata id",
 			err.Error(),
 		)
+
 		return
 	}
 
-	var metadataId string
-	err = wrappedMetadataId.As(&metadataId)
+	var metadataID string
+	err = wrappedMetadataID.As(&metadataID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to decode metadata id",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -259,14 +261,16 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	out, body, err := r.client.SourcesApi.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
 		Slug:       plan.Slug.ValueString(),
 		Enabled:    plan.Enabled.ValueBool(),
-		MetadataId: metadataId,
+		MetadataId: metadataID,
 		Settings:   *api.NewNullableModelMap(modelMap),
 	}).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Source",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -277,11 +281,13 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		updateOut, body, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
 			Name: plan.Name.ValueStringPointer(),
 		}).Execute()
+		defer body.Body.Close()
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to create Source",
 				getError(err, body),
 			)
+
 			return
 		}
 
@@ -295,6 +301,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 			"Unable to create Source",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -320,15 +327,18 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	id := config.ID.ValueString()
 	if id == "" {
 		resp.Diagnostics.AddError("Unable to read Source", "ID is empty")
+
 		return
 	}
 
 	out, body, err := r.client.SourcesApi.GetSource(r.authContext, id).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Source",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -341,6 +351,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 			"Unable to read Source",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -381,11 +392,13 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
 	existingSource, body, err := r.client.SourcesApi.GetSource(r.authContext, state.ID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Source",
 			getError(err, body),
 		)
+
 		return
 	}
 	existingSettings := existingSource.Data.GetSource().Settings.Get().Get()
@@ -402,11 +415,13 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		Name:     name,
 		Settings: *api.NewNullableModelMap(modelMap),
 	}).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Source",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -418,6 +433,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 			"Unable to update Source",
 			err.Error(),
 		)
+
 		return
 	}
 
@@ -440,11 +456,13 @@ func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 
 	_, body, err := r.client.SourcesApi.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Source",
 			getError(err, body),
 		)
+
 		return
 	}
 }

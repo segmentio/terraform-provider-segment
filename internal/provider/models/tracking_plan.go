@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -73,9 +74,9 @@ func (t *TrackingPlanState) Fill(trackingPlan api.TrackingPlan, rules *[]api.Rul
 
 			jsonSchema, err := json.Marshal(rule.JsonSchema)
 			if err != nil {
-				return err
+				return fmt.Errorf("could not marshal json: %w", err)
 			}
-			r.JsonSchema = jsontypes.NewNormalizedValue(string(jsonSchema))
+			r.JSONSchema = jsontypes.NewNormalizedValue(string(jsonSchema))
 
 			r.Version = types.Float64Value(float64(rule.Version))
 
@@ -117,9 +118,9 @@ func (t *TrackingPlanDSState) Fill(trackingPlan api.TrackingPlan, rules *[]api.R
 
 			jsonSchema, err := json.Marshal(rule.JsonSchema)
 			if err != nil {
-				return err
+				return fmt.Errorf("could not marshal json: %w", err)
 			}
-			r.JsonSchema = jsontypes.NewNormalizedValue(string(jsonSchema))
+			r.JSONSchema = jsontypes.NewNormalizedValue(string(jsonSchema))
 
 			r.Version = types.Float64Value(float64(rule.Version))
 
@@ -145,23 +146,23 @@ func (t *TrackingPlanDSState) Fill(trackingPlan api.TrackingPlan, rules *[]api.R
 type RulesState struct {
 	Type       types.String         `tfsdk:"type"`
 	Key        types.String         `tfsdk:"key"`
-	JsonSchema jsontypes.Normalized `tfsdk:"json_schema"`
+	JSONSchema jsontypes.Normalized `tfsdk:"json_schema"`
 	Version    types.Float64        `tfsdk:"version"`
 }
 
 type RulesDSState struct {
 	Type         types.String         `tfsdk:"type"`
 	Key          types.String         `tfsdk:"key"`
-	JsonSchema   jsontypes.Normalized `tfsdk:"json_schema"`
+	JSONSchema   jsontypes.Normalized `tfsdk:"json_schema"`
 	Version      types.Float64        `tfsdk:"version"`
 	CreatedAt    types.String         `tfsdk:"created_at"`
 	UpdatedAt    types.String         `tfsdk:"updated_at"`
 	DeprecatedAt types.String         `tfsdk:"deprecated_at"`
 }
 
-func (r *RulesState) ToApiRule() (api.RuleV1, diag.Diagnostics) {
+func (r *RulesState) ToAPIRule() (api.RuleV1, diag.Diagnostics) {
 	var jsonSchema interface{}
-	diags := r.JsonSchema.Unmarshal(&jsonSchema)
+	diags := r.JSONSchema.Unmarshal(&jsonSchema)
 	if diags.HasError() {
 		return api.RuleV1{}, diags
 	}
