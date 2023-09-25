@@ -1,4 +1,4 @@
-module terraform-provider-segment
+module github.com/segmentio/terraform-provider-segment
 
 go 1.19
 
