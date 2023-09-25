@@ -50,6 +50,7 @@ func (r *labelResource) ImportState(ctx context.Context, req resource.ImportStat
 			"Unexpected Import Identifier",
 			fmt.Sprintf("Expected import identifier with format: <key>:<value>. Got: %q", req.ID),
 		)
+
 		return
 	}
 
@@ -118,11 +119,13 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	out, body, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
 		Label: label,
 	}).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create a label",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -153,11 +156,13 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	response, body, err := r.client.LabelsApi.ListLabels(r.authContext).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Labels",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -185,7 +190,7 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *labelResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *labelResource) Update(context.Context, resource.UpdateRequest, *resource.UpdateResponse) {
 	// Label does not have an update functionality, so added RequiresReplace to each attribute that can be configurable.
 	// reference: https://developer.hashicorp.com/terraform/plugin/framework/resources/update#caveats
 }
@@ -201,10 +206,12 @@ func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	}
 
 	_, body, err := r.client.LabelsApi.DeleteLabel(r.authContext, state.Key.ValueString(), state.Value.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Deleting a Label", "Could not delete a label, unexpected error: "+getError(err, body),
 		)
+
 		return
 	}
 }
@@ -230,6 +237,6 @@ func (r *labelResource) Configure(_ context.Context, req resource.ConfigureReque
 	r.authContext = config.authContext
 }
 
-func id(key string, value string) string {
+func id(key, value string) string {
 	return fmt.Sprintf("%s:%s", key, value)
 }

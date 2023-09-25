@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"terraform-provider-segment/internal/provider/models"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -396,11 +396,13 @@ func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource
 	}
 
 	response, body, err := d.client.CatalogApi.GetDestinationMetadata(d.authContext, state.ID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -411,6 +413,7 @@ func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource
 			"Unable to Read Source metadata",
 			err.Error(),
 		)
+
 		return
 	}
 

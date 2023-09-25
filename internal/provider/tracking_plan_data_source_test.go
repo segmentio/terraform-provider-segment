@@ -12,6 +12,7 @@ func TestAccTrackingPlanDataSource(t *testing.T) {
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
+		t.Parallel()
 		fakeServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				w.Header().Set("content-type", "application/json")
@@ -44,7 +45,6 @@ func TestAccTrackingPlanDataSource(t *testing.T) {
 						}
 					}
 				`))
-
 				} else if req.URL.Path == "/tracking-plans/my-tracking-plan-id" || req.URL.Path == "/tracking-plans" { // Tracking Plan requests
 					_, _ = w.Write([]byte(`
 					{
@@ -103,6 +103,7 @@ func TestAccTrackingPlanDataSource(t *testing.T) {
 	})
 
 	t.Run("nulls", func(t *testing.T) {
+		t.Parallel()
 		fakeServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				w.Header().Set("content-type", "application/json")
@@ -130,7 +131,6 @@ func TestAccTrackingPlanDataSource(t *testing.T) {
 							}
 						}
 					`))
-
 				} else if req.URL.Path == "/tracking-plans/my-tracking-plan-id" || req.URL.Path == "/tracking-plans" { // Tracking Plan requests
 					_, _ = w.Write([]byte(`
 						{

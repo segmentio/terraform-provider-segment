@@ -34,16 +34,16 @@ type ClientInfo struct {
 
 // segmentProviderModel describes the provider data model.
 type segmentProviderModel struct {
-	Url   types.String `tfsdk:"url"`
+	URL   types.String `tfsdk:"url"`
 	Token types.String `tfsdk:"token"`
 }
 
-func (p *segmentProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *segmentProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "segment"
 	resp.Version = p.version
 }
 
-func (p *segmentProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *segmentProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Use the Segment provider to manage resources in your [Segment workspace](https://segment.com/docs/). This provider is built on top of Segment's [Public API](https://segment.com/docs/api/public-api/), so you must configure the provider with the proper Public API token before you can use it.",
 		Attributes: map[string]schema.Attribute{
@@ -69,7 +69,7 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
-	if config.Url.IsUnknown() {
+	if config.URL.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("url"),
 			"Unknown Public API url",
@@ -94,8 +94,8 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 	url := os.Getenv("PUBLIC_API_URL")
 	token := os.Getenv("PUBLIC_API_TOKEN")
 
-	if !config.Url.IsNull() {
-		url = config.Url.ValueString()
+	if !config.URL.IsNull() {
+		url = config.URL.ValueString()
 	}
 
 	if !config.Token.IsNull() && !config.Token.IsUnknown() {
@@ -140,7 +140,7 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 	resp.ResourceData = clientInfo
 }
 
-func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *segmentProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewLabelResource,
 		NewDestinationResource,
@@ -151,7 +151,7 @@ func (p *segmentProvider) Resources(ctx context.Context) []func() resource.Resou
 	}
 }
 
-func (p *segmentProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *segmentProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewWorkspaceDataSource,
 		NewSourceDataSource,

@@ -16,7 +16,7 @@ func TestAccTrackingPlanResource(t *testing.T) {
 	fakeServer := httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			w.Header().Set("content-type", "application/json")
-			payload := ""
+			var payload string
 
 			// Rules requests
 			if req.URL.Path == "/tracking-plans/my-tracking-plan-id/rules" {

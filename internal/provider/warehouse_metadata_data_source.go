@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"terraform-provider-segment/internal/provider/models"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/segmentio/public-api-sdk-go/api"
 
@@ -121,15 +121,18 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 	id := state.ID.ValueString()
 	if id == "" {
 		resp.Diagnostics.AddError("Unable to read Warehouse metadata", "ID is empty")
+
 		return
 	}
 
 	response, body, err := d.client.CatalogApi.GetWarehouseMetadata(d.authContext, state.ID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Warehouse metadata",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -141,6 +144,7 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 			"Unable to Read Warehouse metadata",
 			err.Error(),
 		)
+
 		return
 	}
 

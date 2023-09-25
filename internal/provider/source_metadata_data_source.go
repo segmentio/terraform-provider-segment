@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"terraform-provider-segment/internal/provider/models"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -50,15 +50,18 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	id := state.ID.ValueString()
 	if id == "" {
 		resp.Diagnostics.AddError("Unable to read Source Metadata", "ID is empty")
+
 		return
 	}
 
 	response, body, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, id).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -69,6 +72,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 			"Unable to read Source Metadata",
 			err.Error(),
 		)
+
 		return
 	}
 

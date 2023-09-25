@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -258,7 +259,7 @@ func (d *DestinationMetadataState) getPresets(presets []api.DestinationMetadataS
 
 		fields, err := json.Marshal(preset.Fields)
 		if err != nil {
-			return []Preset{}, err
+			return []Preset{}, fmt.Errorf("could not marshal json: %w", err)
 		}
 		presetToAdd.Fields = jsontypes.NewNormalizedValue(string(fields))
 
@@ -321,14 +322,14 @@ func (d *DestinationMetadataState) getFields(fields []api.DestinationMetadataAct
 		if f.DefaultValue != nil {
 			defaultValue, err := json.Marshal(f.DefaultValue)
 			if err != nil {
-				return []Field{}, err
+				return []Field{}, fmt.Errorf("could not marshal json: %w", err)
 			}
 			fieldToAdd.DefaultValue = jsontypes.NewNormalizedValue(string(defaultValue))
 		}
 
 		choices, err := json.Marshal(f.Choices)
 		if err != nil {
-			return []Field{}, err
+			return []Field{}, fmt.Errorf("could not marshal json: %w", err)
 		}
 		fieldToAdd.Choices = jsontypes.NewNormalizedValue(string(choices))
 
@@ -375,7 +376,7 @@ func getOptions(options []api.IntegrationOptionBeta) ([]IntegrationOptionState, 
 		if opt.DefaultValue != nil {
 			defaultValue, err := json.Marshal(opt.DefaultValue)
 			if err != nil {
-				return []IntegrationOptionState{}, err
+				return []IntegrationOptionState{}, fmt.Errorf("could not marshal json: %w", err)
 			}
 			integrationOption.DefaultValue = jsontypes.NewNormalizedValue(string(defaultValue))
 		}

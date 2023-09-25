@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"terraform-provider-segment/internal/provider/models"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -76,11 +76,13 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	response, body, err := d.client.DestinationsApi.GetDestination(d.authContext, state.ID.ValueString()).Execute()
+	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Destination",
 			getError(err, body),
 		)
+
 		return
 	}
 
@@ -92,6 +94,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 			"Unable to Read Destination",
 			err.Error(),
 		)
+
 		return
 	}
 

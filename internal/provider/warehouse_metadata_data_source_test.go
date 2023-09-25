@@ -12,6 +12,7 @@ func TestAccWarehouseMetadataDataSource(t *testing.T) {
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
+		t.Parallel()
 		fakeServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("content-type", "application/json")
@@ -81,6 +82,7 @@ func TestAccWarehouseMetadataDataSource(t *testing.T) {
 	})
 
 	t.Run("nulls", func(t *testing.T) {
+		t.Parallel()
 		fakeServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("content-type", "application/json")
