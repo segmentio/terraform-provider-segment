@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
@@ -45,7 +46,7 @@ func (d *roleDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 }
 
 func (d *roleDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_tracking_plan"
+	resp.TypeName = req.ProviderTypeName + "_role"
 }
 
 func (d *roleDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -77,12 +78,12 @@ func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	id := config.ID.ValueString()
 	if id == "" {
-		resp.Diagnostics.AddError("Unable to read Tracking Plan", "ID is empty")
+		resp.Diagnostics.AddError("Unable to read Role", "ID is empty")
 
 		return
 	}
 
-	out, body, err := d.client.IAMRolesApi.ListRoles(d.authContext).Pagination(*api.NewPaginationInput(200)).Execute()
+	out, body, err := d.client.IAMRolesApi.ListRoles(d.authContext).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
 	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -93,26 +94,18 @@ func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	roles := out.Data.Roles
-	var role *api.RoleV1
-	for _, r := range roles {
-		if r.Id == id {
-			role = &r
-			break
-		}
-	}
-
-	if role == nil {
+	role, err := findRole(out.Data.Roles, id)
+	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Role",
-			"Role not found",
+			err.Error(),
 		)
 
 		return
 	}
 
 	var state models.RoleState
-	err = state.Fill(*role)
+	err = state.Fill(role)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Role",
@@ -127,4 +120,14 @@ func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func findRole(roles []api.RoleV1, id string) (api.RoleV1, error) {
+	for _, r := range roles {
+		if r.Id == id {
+			return r, nil
+		}
+	}
+
+	return api.RoleV1{}, errors.New("role not found")
 }

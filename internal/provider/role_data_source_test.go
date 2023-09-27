@@ -11,7 +11,7 @@ import (
 
 func TestAccRoleDataSource(t *testing.T) {
 	t.Parallel()
-	regex, _ := regexp.Compile("Role not found")
+	regex, _ := regexp.Compile("role not found")
 
 	t.Run("happy path", func(t *testing.T) {
 		t.Parallel()
@@ -31,7 +31,7 @@ func TestAccRoleDataSource(t *testing.T) {
 								"id": "my-role-id-2",
 								"name": "Workspace Owner",
 								"description": "Owners have full read and edit access to everything in the workspace, including Sources, Destinations, add-on products, and settings. Owners have full edit access to all Team Permissions."
-							},
+							}
 						]
 					}
 				}
@@ -56,7 +56,7 @@ func TestAccRoleDataSource(t *testing.T) {
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.segment_role.test", "id", "my-role-id-1"),
 						resource.TestCheckResourceAttr("data.segment_role.test", "name", "Source Read-only"),
-						resource.TestCheckResourceAttr("data.segment_role.test", "slug", "Read-only access to assigned Source(s), Source settings, enabled Destinations, Schema, live data in the Debugger, and connected Tracking Plans."),
+						resource.TestCheckResourceAttr("data.segment_role.test", "description", "Read-only access to assigned Source(s), Source settings, enabled Destinations, Schema, live data in the Debugger, and connected Tracking Plans."),
 					),
 				},
 			},
@@ -81,7 +81,7 @@ func TestAccRoleDataSource(t *testing.T) {
 								"id": "my-role-id-2",
 								"name": "Workspace Owner",
 								"description": "Owners have full read and edit access to everything in the workspace, including Sources, Destinations, add-on products, and settings. Owners have full edit access to all Team Permissions."
-							},
+							}
 						]
 					}
 				}
