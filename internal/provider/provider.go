@@ -161,6 +161,7 @@ func (p *segmentProvider) DataSources(_ context.Context) []func() datasource.Dat
 		NewDestinationDataSource,
 		NewWarehouseDataSource,
 		NewTrackingPlanDataSource,
+		NewRoleDataSource,
 	}
 }
 
