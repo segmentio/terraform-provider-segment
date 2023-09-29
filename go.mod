@@ -12,6 +12,8 @@ require (
 	gotest.tools/gotestsum v1.11.0
 )
 
+replace github.com/segmentio/public-api-sdk-go v0.0.0-20230823204623-890490778713 => /Users/dhuynh/dev/src/github.com/segmentio/public-api-sdk-go
+
 require github.com/bitfield/gotestdox v0.2.1 // indirect
 
 require (

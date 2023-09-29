@@ -143,9 +143,9 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 	var rules []models.RulesState
 	plan.Rules.ElementsAs(ctx, &rules, false)
 
-	replaceRules := []api.RuleV1{}
+	replaceRules := []api.RuleInputV1{}
 	for _, rule := range rules {
-		apiRule, diags := rule.ToAPIRule()
+		apiRule, diags := rule.ToAPIRuleInput()
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -153,8 +153,18 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 		replaceRules = append(replaceRules, apiRule)
 	}
 
+	rulesOut := []api.RuleV1{}
+	for _, rule := range rules {
+		apiRule, diags := rule.ToAPIRule()
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		rulesOut = append(rulesOut, apiRule)
+	}
+
 	_, body, err = r.client.TrackingPlansApi.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
-		Rules: replaceRules,
+		Rules: []api.RuleInputV1(replaceRules),
 	}).Execute()
 	defer body.Body.Close()
 	if err != nil {
@@ -167,7 +177,7 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	var state models.TrackingPlanState
-	err = state.Fill(api.TrackingPlan(trackingPlan), &replaceRules)
+	err = state.Fill(api.TrackingPlan(trackingPlan), &rulesOut)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Tracking Plan",
@@ -314,14 +324,24 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	var rules []models.RulesState
 	plan.Rules.ElementsAs(ctx, &rules, false)
 
-	replaceRules := []api.RuleV1{}
+	replaceRules := []api.RuleInputV1{}
+	for _, rule := range rules {
+		apiRule, diags := rule.ToAPIRuleInput()
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		replaceRules = append(replaceRules, apiRule)
+	}
+
+	rulesOut := []api.RuleV1{}
 	for _, rule := range rules {
 		apiRule, diags := rule.ToAPIRule()
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		replaceRules = append(replaceRules, apiRule)
+		rulesOut = append(rulesOut, apiRule)
 	}
 
 	_, body, err = r.client.TrackingPlansApi.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
@@ -338,7 +358,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	var state models.TrackingPlanState
-	err = state.Fill(trackingPlan, &replaceRules)
+	err = state.Fill(trackingPlan, &rulesOut)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",

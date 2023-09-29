@@ -174,3 +174,18 @@ func (r *RulesState) ToAPIRule() (api.RuleV1, diag.Diagnostics) {
 		JsonSchema: jsonSchema,
 	}, diags
 }
+
+func (r *RulesState) ToAPIRuleInput() (api.RuleInputV1, diag.Diagnostics) {
+	var jsonSchema interface{}
+	diags := r.JSONSchema.Unmarshal(&jsonSchema)
+	if diags.HasError() {
+		return api.RuleInputV1{}, diags
+	}
+
+	return api.RuleInputV1{
+		Type:       r.Type.ValueString(),
+		Key:        r.Key.ValueStringPointer(),
+		Version:    float32(r.Version.ValueFloat64()),
+		JsonSchema: jsonSchema,
+	}, diags
+}

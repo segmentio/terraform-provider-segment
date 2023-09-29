@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -51,7 +52,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Description: "The unique identifier for this user, or the user's email if the invite has not been accepted.",
 			},
 			"name": schema.StringAttribute{
-				Description: "The human-readable name of this user.",
+				Description: "The human-readable name of this user, or the user's email if the invite has not been accepted.",
 				Computed:    true,
 			},
 			"email": schema.StringAttribute{
@@ -73,17 +74,13 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"role_name": schema.StringAttribute{
-							Description: "The name of the role associated with this permission.",
-							Computed:    true,
-						},
 						"role_id": schema.StringAttribute{
 							Description: "The id of the role associated with this permission.",
 							Required:    true,
 						},
 						"resources": schema.SetNestedAttribute{
 							Description: "The resources associated with this permission.",
-							Required:    true,
+							Optional:    true,
 							Validators: []validator.Set{
 								setvalidator.SizeAtMost(MaxPageSize),
 							},
@@ -148,18 +145,23 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 }
 
 func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan models.UserState
+	var plan models.UserPlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	apiPermissions, diags := models.GetPermissionsAPIValueFromPlan(ctx, plan.Permissions)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	_, body, err := r.client.IAMUsersApi.CreateInvites(r.authContext).CreateInvitesV1Input(api.CreateInvitesV1Input{
 		Invites: []api.InviteV1{
 			{
 				Email:       plan.Email.ValueString(),
-				Permissions: models.GetPermissionsAPIValue(plan.Permissions),
+				Permissions: apiPermissions,
 			},
 		},
 	}).Execute()
@@ -184,9 +186,16 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	if user == nil { // Handle invite
-		plan.IsInvite = types.BoolValue(true)
-		plan.ID = plan.Email
-		diags = resp.State.Set(ctx, plan)
+		inviteUser := &api.UserV1{
+			Email:       plan.Email.ValueString(),
+			Id:          plan.Email.ValueString(),
+			Name:        plan.Email.ValueString(),
+			Permissions: models.InvitePermissionsToPermissions(apiPermissions),
+		}
+		state := models.UserState{}
+		state.Fill(*inviteUser)
+		state.IsInvite = types.BoolValue(true)
+		diags = resp.State.Set(ctx, state)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -272,42 +281,10 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	if !state.IsInvite.ValueBool() { // Handle user
-		_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, state.ID.ValueString()).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
-			Permissions: models.GetPermissionsInputAPIValue(plan.Permissions),
-		}).Execute()
-		defer body.Body.Close()
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Unable to update user",
-				getError(err, body),
-			)
+	var userId string
 
-			return
-		}
-
-		out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, state.ID.ValueString()).Execute()
-		defer body.Body.Close()
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Unable to read user",
-				getError(err, body),
-			)
-
-			return
-		}
-
-		state := models.UserState{}
-		state.Fill(api.UserV1(out.Data.User))
-		state.IsInvite = types.BoolValue(false)
-		diags := resp.State.Set(ctx, state)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
-	} else { // Handle potential invite
-		user, err := findUser(r.client, r.authContext, state.Email.ValueString())
+	if state.IsInvite.ValueBool() { // Handle potential invite
+		foundUser, err := findUser(r.client, r.authContext, state.Email.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to find user",
@@ -317,7 +294,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			return
 		}
 
-		if user == nil { // Handle invite
+		if foundUser == nil { // Handle invite
 			_, body, err := r.client.IAMUsersApi.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
 			if err != nil {
 				resp.Diagnostics.AddError(
@@ -327,42 +304,69 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 				return
 			}
-		} else { // Handle user
-			_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, state.ID.ValueString()).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
-				Permissions: models.GetPermissionsInputAPIValue(plan.Permissions),
+
+			_, body, err = r.client.IAMUsersApi.CreateInvites(r.authContext).CreateInvitesV1Input(api.CreateInvitesV1Input{
+				Invites: []api.InviteV1{
+					{
+						Email:       plan.Email.ValueString(),
+						Permissions: models.GetPermissionsAPIValueFromState(plan.Permissions),
+					},
+				},
 			}).Execute()
 			defer body.Body.Close()
 			if err != nil {
 				resp.Diagnostics.AddError(
-					"Unable to update user",
+					"Unable to invite user",
 					getError(err, body),
 				)
 
 				return
 			}
 
-			out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, state.ID.ValueString()).Execute()
-			defer body.Body.Close()
-			if err != nil {
-				resp.Diagnostics.AddError(
-					"Unable to read user",
-					getError(err, body),
-				)
-
-				return
-			}
-
-			state := models.UserState{}
-			state.Fill(api.UserV1(out.Data.User))
-			state.IsInvite = types.BoolValue(false)
-			diags := resp.State.Set(ctx, state)
+			plan.IsInvite = types.BoolValue(true)
+			plan.ID = plan.Email
+			diags = resp.State.Set(ctx, plan)
 			resp.Diagnostics.Append(diags...)
-			if resp.Diagnostics.HasError() {
-				return
-			}
+			return
+
+		} else { // Handle user that was previously an invite
+			userId = foundUser.Id
 		}
+	} else { // Handle user
+		userId = state.ID.ValueString()
 	}
 
+	_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, userId).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
+		Permissions: models.GetPermissionsInputAPIValueFromState(plan.Permissions),
+	}).Execute()
+	defer body.Body.Close()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to update user",
+			getError(err, body),
+		)
+
+		return
+	}
+
+	out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, userId).Execute()
+	defer body.Body.Close()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to read user",
+			getError(err, body),
+		)
+
+		return
+	}
+
+	state.Fill(api.UserV1(out.Data.User))
+	state.IsInvite = types.BoolValue(false)
+	diags = resp.State.Set(ctx, state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -406,9 +410,10 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	_, body, err := r.client.IAMUsersApi.DeleteUsers(r.authContext).UserIds([]string{userId}).Execute()
 	defer body.Body.Close()
 	if err != nil {
+		b, _ := io.ReadAll(body.Request.Body)
 		resp.Diagnostics.AddError(
 			"Unable to delete user",
-			getError(err, body),
+			string(b),
 		)
 
 		return
