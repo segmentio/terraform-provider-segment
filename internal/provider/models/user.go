@@ -222,11 +222,10 @@ func InvitePermissionsToPermissions(permissions []api.InvitePermissionV1) []api.
 	return apiPermissions
 }
 
-func GetPermissionsInputAPIValueFromState(permissions []PermissionState) []api.PermissionInputV1 {
-	apiPermissions := GetPermissionsAPIValueFromState(permissions)
+func InvitePermissionsToPermissionsInput(permissions []api.InvitePermissionV1) []api.PermissionInputV1 {
+	var apiPermissions []api.PermissionInputV1
 
-	inputPermissions := []api.PermissionInputV1{}
-	for _, permission := range apiPermissions {
+	for _, permission := range permissions {
 		resources := []api.PermissionResourceV1{}
 		for _, resource := range permission.Resources {
 			resources = append(resources, api.PermissionResourceV1{
@@ -234,12 +233,11 @@ func GetPermissionsInputAPIValueFromState(permissions []PermissionState) []api.P
 				Type: resource.Type,
 			})
 		}
-
-		inputPermissions = append(inputPermissions, api.PermissionInputV1{
+		apiPermissions = append(apiPermissions, api.PermissionInputV1{
 			RoleId:    permission.RoleId,
 			Resources: resources,
 		})
 	}
 
-	return inputPermissions
+	return apiPermissions
 }

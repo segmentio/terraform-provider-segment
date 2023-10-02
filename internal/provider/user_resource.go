@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -50,10 +54,16 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The unique identifier for this user, or the user's email if the invite has not been accepted.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Description: "The human-readable name of this user, or the user's email if the invite has not been accepted.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"email": schema.StringAttribute{
 				Description: "The email address associated with this user.",
@@ -65,6 +75,9 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"is_invite": schema.BoolAttribute{
 				Description: "Whether or not this user is an invite.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"permissions": schema.SetNestedAttribute{
 				Description: "The permissions associated with this user.",
@@ -93,10 +106,16 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 									"type": schema.StringAttribute{
 										Description: "The type for this resource.",
 										Required:    true,
+										Validators: []validator.String{
+											stringvalidator.RegexMatches(regexp.MustCompile("^[A-Z]+$"), "value must be in all caps"),
+										},
 									},
 									"labels": schema.SetNestedAttribute{
 										Description: "The labels that further refine access to this resource. Labels are exclusive to Workspace-level permissions.",
 										Computed:    true,
+										PlanModifiers: []planmodifier.Set{
+											setplanmodifier.UseStateForUnknown(),
+										},
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"key": schema.StringAttribute{
@@ -119,7 +138,10 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 						},
 						"labels": schema.SetNestedAttribute{
 							Description: "The labels to attach to this permission.",
-							Optional:    true,
+							Required:    true,
+							Validators: []validator.Set{
+								setvalidator.SizeAtMost(MaxPageSize),
+							},
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"key": schema.StringAttribute{
@@ -274,8 +296,14 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	var plan models.UserState
+	var plan models.UserPlan
 	diags = req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	permissions, diags := models.GetPermissionsAPIValueFromPlan(ctx, plan.Permissions)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -309,7 +337,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 				Invites: []api.InviteV1{
 					{
 						Email:       plan.Email.ValueString(),
-						Permissions: models.GetPermissionsAPIValueFromState(plan.Permissions),
+						Permissions: permissions,
 					},
 				},
 			}).Execute()
@@ -323,9 +351,16 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 				return
 			}
 
-			plan.IsInvite = types.BoolValue(true)
-			plan.ID = plan.Email
-			diags = resp.State.Set(ctx, plan)
+			inviteUser := &api.UserV1{
+				Email:       plan.Email.ValueString(),
+				Id:          plan.Email.ValueString(),
+				Name:        plan.Email.ValueString(),
+				Permissions: models.InvitePermissionsToPermissions(permissions),
+			}
+			state := models.UserState{}
+			state.Fill(*inviteUser)
+			state.IsInvite = types.BoolValue(true)
+			diags = resp.State.Set(ctx, state)
 			resp.Diagnostics.Append(diags...)
 			return
 
@@ -337,7 +372,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, userId).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
-		Permissions: models.GetPermissionsInputAPIValueFromState(plan.Permissions),
+		Permissions: models.InvitePermissionsToPermissionsInput(permissions),
 	}).Execute()
 	defer body.Body.Close()
 	if err != nil {
@@ -360,6 +395,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
+	state = models.UserState{}
 	state.Fill(api.UserV1(out.Data.User))
 	state.IsInvite = types.BoolValue(false)
 	diags = resp.State.Set(ctx, state)
