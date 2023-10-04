@@ -24,7 +24,10 @@ func (u *UserState) Fill(user api.UserV1) error {
 	u.Permissions = []PermissionState{}
 	for _, p := range user.Permissions {
 		var permission PermissionState
-		permission.Fill(p)
+		err := permission.Fill(p)
+		if err != nil {
+			return err
+		}
 		u.Permissions = append(u.Permissions, permission)
 	}
 
@@ -144,7 +147,7 @@ type ResourcePlan struct {
 }
 
 func (r *ResourcePlan) ToAPIValue(ctx context.Context) (api.PermissionResourceV1, diag.Diagnostics) {
-	apiLabels, diags := LabelsPlanToApiLabels(ctx, r.Labels)
+	apiLabels, diags := LabelsPlanToAPILabels(ctx, r.Labels)
 	if diags.HasError() {
 		return api.PermissionResourceV1{}, diags
 	}

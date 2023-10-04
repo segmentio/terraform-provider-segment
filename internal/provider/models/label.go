@@ -27,7 +27,7 @@ func (l *LabelState) Fill(label api.LabelV1) {
 	l.Description = types.StringPointerValue(label.Description)
 }
 
-func LabelsPlanToApiLabels(ctx context.Context, labels types.Set) ([]api.AllowedLabelBeta, diag.Diagnostics) {
+func LabelsPlanToAPILabels(ctx context.Context, labels types.Set) ([]api.AllowedLabelBeta, diag.Diagnostics) {
 	apiLabels := []api.AllowedLabelBeta{}
 
 	if !labels.IsNull() && !labels.IsUnknown() {

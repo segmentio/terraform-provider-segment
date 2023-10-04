@@ -164,7 +164,7 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	_, body, err = r.client.TrackingPlansApi.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
-		Rules: []api.RuleInputV1(replaceRules),
+		Rules: replaceRules,
 	}).Execute()
 	defer body.Body.Close()
 	if err != nil {

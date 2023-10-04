@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"io"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -164,7 +164,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	user, err := findUser(r.client, r.authContext, plan.Email.ValueString())
+	user, err := findUser(r.authContext, r.client, plan.Email.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to find user",
@@ -182,7 +182,15 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 			Permissions: apiPermissions,
 		}
 		state := models.UserState{}
-		state.Fill(*inviteUser)
+		err := state.Fill(*inviteUser)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to populate invite state",
+				err.Error(),
+			)
+
+			return
+		}
 		state.IsInvite = types.BoolValue(true)
 		diags = resp.State.Set(ctx, state)
 		resp.Diagnostics.Append(diags...)
@@ -191,7 +199,15 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 	} else { // Handle user
 		state := models.UserState{}
-		state.Fill(*user)
+		err := state.Fill(*user)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to populate user state",
+				err.Error(),
+			)
+
+			return
+		}
 		state.IsInvite = types.BoolValue(false)
 		diags = resp.State.Set(ctx, state)
 		resp.Diagnostics.Append(diags...)
@@ -212,7 +228,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	var user api.UserV1
 
 	if state.IsInvite.ValueBool() { // Handle potential invite
-		foundUser, err := findUser(r.client, r.authContext, state.Email.ValueString())
+		foundUser, err := findUser(r.authContext, r.client, state.Email.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to find user",
@@ -226,10 +242,11 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			state.IsInvite = types.BoolValue(true)
 			diags := resp.State.Set(ctx, state)
 			resp.Diagnostics.Append(diags...)
+
 			return
-		} else {
-			user = *foundUser
 		}
+
+		user = *foundUser
 	} else { // Handle user
 		out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, state.ID.ValueString()).Execute()
 		defer body.Body.Close()
@@ -246,7 +263,15 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	state = models.UserState{}
-	state.Fill(user)
+	err := state.Fill(user)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to populate user state",
+			err.Error(),
+		)
+
+		return
+	}
 	state.IsInvite = types.BoolValue(false)
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -276,10 +301,10 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	var userId string
+	var userID string
 
 	if state.IsInvite.ValueBool() { // Handle potential invite
-		foundUser, err := findUser(r.client, r.authContext, state.Email.ValueString())
+		foundUser, err := findUser(r.authContext, r.client, state.Email.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to find user",
@@ -291,6 +316,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 		if foundUser == nil { // Handle invite
 			_, body, err := r.client.IAMUsersApi.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
+			defer body.Body.Close()
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to delete user",
@@ -325,20 +351,29 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 				Permissions: permissions,
 			}
 			state := models.UserState{}
-			state.Fill(*inviteUser)
+			err = state.Fill(*inviteUser)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Unable to populate invite state",
+					err.Error(),
+				)
+
+				return
+			}
 			state.IsInvite = types.BoolValue(true)
 			diags = resp.State.Set(ctx, state)
 			resp.Diagnostics.Append(diags...)
-			return
 
-		} else { // Handle user that was previously an invite
-			userId = foundUser.Id
+			return
 		}
+
+		// Handle user that was previously an invite
+		userID = foundUser.Id
 	} else { // Handle user
-		userId = state.ID.ValueString()
+		userID = state.ID.ValueString()
 	}
 
-	_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, userId).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
+	_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, userID).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
 		Permissions: models.PermissionsToPermissionsInput(permissions),
 	}).Execute()
 	defer body.Body.Close()
@@ -351,7 +386,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, userId).Execute()
+	out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, userID).Execute()
 	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -363,7 +398,15 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	state = models.UserState{}
-	state.Fill(api.UserV1(out.Data.User))
+	err = state.Fill(api.UserV1(out.Data.User))
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to populate user state",
+			err.Error(),
+		)
+
+		return
+	}
 	state.IsInvite = types.BoolValue(false)
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -380,10 +423,10 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	var userId string
+	var userID string
 
 	if state.IsInvite.ValueBool() { // Handle potential invite
-		foundUser, err := findUser(r.client, r.authContext, state.Email.ValueString())
+		foundUser, err := findUser(r.authContext, r.client, state.Email.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to find user",
@@ -395,6 +438,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 		if foundUser == nil { // Handle invite
 			_, body, err := r.client.IAMUsersApi.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
+			defer body.Body.Close()
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to delete user",
@@ -404,19 +448,18 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 				return
 			}
 		} else {
-			userId = foundUser.Id
+			userID = foundUser.Id
 		}
 	} else { // Handle user
-		userId = state.ID.ValueString()
+		userID = state.ID.ValueString()
 	}
 
-	_, body, err := r.client.IAMUsersApi.DeleteUsers(r.authContext).UserIds([]string{userId}).Execute()
+	_, body, err := r.client.IAMUsersApi.DeleteUsers(r.authContext).UserIds([]string{userID}).Execute()
 	defer body.Body.Close()
 	if err != nil {
-		b, _ := io.ReadAll(body.Request.Body)
 		resp.Diagnostics.AddError(
 			"Unable to delete user",
-			string(b),
+			getError(err, body),
 		)
 
 		return
@@ -443,18 +486,20 @@ func (r *userResource) Configure(_ context.Context, req resource.ConfigureReques
 	r.authContext = config.authContext
 }
 
-func findUser(client *api.APIClient, authContext context.Context, email string) (*api.UserV1, error) {
+func findUser(authContext context.Context, client *api.APIClient, email string) (*api.UserV1, error) {
 	var pageToken api.NullableString
 	firstPageToken := "MA=="
 	pageToken.Set(&firstPageToken)
 
 	for pageToken.IsSet() {
-		out, _, err := client.IAMUsersApi.ListUsers(authContext).Pagination(api.PaginationInput{
+		out, body, err := client.IAMUsersApi.ListUsers(authContext).Pagination(api.PaginationInput{
 			Count:  MaxPageSize,
 			Cursor: pageToken.Get(),
 		}).Execute()
+		defer body.Body.Close()
+
 		if err != nil {
-			return nil, err
+			return nil, errors.New(getError(err, body))
 		}
 
 		users := out.Data.Users
