@@ -18,7 +18,6 @@ func TestAccUserResource(t *testing.T) {
 			w.Header().Set("content-type", "application/json")
 			var payload string
 
-			// Rules requests
 			if req.URL.Path == "/invites" && req.Method == http.MethodPost {
 				payload = `
 				{
