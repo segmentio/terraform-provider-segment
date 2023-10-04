@@ -34,21 +34,17 @@ func (u *UserState) Fill(user api.UserV1) error {
 type PermissionState struct {
 	RoleID    types.String    `tfsdk:"role_id"`
 	Resources []ResourceState `tfsdk:"resources"`
-	Labels    []LabelState    `tfsdk:"labels"`
 }
 
-func (p *PermissionState) ToAPIValue() api.InvitePermissionV1 {
+func (p *PermissionState) ToAPIValue() api.PermissionV1 {
 	labels := []api.AllowedLabelBeta{}
-	for _, label := range p.Labels {
-		labels = append(labels, label.ToAPIValue())
-	}
 
-	resources := []api.ResourceV1{}
+	resources := []api.PermissionResourceV1{}
 	for _, resource := range p.Resources {
 		resources = append(resources, resource.ToAPIValue())
 	}
 
-	return api.InvitePermissionV1{
+	return api.PermissionV1{
 		RoleId:    p.RoleID.ValueString(),
 		Resources: resources,
 		Labels:    labels,
@@ -70,21 +66,24 @@ func (p *PermissionState) Fill(permission api.PermissionV1) error {
 		p.Resources = append(p.Resources, resource)
 	}
 
-	p.Labels = []LabelState{}
-	for _, l := range permission.Labels {
-		label := LabelState{}
-		label.Fill(api.LabelV1(l))
-
-		p.Labels = append(p.Labels, label)
-	}
-
 	return nil
 }
 
-func (r *ResourceState) ToAPIValue() api.ResourceV1 {
-	return api.ResourceV1{
-		Id:   r.ID.ValueString(),
-		Type: r.Type.ValueString(),
+func (r *ResourceState) ToAPIValue() api.PermissionResourceV1 {
+	apiLabels := []api.AllowedLabelBeta{}
+
+	for _, label := range r.Labels {
+		apiLabels = append(apiLabels, label.ToAPIValue())
+	}
+
+	if len(apiLabels) == 0 {
+		apiLabels = nil
+	}
+
+	return api.PermissionResourceV1{
+		Id:     r.ID.ValueString(),
+		Type:   r.Type.ValueString(),
+		Labels: apiLabels,
 	}
 }
 
@@ -111,46 +110,30 @@ type UserPlan struct {
 type PermissionPlan struct {
 	RoleID    types.String `tfsdk:"role_id"`
 	Resources types.Set    `tfsdk:"resources"`
-	Labels    types.Set    `tfsdk:"labels"`
 }
 
-func (p *PermissionPlan) ToAPIValue(ctx context.Context) (api.InvitePermissionV1, diag.Diagnostics) {
+func (p *PermissionPlan) ToAPIValue(ctx context.Context) (api.PermissionV1, diag.Diagnostics) {
 	var outDiags diag.Diagnostics
-
-	apiLabels := []api.AllowedLabelBeta{}
-
-	if !p.Labels.IsNull() && !p.Labels.IsUnknown() {
-		labels := []LabelState{}
-		diags := p.Labels.ElementsAs(ctx, &labels, false)
-		if diags.HasError() {
-			return api.InvitePermissionV1{}, diags
-		}
-		for _, label := range labels {
-			apiLabels = append(apiLabels, label.ToAPIValue())
-		}
-	}
-	if len(apiLabels) == 0 {
-		apiLabels = nil
-	}
 
 	resources := []ResourcePlan{}
 	diags := p.Resources.ElementsAs(ctx, &resources, false)
 	outDiags.Append(diags...)
 	if outDiags.HasError() {
-		return api.InvitePermissionV1{}, outDiags
+		return api.PermissionV1{}, outDiags
 	}
-	apiResources := []api.ResourceV1{}
+	apiResources := []api.PermissionResourceV1{}
 	for _, resource := range resources {
-		apiResources = append(apiResources, resource.ToAPIValue())
-	}
-	if len(apiResources) == 0 {
-		apiResources = nil
+		apiResource, diags := resource.ToAPIValue(ctx)
+		outDiags.Append(diags...)
+		if outDiags.HasError() {
+			return api.PermissionV1{}, outDiags
+		}
+		apiResources = append(apiResources, apiResource)
 	}
 
-	return api.InvitePermissionV1{
+	return api.PermissionV1{
 		RoleId:    p.RoleID.ValueString(),
 		Resources: apiResources,
-		Labels:    apiLabels,
 	}, outDiags
 }
 
@@ -160,30 +143,36 @@ type ResourcePlan struct {
 	Labels types.Set    `tfsdk:"labels"`
 }
 
-func (r *ResourcePlan) ToAPIValue() api.ResourceV1 {
-	return api.ResourceV1{
-		Id:   r.ID.ValueString(),
-		Type: r.Type.ValueString(),
+func (r *ResourcePlan) ToAPIValue(ctx context.Context) (api.PermissionResourceV1, diag.Diagnostics) {
+	apiLabels, diags := LabelsPlanToApiLabels(ctx, r.Labels)
+	if diags.HasError() {
+		return api.PermissionResourceV1{}, diags
 	}
+
+	return api.PermissionResourceV1{
+		Id:     r.ID.ValueString(),
+		Type:   r.Type.ValueString(),
+		Labels: apiLabels,
+	}, diags
 }
 
-func GetPermissionsAPIValueFromPlan(ctx context.Context, permissions types.Set) ([]api.InvitePermissionV1, diag.Diagnostics) {
+func GetPermissionsAPIValueFromPlan(ctx context.Context, permissions types.Set) ([]api.PermissionV1, diag.Diagnostics) {
 	var outDiags diag.Diagnostics
 
 	var permissionsPlan = []PermissionPlan{}
 	diags := permissions.ElementsAs(ctx, &permissionsPlan, false)
 	outDiags.Append(diags...)
 	if outDiags.HasError() {
-		return []api.InvitePermissionV1{}, outDiags
+		return []api.PermissionV1{}, outDiags
 	}
 
-	var apiPermissions []api.InvitePermissionV1
+	var apiPermissions []api.PermissionV1
 
 	for _, permission := range permissionsPlan {
 		p, diags := permission.ToAPIValue(ctx)
 		outDiags.Append(diags...)
 		if outDiags.HasError() {
-			return []api.InvitePermissionV1{}, outDiags
+			return []api.PermissionV1{}, outDiags
 		}
 		apiPermissions = append(apiPermissions, p)
 	}
@@ -191,8 +180,8 @@ func GetPermissionsAPIValueFromPlan(ctx context.Context, permissions types.Set) 
 	return apiPermissions, outDiags
 }
 
-func GetPermissionsAPIValueFromState(permissions []PermissionState) []api.InvitePermissionV1 {
-	var apiPermissions []api.InvitePermissionV1
+func GetPermissionsAPIValueFromState(permissions []PermissionState) []api.PermissionV1 {
+	var apiPermissions []api.PermissionV1
 
 	for _, permission := range permissions {
 		apiPermissions = append(apiPermissions, permission.ToAPIValue())
@@ -201,18 +190,18 @@ func GetPermissionsAPIValueFromState(permissions []PermissionState) []api.Invite
 	return apiPermissions
 }
 
-func InvitePermissionsToPermissions(permissions []api.InvitePermissionV1) []api.PermissionV1 {
-	var apiPermissions []api.PermissionV1
+func PermissionsToInvitePermissions(permissions []api.PermissionV1) []api.InvitePermissionV1 {
+	var apiPermissions []api.InvitePermissionV1
 
 	for _, permission := range permissions {
-		resources := []api.PermissionResourceV1{}
+		resources := []api.ResourceV1{}
 		for _, resource := range permission.Resources {
-			resources = append(resources, api.PermissionResourceV1{
+			resources = append(resources, api.ResourceV1{
 				Id:   resource.Id,
 				Type: resource.Type,
 			})
 		}
-		apiPermissions = append(apiPermissions, api.PermissionV1{
+		apiPermissions = append(apiPermissions, api.InvitePermissionV1{
 			RoleId:    permission.RoleId,
 			Resources: resources,
 			Labels:    permission.Labels,
@@ -222,15 +211,16 @@ func InvitePermissionsToPermissions(permissions []api.InvitePermissionV1) []api.
 	return apiPermissions
 }
 
-func InvitePermissionsToPermissionsInput(permissions []api.InvitePermissionV1) []api.PermissionInputV1 {
+func PermissionsToPermissionsInput(permissions []api.PermissionV1) []api.PermissionInputV1 {
 	var apiPermissions []api.PermissionInputV1
 
 	for _, permission := range permissions {
 		resources := []api.PermissionResourceV1{}
 		for _, resource := range permission.Resources {
 			resources = append(resources, api.PermissionResourceV1{
-				Id:   resource.Id,
-				Type: resource.Type,
+				Id:     resource.Id,
+				Type:   resource.Type,
+				Labels: resource.Labels,
 			})
 		}
 		apiPermissions = append(apiPermissions, api.PermissionInputV1{

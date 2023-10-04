@@ -45,7 +45,6 @@ func (r *labelResource) ImportState(ctx context.Context, req resource.ImportStat
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("key"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("value"), idParts[1])...)
 }
@@ -58,10 +57,6 @@ func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 	resp.Schema = schema.Schema{
 		Description: "A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed:    true,
-				Description: "The unique identifier for this label.",
-			},
 			"key": schema.StringAttribute{
 				Description: "The key that represents the name of this label.",
 				Required:    true,
@@ -89,7 +84,7 @@ func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 
 func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan models.LabelResourceState
+	var plan models.LabelState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -120,11 +115,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	outLabel := out.Data.Label
 	plan.Key = types.StringValue(outLabel.Key)
 	plan.Value = types.StringValue(outLabel.Value)
-	plan.ID = types.StringValue(id(outLabel.Key, outLabel.Value))
-
-	if outLabel.Description != nil {
-		plan.Description = types.StringValue(*outLabel.Description)
-	}
+	plan.Description = types.StringPointerValue(outLabel.Description)
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -135,7 +126,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 }
 
 func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state models.LabelResourceState
+	var state models.LabelState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -164,10 +155,10 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	state.Key = types.StringValue(label.Key)
 	state.Value = types.StringValue(label.Value)
-	if label.Description != nil {
-		state.Description = types.StringValue(*label.Description)
+	if label.Description != nil && *label.Description == "" {
+		label.Description = nil
 	}
-	state.ID = types.StringValue(id(label.Key, label.Value))
+	state.Description = types.StringPointerValue(label.Description)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -183,7 +174,7 @@ func (r *labelResource) Update(context.Context, resource.UpdateRequest, *resourc
 
 func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state models.LabelResourceState
+	var state models.LabelState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -220,8 +211,4 @@ func (r *labelResource) Configure(_ context.Context, req resource.ConfigureReque
 
 	r.client = config.client
 	r.authContext = config.authContext
-}
-
-func id(key, value string) string {
-	return fmt.Sprintf("%s:%s", key, value)
 }

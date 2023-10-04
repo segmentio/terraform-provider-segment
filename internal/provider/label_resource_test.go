@@ -68,7 +68,6 @@ resource "segment_label" "test" {
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("segment_label.test", "id", "environment:dev"),
 					resource.TestCheckResourceAttr("segment_label.test", "key", "environment"),
 					resource.TestCheckResourceAttr("segment_label.test", "value", "dev"),
 					resource.TestCheckResourceAttr("segment_label.test", "description", "dev environment"),
@@ -76,10 +75,10 @@ resource "segment_label" "test" {
 			},
 			// ImportState testing
 			{
-				ResourceName:      "segment_label.test",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateId:     "environment:dev",
+				ResourceName:                         "segment_label.test",
+				ImportState:                          true,
+				ImportStateVerifyIdentifierAttribute: "key",
+				ImportStateId:                        "environment:dev",
 			},
 		},
 	})

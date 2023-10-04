@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -41,6 +39,7 @@ type userResource struct {
 
 func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("is_invite"), false)...)
 }
 
 func (r *userResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -49,21 +48,15 @@ func (r *userResource) Metadata(_ context.Context, req resource.MetadataRequest,
 
 func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "A user or invite belonging to a Segment Workspace.",
+		Description: "A user or invite belonging to a Segment Workspace. Only users may be imported",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The unique identifier for this user, or the user's email if the invite has not been accepted.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"name": schema.StringAttribute{
 				Description: "The human-readable name of this user, or the user's email if the invite has not been accepted.",
 				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"email": schema.StringAttribute{
 				Description: "The email address associated with this user.",
@@ -75,12 +68,9 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"is_invite": schema.BoolAttribute{
 				Description: "Whether or not this user is an invite.",
 				Computed:    true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"permissions": schema.SetNestedAttribute{
-				Description: "The permissions associated with this user.",
+				Description: "The permissions associated with this user. This field is currently limited to 200 items.",
 				Required:    true,
 				Validators: []validator.Set{
 					setvalidator.SizeAtMost(MaxPageSize),
@@ -92,7 +82,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 							Required:    true,
 						},
 						"resources": schema.SetNestedAttribute{
-							Description: "The resources associated with this permission.",
+							Description: "The resources associated with this permission. This field is currently limited to 200 items.",
 							Optional:    true,
 							Validators: []validator.Set{
 								setvalidator.SizeAtMost(MaxPageSize),
@@ -107,14 +97,14 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 										Description: "The type for this resource.",
 										Required:    true,
 										Validators: []validator.String{
-											stringvalidator.RegexMatches(regexp.MustCompile("^[A-Z]+$"), "value must be in all caps"),
+											stringvalidator.RegexMatches(regexp.MustCompile("^[A-Z]+$"), "'type' must be in all uppercase"),
 										},
 									},
 									"labels": schema.SetNestedAttribute{
-										Description: "The labels that further refine access to this resource. Labels are exclusive to Workspace-level permissions.",
-										Computed:    true,
-										PlanModifiers: []planmodifier.Set{
-											setplanmodifier.UseStateForUnknown(),
+										Description: "The labels that further refine access to this resource. Labels are exclusive to Workspace-level permissions. This field is currently limited to 200 items.",
+										Required:    true,
+										Validators: []validator.Set{
+											setvalidator.SizeAtMost(MaxPageSize),
 										},
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
@@ -132,29 +122,6 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 												},
 											},
 										},
-									},
-								},
-							},
-						},
-						"labels": schema.SetNestedAttribute{
-							Description: "The labels to attach to this permission.",
-							Required:    true,
-							Validators: []validator.Set{
-								setvalidator.SizeAtMost(MaxPageSize),
-							},
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"key": schema.StringAttribute{
-										Description: "The key that represents the name of this label.",
-										Required:    true,
-									},
-									"value": schema.StringAttribute{
-										Description: "The value associated with the key of this label.",
-										Required:    true,
-									},
-									"description": schema.StringAttribute{
-										Description: "An optional description of the purpose of this label.",
-										Computed:    true,
 									},
 								},
 							},
@@ -183,7 +150,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		Invites: []api.InviteV1{
 			{
 				Email:       plan.Email.ValueString(),
-				Permissions: apiPermissions,
+				Permissions: models.PermissionsToInvitePermissions(apiPermissions),
 			},
 		},
 	}).Execute()
@@ -212,7 +179,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 			Email:       plan.Email.ValueString(),
 			Id:          plan.Email.ValueString(),
 			Name:        plan.Email.ValueString(),
-			Permissions: models.InvitePermissionsToPermissions(apiPermissions),
+			Permissions: apiPermissions,
 		}
 		state := models.UserState{}
 		state.Fill(*inviteUser)
@@ -337,7 +304,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 				Invites: []api.InviteV1{
 					{
 						Email:       plan.Email.ValueString(),
-						Permissions: permissions,
+						Permissions: models.PermissionsToInvitePermissions(permissions),
 					},
 				},
 			}).Execute()
@@ -355,7 +322,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 				Email:       plan.Email.ValueString(),
 				Id:          plan.Email.ValueString(),
 				Name:        plan.Email.ValueString(),
-				Permissions: models.InvitePermissionsToPermissions(permissions),
+				Permissions: permissions,
 			}
 			state := models.UserState{}
 			state.Fill(*inviteUser)
@@ -372,7 +339,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, userId).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
-		Permissions: models.InvitePermissionsToPermissionsInput(permissions),
+		Permissions: models.PermissionsToPermissionsInput(permissions),
 	}).Execute()
 	defer body.Body.Close()
 	if err != nil {

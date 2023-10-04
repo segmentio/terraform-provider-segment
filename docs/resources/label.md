@@ -32,7 +32,3 @@ resource "segment_label" "dev" {
 ### Optional
 
 - `description` (String) An optional description of the purpose of this label.
-
-### Read-Only
-
-- `id` (String) The unique identifier for this label.
