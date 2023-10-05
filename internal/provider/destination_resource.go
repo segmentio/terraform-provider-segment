@@ -537,7 +537,9 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 
 	// Generate API request body from plan
 	out, body, err := r.client.DestinationsApi.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Destination",
@@ -581,7 +583,9 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	out, body, err := r.client.DestinationsApi.GetDestination(r.authContext, previousState.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Destination",
@@ -641,7 +645,9 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 
 	// Generate API request body from plan
 	out, body, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Destination",
@@ -686,7 +692,9 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	_, body, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting Destination", "Could not delete Destination, unexpected error: "+getError(err, body),

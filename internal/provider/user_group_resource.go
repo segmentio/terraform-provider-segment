@@ -51,12 +51,16 @@ func (r *userGroupResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Required:    true,
 				Description: "A list of emails that are members of this user group.",
 				ElementType: types.StringType,
+				Validators: []validator.Set{
+					setvalidator.SizeAtMost(MaxPageSize),
+				},
 			},
 			"permissions": schema.SetNestedAttribute{
-				Description: "The permissions associated with this user. This field is currently limited to 200 items.",
+				Description: "The permissions associated with this user. This field is currently limited to 200 items and must not be empty.",
 				Required:    true,
 				Validators: []validator.Set{
 					setvalidator.SizeAtMost(MaxPageSize),
+					setvalidator.SizeAtLeast(1),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -127,7 +131,9 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 	out, body, err := r.client.IAMGroupsApi.CreateUserGroup(r.authContext).CreateUserGroupV1Input(api.CreateUserGroupV1Input{
 		Name: plan.Name.ValueString(),
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create User Group",
@@ -136,6 +142,8 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 
 		return
 	}
+
+	resp.State.SetAttribute(ctx, path.Root("id"), types.StringValue(out.Data.GetUserGroup().Id))
 
 	userGroup := out.Data.GetUserGroup()
 
@@ -148,7 +156,9 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 	_, body, err = r.client.IAMGroupsApi.ReplacePermissionsForUserGroup(r.authContext, userGroup.Id).ReplacePermissionsForUserGroupV1Input(api.ReplacePermissionsForUserGroupV1Input{
 		Permissions: models.PermissionsToPermissionsInput(permissions),
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to add User Group permissions",
@@ -165,7 +175,9 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 	_, body, err = r.client.IAMGroupsApi.AddUsersToUserGroup(r.authContext, userGroup.Id).AddUsersToUserGroupV1Input(api.AddUsersToUserGroupV1Input{
 		Emails: members,
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to add users/invites to User Group",
@@ -176,7 +188,9 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	getOut, body, err := r.client.IAMGroupsApi.GetUserGroup(r.authContext, userGroup.Id).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get User Group",
@@ -215,7 +229,9 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	out, body, err := r.client.IAMGroupsApi.GetUserGroup(r.authContext, config.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read User Group",
@@ -226,8 +242,10 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	userGroup := out.Data.GetUserGroup()
 
-	usersOut, body, err := r.client.IAMGroupsApi.ListUsersFromUserGroup(r.authContext, config.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	usersOut, body, err := r.client.IAMGroupsApi.ListUsersFromUserGroup(r.authContext, config.ID.ValueString()).Pagination(api.PaginationInput{Count: MaxPageSize}).Execute()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read User Group members",
@@ -237,8 +255,10 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	invitesOut, body, err := r.client.IAMGroupsApi.ListInvitesFromUserGroup(r.authContext, config.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	invitesOut, body, err := r.client.IAMGroupsApi.ListInvitesFromUserGroup(r.authContext, config.ID.ValueString()).Pagination(api.PaginationInput{Count: MaxPageSize}).Execute()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read User Group members",
@@ -290,7 +310,9 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	_, body, err := r.client.IAMGroupsApi.UpdateUserGroup(r.authContext, config.ID.ValueString()).UpdateUserGroupV1Input(api.UpdateUserGroupV1Input{
 		Name: plan.Name.ValueString(),
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update User Group",
@@ -309,7 +331,9 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	_, body, err = r.client.IAMGroupsApi.ReplacePermissionsForUserGroup(r.authContext, config.ID.ValueString()).ReplacePermissionsForUserGroupV1Input(api.ReplacePermissionsForUserGroupV1Input{
 		Permissions: models.PermissionsToPermissionsInput(permissions),
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to add User Group permissions",
@@ -323,10 +347,12 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	for _, member := range plan.Members {
 		members = append(members, member.ValueString())
 	}
-	_, body, err = r.client.IAMGroupsApi.AddUsersToUserGroup(r.authContext, config.ID.ValueString()).AddUsersToUserGroupV1Input(api.AddUsersToUserGroupV1Input{
+	_, body, err = r.client.IAMGroupsApi.ReplaceUsersInUserGroup(r.authContext, config.ID.ValueString()).ReplaceUsersInUserGroupV1Input(api.ReplaceUsersInUserGroupV1Input{
 		Emails: members,
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to add users/invites to User Group",
@@ -337,7 +363,9 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	getOut, body, err := r.client.IAMGroupsApi.GetUserGroup(r.authContext, config.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get User Group",
@@ -375,7 +403,9 @@ func (r *userGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	_, body, err := r.client.IAMGroupsApi.DeleteUserGroup(r.authContext, config.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete User Group",
