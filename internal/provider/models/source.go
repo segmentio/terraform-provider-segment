@@ -32,12 +32,6 @@ type SourceState struct {
 	Settings    jsontypes.Normalized `tfsdk:"settings"`
 }
 
-type LabelState struct {
-	Description types.String `tfsdk:"description"`
-	Key         types.String `tfsdk:"key"`
-	Value       types.String `tfsdk:"value"`
-}
-
 func (s *SourceState) Fill(source api.Source4) error {
 	s.ID = types.StringValue(source.Id)
 	if source.Name != nil {
@@ -66,14 +60,8 @@ func (s *SourceState) getLabels(labels []api.LabelV1) []LabelState {
 	var labelsToAdd []LabelState
 
 	for _, label := range labels {
-		labelToAdd := LabelState{
-			Key:   types.StringValue(label.Key),
-			Value: types.StringValue(label.Value),
-		}
-
-		if label.Description != nil {
-			labelToAdd.Description = types.StringValue(*label.Description)
-		}
+		labelToAdd := LabelState{}
+		labelToAdd.Fill(label)
 
 		labelsToAdd = append(labelsToAdd, labelToAdd)
 	}

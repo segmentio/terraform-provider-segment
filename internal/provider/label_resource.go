@@ -12,34 +12,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
-// Ensure the implementation satisfies the expected interfaces.
 var (
 	_ resource.Resource                = &labelResource{}
 	_ resource.ResourceWithConfigure   = &labelResource{}
 	_ resource.ResourceWithImportState = &labelResource{}
 )
 
-// NewLabelResource is a helper function to simplify the provider implementation.
 func NewLabelResource() resource.Resource {
 	return &labelResource{}
 }
 
-// labelResource is the resource implementation.
 type labelResource struct {
 	client      *api.APIClient
 	authContext context.Context
-}
-
-type labelResourceModel struct {
-	ID          types.String `tfsdk:"id"`
-	Key         types.String `tfsdk:"key"`
-	Value       types.String `tfsdk:"value"`
-	Description types.String `tfsdk:"description"`
 }
 
 func (r *labelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -54,25 +45,18 @@ func (r *labelResource) ImportState(ctx context.Context, req resource.ImportStat
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("key"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("value"), idParts[1])...)
 }
 
-// Metadata returns the resource type name.
 func (r *labelResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_label"
 }
 
-// Schema defines the schema for the resource.
 func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed:    true,
-				Description: "The unique identifier for this label.",
-			},
 			"key": schema.StringAttribute{
 				Description: "The key that represents the name of this label.",
 				Required:    true,
@@ -98,10 +82,9 @@ func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 	}
 }
 
-// Create creates the resource and sets the initial Terraform state.
 func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan labelResourceModel
+	var plan models.LabelState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -122,7 +105,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create a label",
+			"Unable to create a label",
 			getError(err, body),
 		)
 
@@ -132,11 +115,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	outLabel := out.Data.Label
 	plan.Key = types.StringValue(outLabel.Key)
 	plan.Value = types.StringValue(outLabel.Value)
-	plan.ID = types.StringValue(id(outLabel.Key, outLabel.Value))
-
-	if outLabel.Description != nil {
-		plan.Description = types.StringValue(*outLabel.Description)
-	}
+	plan.Description = types.StringPointerValue(outLabel.Description)
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -146,9 +125,8 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 }
 
-// Read refreshes the Terraform state with the latest data.
 func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state labelResourceModel
+	var state models.LabelState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -159,7 +137,7 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Labels",
+			"Unable to read Labels",
 			getError(err, body),
 		)
 
@@ -177,10 +155,10 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	state.Key = types.StringValue(label.Key)
 	state.Value = types.StringValue(label.Value)
-	if label.Description != nil {
-		state.Description = types.StringValue(*label.Description)
+	if label.Description != nil && *label.Description == "" {
+		label.Description = nil
 	}
-	state.ID = types.StringValue(id(label.Key, label.Value))
+	state.Description = types.StringPointerValue(label.Description)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -189,16 +167,14 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 }
 
-// Update updates the resource and sets the updated Terraform state on success.
 func (r *labelResource) Update(context.Context, resource.UpdateRequest, *resource.UpdateResponse) {
 	// Label does not have an update functionality, so added RequiresReplace to each attribute that can be configurable.
 	// reference: https://developer.hashicorp.com/terraform/plugin/framework/resources/update#caveats
 }
 
-// Delete deletes the resource and removes the Terraform state on success.
 func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state labelResourceModel
+	var state models.LabelState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -209,14 +185,14 @@ func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	defer body.Body.Close()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Deleting a Label", "Could not delete a label, unexpected error: "+getError(err, body),
+			"Unable to delete Label",
+			getError(err, body),
 		)
 
 		return
 	}
 }
 
-// Configure adds the provider configured client to the resource.
 func (r *labelResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -227,7 +203,7 @@ func (r *labelResource) Configure(_ context.Context, req resource.ConfigureReque
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected ClientInfo, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -235,8 +211,4 @@ func (r *labelResource) Configure(_ context.Context, req resource.ConfigureReque
 
 	r.client = config.client
 	r.authContext = config.authContext
-}
-
-func id(key, value string) string {
-	return fmt.Sprintf("%s:%s", key, value)
 }

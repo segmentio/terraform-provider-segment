@@ -11,7 +11,6 @@ import (
 
 func TestAccRoleDataSource(t *testing.T) {
 	t.Parallel()
-	regex, _ := regexp.Compile("role not found")
 
 	t.Run("happy path", func(t *testing.T) {
 		t.Parallel()
@@ -103,7 +102,7 @@ func TestAccRoleDataSource(t *testing.T) {
 				// Read testing
 				{
 					Config:      providerConfig + `data "segment_role" "test" { id = "my-role-id-3" }`,
-					ExpectError: regex,
+					ExpectError: regexp.MustCompile("role not found"),
 				},
 			},
 		})
