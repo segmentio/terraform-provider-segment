@@ -3,12 +3,12 @@
 page_title: "segment_user Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  A user or invite belonging to a Segment Workspace. Only users may be imported
+  A user or invite belonging to a Segment Workspace. Only users may be imported.
 ---
 
 # segment_user (Resource)
 
-A user or invite belonging to a Segment Workspace. Only users may be imported
+A user or invite belonging to a Segment Workspace. Only users may be imported.
 
 ## Example Usage
 
