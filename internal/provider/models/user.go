@@ -34,6 +34,31 @@ func (u *UserState) Fill(user api.UserV1) error {
 	return nil
 }
 
+type UserDataSourceState struct {
+	ID          types.String      `tfsdk:"id"`
+	Name        types.String      `tfsdk:"name"`
+	Email       types.String      `tfsdk:"email"`
+	Permissions []PermissionState `tfsdk:"permissions"`
+}
+
+func (u *UserDataSourceState) Fill(user api.UserV1) error {
+	u.ID = types.StringValue(user.Id)
+	u.Name = types.StringValue(user.Name)
+	u.Email = types.StringValue(user.Email)
+
+	u.Permissions = []PermissionState{}
+	for _, p := range user.Permissions {
+		var permission PermissionState
+		err := permission.Fill(p)
+		if err != nil {
+			return err
+		}
+		u.Permissions = append(u.Permissions, permission)
+	}
+
+	return nil
+}
+
 type PermissionState struct {
 	RoleID    types.String    `tfsdk:"role_id"`
 	Resources []ResourceState `tfsdk:"resources"`
