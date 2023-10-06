@@ -55,7 +55,9 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	response, body, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, id).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source metadata",

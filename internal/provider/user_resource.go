@@ -154,7 +154,9 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 			},
 		},
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to invite user",
@@ -249,7 +251,9 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		user = *foundUser
 	} else { // Handle user
 		out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, state.ID.ValueString()).Execute()
-		defer body.Body.Close()
+		if body != nil {
+			defer body.Body.Close()
+		}
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to read user",
@@ -316,7 +320,9 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 		if foundUser == nil { // Handle invite
 			_, body, err := r.client.IAMUsersApi.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
-			defer body.Body.Close()
+			if body != nil {
+				defer body.Body.Close()
+			}
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to delete user",
@@ -334,7 +340,9 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 					},
 				},
 			}).Execute()
-			defer body.Body.Close()
+			if body != nil {
+				defer body.Body.Close()
+			}
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to invite user",
@@ -376,7 +384,9 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, userID).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
 		Permissions: models.PermissionsToPermissionsInput(permissions),
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update user",
@@ -387,7 +397,9 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, userID).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read user",
@@ -438,7 +450,9 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 		if foundUser == nil { // Handle invite
 			_, body, err := r.client.IAMUsersApi.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
-			defer body.Body.Close()
+			if body != nil {
+				defer body.Body.Close()
+			}
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to delete user",
@@ -455,7 +469,9 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	}
 
 	_, body, err := r.client.IAMUsersApi.DeleteUsers(r.authContext).UserIds([]string{userID}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete user",
@@ -496,7 +512,9 @@ func findUser(authContext context.Context, client *api.APIClient, email string) 
 			Count:  MaxPageSize,
 			Cursor: pageToken.Get(),
 		}).Execute()
-		defer body.Body.Close()
+		if body != nil {
+			defer body.Body.Close()
+		}
 
 		if err != nil {
 			return nil, errors.New(getError(err, body))

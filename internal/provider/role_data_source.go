@@ -84,7 +84,9 @@ func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	out, body, err := d.client.IAMRolesApi.ListRoles(d.authContext).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Role",

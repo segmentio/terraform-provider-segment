@@ -206,7 +206,9 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	out, body, err := d.client.SourcesApi.GetSource(d.authContext, id).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Source",

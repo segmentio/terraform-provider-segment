@@ -224,7 +224,9 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 		Settings:   *api.NewNullableModelMap(modelMap),
 		Name:       name,
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Warehouse",
@@ -276,7 +278,9 @@ func (r *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	response, body, err := r.client.WarehousesApi.GetWarehouse(r.authContext, previousState.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Warehouse",
@@ -336,7 +340,9 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 
 	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
 	existingWarehouse, body, err := r.client.WarehousesApi.GetWarehouse(r.authContext, state.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Warehouse",
@@ -358,7 +364,9 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 		Settings: *api.NewNullableModelMap(modelMap),
 		Name:     *api.NewNullableString(plan.Name.ValueStringPointer()),
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Warehouse",
@@ -399,7 +407,9 @@ func (r *warehouseResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	_, body, err := r.client.WarehousesApi.DeleteWarehouse(r.authContext, config.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Warehouse",

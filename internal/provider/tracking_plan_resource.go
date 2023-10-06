@@ -128,7 +128,9 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 		Type:        plan.Type.ValueString(),
 		Description: description,
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Tracking Plan",
@@ -166,7 +168,9 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 	_, body, err = r.client.TrackingPlansApi.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
 		Rules: replaceRules,
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Tracking Plan rules",
@@ -211,7 +215,9 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	out, body, err := r.client.TrackingPlansApi.GetTrackingPlan(r.authContext, id).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",
@@ -240,7 +246,9 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 		state.Rules = rules
 	} else {
 		out, body, err := r.client.TrackingPlansApi.ListRulesFromTrackingPlan(r.authContext, id).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
-		defer body.Body.Close()
+		if body != nil {
+			defer body.Body.Close()
+		}
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to get Tracking Plan rules",
@@ -298,7 +306,9 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 		Name:        name,
 		Description: description,
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Tracking Plan",
@@ -309,7 +319,9 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	out, body, err := r.client.TrackingPlansApi.GetTrackingPlan(r.authContext, config.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Tracking Plan",
@@ -347,7 +359,9 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	_, body, err = r.client.TrackingPlansApi.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
 		Rules: replaceRules,
 	}).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create Tracking Plan rules",
@@ -384,7 +398,9 @@ func (r *trackingPlanResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 
 	_, body, err := r.client.TrackingPlansApi.DeleteTrackingPlan(r.authContext, config.ID.ValueString()).Execute()
-	defer body.Body.Close()
+	if body != nil {
+		defer body.Body.Close()
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to delete Tracking Plan",
