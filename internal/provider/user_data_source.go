@@ -137,7 +137,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read User",
+			"Unable to read user",
 			getError(err, body),
 		)
 
