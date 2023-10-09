@@ -205,11 +205,11 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"key": schema.StringAttribute{
-							Computed:    true,
+							Required:    true,
 							Description: "The key that represents the name of this label.",
 						},
 						"value": schema.StringAttribute{
-							Computed:    true,
+							Required:    true,
 							Description: "The value associated with the key of this label.",
 						},
 						"description": schema.StringAttribute{
@@ -298,6 +298,31 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 
 		source.Name = updateOut.Data.Source.Name
+	}
+
+	labels, diags := models.LabelsPlanToAPILabels(ctx, plan.Labels)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if len(labels) > 0 {
+		_, body, err := r.client.SourcesApi.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
+			Labels: models.APILabelsToLabelsV1(labels),
+		}).Execute()
+		if body != nil {
+			defer body.Body.Close()
+		}
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to replace Source labels",
+				getError(err, body),
+			)
+
+			return
+		}
+
+		source.Labels = models.APILabelsToLabelsV1(labels)
 	}
 
 	var state models.SourceState
@@ -438,6 +463,30 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	source := out.Data.Source
+
+	labels, diags := models.LabelsPlanToAPILabels(ctx, plan.Labels)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if len(labels) > 0 {
+		_, body, err := r.client.SourcesApi.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
+			Labels: models.APILabelsToLabelsV1(labels),
+		}).Execute()
+		if body != nil {
+			defer body.Body.Close()
+		}
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to replace Source labels",
+				getError(err, body),
+			)
+
+			return
+		}
+
+		source.Labels = models.APILabelsToLabelsV1(labels)
+	}
 
 	err = state.Fill(api.Source4(source))
 	if err != nil {

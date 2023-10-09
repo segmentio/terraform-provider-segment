@@ -9,4 +9,10 @@ resource "segment_source" "my_source" {
   settings = jsonencode({
     "token" : "xyz321",
   })
+  labels = [
+    {
+      key   = "env"
+      value = "dev"
+    },
+  ]
 }

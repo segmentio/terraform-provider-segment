@@ -44,6 +44,14 @@ func LabelsPlanToAPILabels(ctx context.Context, labels types.Set) ([]api.Allowed
 	return apiLabels, diag.Diagnostics{}
 }
 
+func APILabelsToLabelsV1(labels []api.AllowedLabelBeta) []api.LabelV1 {
+	outLabels := []api.LabelV1{}
+	for _, label := range labels {
+		outLabels = append(outLabels, api.LabelV1(label))
+	}
+	return outLabels
+}
+
 type LabelAssignmentState struct {
 	ResourceID   types.String `tfsdk:"resource_id"`
 	ResourceType types.String `tfsdk:"resource_type"`

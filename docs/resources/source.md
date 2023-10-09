@@ -24,6 +24,12 @@ resource "segment_source" "my_source" {
   settings = jsonencode({
     "token" : "xyz321",
   })
+  labels = [
+    {
+      key   = "env"
+      value = "dev"
+    },
+  ]
 }
 ```
 
@@ -39,12 +45,12 @@ resource "segment_source" "my_source" {
 
 ### Optional
 
+- `labels` (Attributes Set) A list of labels applied to the Source. (see [below for nested schema](#nestedatt--labels))
 - `name` (String) The name of the Source.
 
 ### Read-Only
 
 - `id` (String) The id of the Source.
-- `labels` (Attributes List) A list of labels applied to the Source. (see [below for nested schema](#nestedatt--labels))
 - `workspace_id` (String) The id of the Workspace that owns the Source.
 - `write_keys` (List of String) The write keys used to send data from the Source. This field is left empty when the current token does not have the 'source admin' permission.
 
@@ -92,8 +98,11 @@ Read-Only:
 <a id="nestedatt--labels"></a>
 ### Nested Schema for `labels`
 
+Required:
+
+- `key` (String) The key that represents the name of this label.
+- `value` (String) The value associated with the key of this label.
+
 Read-Only:
 
 - `description` (String) An optional description of the purpose of this label.
-- `key` (String) The key that represents the name of this label.
-- `value` (String) The value associated with the key of this label.
