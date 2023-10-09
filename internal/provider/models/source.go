@@ -11,7 +11,7 @@ import (
 type SourcePlan struct {
 	Enabled     types.Bool           `tfsdk:"enabled"`
 	ID          types.String         `tfsdk:"id"`
-	Labels      types.List           `tfsdk:"labels"`
+	Labels      types.Set            `tfsdk:"labels"`
 	Metadata    types.Object         `tfsdk:"metadata"`
 	Name        types.String         `tfsdk:"name"`
 	Slug        types.String         `tfsdk:"slug"`

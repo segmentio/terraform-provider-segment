@@ -16,7 +16,9 @@ func TestAccSourceResource(t *testing.T) {
 		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			w.Header().Set("content-type", "application/json")
 
-			payload := `
+			payload := ""
+			if req.URL.Path == "/sources" && req.Method == http.MethodPost {
+				payload = `
 				{
 					"data": {
 						"source": {
@@ -62,58 +64,199 @@ func TestAccSourceResource(t *testing.T) {
 					}
 				}
 			`
-
-			// After we update the source, return the updated source for subsequent calls (first update is part of the create call)
-			if req.Method == http.MethodPatch {
-				updated++
-			}
-			if updated > 1 {
-				payload = `
-				{
-					"data": {
-						"source": {
-							"id": "my-source-id",
-							"slug": "my-new-source-slug",
-							"name": "My new source name",
-							"workspaceId": "my-workspace-id",
-							"enabled": false,
-							"writeKeys": ["my-write-key"],
-							"metadata": {
-								"id": "my-metadata-id",
-								"slug": "my-metadata-slug",
-								"name": "My metadata name",
-								"categories": ["my-category"],
-								"description": "My metadata description",
-								"logos": {
-									"default": "https://example.segment.com/image.png",
-									"alt": "https://example.segment.com/image.png",
-									"mark": "https://example.segment.com/image.png"
-								},
-								"options": [
-									{
-										"name": "sid",
-										"required": true,
-										"type": "string",
-										"defaultValue": "",
-										"description": "Your Segment SID",
-										"defaultValue": "default-sid"
-									}
-								],
-								"isCloudEventSource": false
-							},
-							"settings": {
-								"myKey": "myOtherValue"
-							},
-							"labels": [
-								{
-									"key": "my-label-key",
-									"value": "my-label-value"
+			} else if req.URL.Path == "/sources/my-source-id" && req.Method == http.MethodGet {
+				if updated <= 1 {
+					payload = `
+						{
+							"data": {
+								"source": {
+									"id": "my-source-id",
+									"slug": "my-source-slug",
+									"name": "My source name",
+									"workspaceId": "my-workspace-id",
+									"enabled": true,
+									"writeKeys": ["my-write-key"],
+									"metadata": {
+										"id": "my-metadata-id",
+										"slug": "my-metadata-slug",
+										"name": "My metadata name",
+										"categories": ["my-category"],
+										"description": "My metadata description",
+										"logos": {
+											"default": "https://example.segment.com/image.png",
+											"alt": "https://example.segment.com/image.png",
+											"mark": "https://example.segment.com/image.png"
+										},
+										"options": [
+											{
+												"name": "sid",
+												"required": true,
+												"type": "string",
+												"defaultValue": "",
+												"description": "Your Segment SID",
+												"defaultValue": "default-sid"
+											}
+										],
+										"isCloudEventSource": false
+									},
+									"settings": {
+										"myKey": "myValue"
+									},
+									"labels": [
+										{
+											"key": "my-label-key",
+											"value": "my-label-value"
+										}
+									]
 								}
-							]
+							}
+						}
+					`
+				} else {
+					payload = `
+					{
+						"data": {
+							"source": {
+								"id": "my-source-id",
+								"slug": "my-new-source-slug",
+								"name": "My new source name",
+								"workspaceId": "my-workspace-id",
+								"enabled": false,
+								"writeKeys": ["my-write-key"],
+								"metadata": {
+									"id": "my-metadata-id",
+									"slug": "my-metadata-slug",
+									"name": "My metadata name",
+									"categories": ["my-category"],
+									"description": "My metadata description",
+									"logos": {
+										"default": "https://example.segment.com/image.png",
+										"alt": "https://example.segment.com/image.png",
+										"mark": "https://example.segment.com/image.png"
+									},
+									"options": [
+										{
+											"name": "sid",
+											"required": true,
+											"type": "string",
+											"defaultValue": "",
+											"description": "Your Segment SID",
+											"defaultValue": "default-sid"
+										}
+									],
+									"isCloudEventSource": false
+								},
+								"settings": {
+									"myKey": "myOtherValue"
+								},
+								"labels": [
+									{
+										"key": "my-label-key",
+										"value": "my-label-value"
+									}
+								]
+							}
 						}
 					}
+				`
 				}
-			`
+			} else if req.URL.Path == "/sources/my-source-id" && req.Method == http.MethodPatch {
+				updated++
+				if updated <= 1 {
+					payload = `
+						{
+							"data": {
+								"source": {
+									"id": "my-source-id",
+									"slug": "my-source-slug",
+									"name": "My source name",
+									"workspaceId": "my-workspace-id",
+									"enabled": true,
+									"writeKeys": ["my-write-key"],
+									"metadata": {
+										"id": "my-metadata-id",
+										"slug": "my-metadata-slug",
+										"name": "My metadata name",
+										"categories": ["my-category"],
+										"description": "My metadata description",
+										"logos": {
+											"default": "https://example.segment.com/image.png",
+											"alt": "https://example.segment.com/image.png",
+											"mark": "https://example.segment.com/image.png"
+										},
+										"options": [
+											{
+												"name": "sid",
+												"required": true,
+												"type": "string",
+												"defaultValue": "",
+												"description": "Your Segment SID",
+												"defaultValue": "default-sid"
+											}
+										],
+										"isCloudEventSource": false
+									},
+									"settings": {
+										"myKey": "myValue"
+									},
+									"labels": [
+										{
+											"key": "my-label-key",
+											"value": "my-label-value"
+										}
+									]
+								}
+							}
+						}
+					`
+				} else {
+					payload = `
+					{
+						"data": {
+							"source": {
+								"id": "my-source-id",
+								"slug": "my-new-source-slug",
+								"name": "My new source name",
+								"workspaceId": "my-workspace-id",
+								"enabled": false,
+								"writeKeys": ["my-write-key"],
+								"metadata": {
+									"id": "my-metadata-id",
+									"slug": "my-metadata-slug",
+									"name": "My metadata name",
+									"categories": ["my-category"],
+									"description": "My metadata description",
+									"logos": {
+										"default": "https://example.segment.com/image.png",
+										"alt": "https://example.segment.com/image.png",
+										"mark": "https://example.segment.com/image.png"
+									},
+									"options": [
+										{
+											"name": "sid",
+											"required": true,
+											"type": "string",
+											"defaultValue": "",
+											"description": "Your Segment SID",
+											"defaultValue": "default-sid"
+										}
+									],
+									"isCloudEventSource": false
+								},
+								"settings": {
+									"myKey": "myOtherValue"
+								},
+								"labels": [
+									{
+										"key": "my-label-key",
+										"value": "my-label-value"
+									}
+								]
+							}
+						}
+					}
+				`
+				}
 			}
 
 			_, _ = w.Write([]byte(payload))
@@ -144,6 +287,12 @@ func TestAccSourceResource(t *testing.T) {
 						settings = jsonencode({
 							"myKey": "myValue"
 						})
+						labels = [
+							{
+								key = "my-label-key"
+								value = "my-label-value"
+							}
+						]
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -190,6 +339,12 @@ func TestAccSourceResource(t *testing.T) {
 						settings = jsonencode({
 							"myKey": "myValue"
 						})
+						labels = [
+							{
+								key = "my-label-key"
+								value = "my-label-value"
+							}
+						]
 					}
 				`,
 				ImportState:       true,
@@ -208,6 +363,12 @@ func TestAccSourceResource(t *testing.T) {
 						settings = jsonencode({
 							"myKey": "myOtherValue"
 						})
+						labels = [
+							{
+								key = "my-label-key"
+								value = "my-label-value"
+							}
+						]
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
