@@ -49,5 +49,6 @@ func APILabelsToLabelsV1(labels []api.AllowedLabelBeta) []api.LabelV1 {
 	for _, label := range labels {
 		outLabels = append(outLabels, api.LabelV1(label))
 	}
+
 	return outLabels
 }
