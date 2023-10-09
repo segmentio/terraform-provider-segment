@@ -43,3 +43,15 @@ func LabelsPlanToAPILabels(ctx context.Context, labels types.Set) ([]api.Allowed
 
 	return apiLabels, diag.Diagnostics{}
 }
+
+type LabelAssignmentState struct {
+	ResourceID   types.String `tfsdk:"resource_id"`
+	ResourceType types.String `tfsdk:"resource_type"`
+	Labels       LabelState   `tfsdk:"labels"`
+}
+
+type LabelAssignmentPlan struct {
+	ResourceID   types.String `tfsdk:"resource_id"`
+	ResourceType types.String `tfsdk:"resource_type"`
+	Labels       types.Set    `tfsdk:"labels"`
+}

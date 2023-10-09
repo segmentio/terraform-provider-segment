@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
@@ -194,11 +196,11 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				},
 				Description: "The write keys used to send data from the Source. This field is left empty when the current token does not have the 'source admin' permission.",
 			},
-			"labels": schema.ListNestedAttribute{
-				Computed:    true,
+			"labels": schema.SetNestedAttribute{
+				Optional:    true,
 				Description: "A list of labels applied to the Source.",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
+				Validators: []validator.Set{
+					setvalidator.SizeAtMost(MaxPageSize),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
