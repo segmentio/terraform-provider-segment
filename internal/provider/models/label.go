@@ -51,15 +51,3 @@ func APILabelsToLabelsV1(labels []api.AllowedLabelBeta) []api.LabelV1 {
 	}
 	return outLabels
 }
-
-type LabelAssignmentState struct {
-	ResourceID   types.String `tfsdk:"resource_id"`
-	ResourceType types.String `tfsdk:"resource_type"`
-	Labels       LabelState   `tfsdk:"labels"`
-}
-
-type LabelAssignmentPlan struct {
-	ResourceID   types.String `tfsdk:"resource_id"`
-	ResourceType types.String `tfsdk:"resource_type"`
-	Labels       types.Set    `tfsdk:"labels"`
-}
