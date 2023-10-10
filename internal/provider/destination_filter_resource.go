@@ -380,5 +380,6 @@ func validateActions(actions []api.DestinationFilterActionV1) error {
 			}
 		}
 	}
+
 	return nil
 }

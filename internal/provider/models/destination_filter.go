@@ -101,7 +101,7 @@ func (d *DestinationFilterActionState) Fill(action api.DestinationFilterActionV1
 		// Converts to float64 in a way that ensures equivalence with plan
 		p, err := strconv.ParseFloat(fmt.Sprintf("%f", *action.Percent), 64)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to parse action percent: %v", err)
 		}
 		percent = &p
 	}
@@ -110,7 +110,7 @@ func (d *DestinationFilterActionState) Fill(action api.DestinationFilterActionV1
 	if action.Fields != nil {
 		b, err := json.Marshal(action.Fields)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to marshal action fields to JSON: %v", err)
 		}
 		fieldsString := string(b)
 		fields = &fieldsString
