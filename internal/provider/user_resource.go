@@ -97,7 +97,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 										Description: "The type for this resource.",
 										Required:    true,
 										Validators: []validator.String{
-											stringvalidator.RegexMatches(regexp.MustCompile("^[A-Z]+$"), "'type' must be in all uppercase"),
+											stringvalidator.RegexMatches(regexp.MustCompile("^[A-Z_]+$"), "'type' must be in all uppercase"),
 										},
 									},
 									"labels": schema.SetNestedAttribute{
