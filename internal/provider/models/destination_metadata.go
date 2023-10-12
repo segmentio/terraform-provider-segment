@@ -289,7 +289,7 @@ func (d *DestinationMetadataState) getActions(actions []api.DestinationMetadataA
 		destinationMetadataAction.Fields = fields
 
 		if action.DefaultTrigger.IsSet() {
-			destinationMetadataAction.DefaultTrigger = types.StringValue(*action.DefaultTrigger.Get())
+			destinationMetadataAction.DefaultTrigger = types.StringPointerValue(action.DefaultTrigger.Get())
 		}
 
 		destinationActionsToAdd = append(destinationActionsToAdd, destinationMetadataAction)
