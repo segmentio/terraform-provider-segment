@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
@@ -48,10 +49,16 @@ func (r *profilesWarehouseResource) Schema(_ context.Context, _ resource.SchemaR
 			"space_id": schema.StringAttribute{
 				Required:    true,
 				Description: "The Space id.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"metadata_id": schema.StringAttribute{
 				Required:    true,
 				Description: "The Warehouse metadata to use.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Optional:    true,
@@ -81,31 +88,10 @@ func (r *profilesWarehouseResource) Schema(_ context.Context, _ resource.SchemaR
 }
 
 func (r *profilesWarehouseResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan models.ProfilesWarehousePlan
+	var plan models.ProfilesWarehouseState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	wrappedMetadataID, err := plan.Metadata.Attributes()["id"].ToTerraformValue(ctx)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to decode metadata id",
-			err.Error(),
-		)
-
-		return
-	}
-
-	var metadataID string
-	err = wrappedMetadataID.As(&metadataID)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to decode metadata id",
-			err.Error(),
-		)
-
 		return
 	}
 
@@ -117,36 +103,32 @@ func (r *profilesWarehouseResource) Create(ctx context.Context, req resource.Cre
 	}
 	modelMap := api.NewModelMap(settings)
 
-	name := plan.Name.ValueStringPointer()
-	if *name == "" {
-		name = nil
-	}
-
-	out, body, err := r.client.ProfilesWarehousesApi.CreateProfilesWarehouse(r.authContext).CreateProfilesWarehouseV1Input(api.CreateProfilesWarehouseV1Input{
+	out, body, err := r.client.ProfilesSyncApi.CreateProfilesWarehouse(r.authContext, plan.SpaceID.ValueString()).CreateProfilesWarehouseAlphaInput(api.CreateProfilesWarehouseAlphaInput{
 		Enabled:    plan.Enabled.ValueBoolPointer(),
-		MetadataId: metadataID,
+		MetadataId: plan.MetadataID.ValueString(),
 		Settings:   *api.NewNullableModelMap(modelMap),
-		Name:       name,
+		Name:       plan.Name.ValueStringPointer(),
+		SchemaName: plan.SchemaName.ValueStringPointer(),
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to create ProfilesWarehouse",
+			"Unable to create Profiles Warehouse",
 			getError(err, body),
 		)
 
 		return
 	}
 
-	profileswarehouse := out.Data.GetProfilesWarehouse()
+	profilesWarehouse := out.Data.GetProfilesWarehouse()
 
 	var state models.ProfilesWarehouseState
-	err = state.Fill(api.ProfilesWarehouse(profileswarehouse))
+	err = state.Fill(api.ProfilesWarehouse1(profilesWarehouse))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to create ProfilesWarehouse",
+			"Unable to populate Profiles Warehouse state",
 			err.Error(),
 		)
 
@@ -174,21 +156,20 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	id := previousState.ID.ValueString()
-	if id == "" {
-		resp.Diagnostics.AddError("Unable to read ProfilesWarehouse", "ID is empty")
+	warehouse, err := findProfileWarehouse(r.authContext, r.client, previousState.ID.ValueString(), previousState.SpaceID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to read Profiles Warehouse",
+			err.Error(),
+		)
 
 		return
 	}
 
-	response, body, err := r.client.ProfilesWarehousesApi.GetProfilesWarehouse(r.authContext, previousState.ID.ValueString()).Execute()
-	if body != nil {
-		defer body.Body.Close()
-	}
-	if err != nil {
+	if warehouse == nil {
 		resp.Diagnostics.AddError(
-			"Unable to read ProfilesWarehouse",
-			getError(err, body),
+			"Unable to find Profile Warehouse",
+			err.Error(),
 		)
 
 		return
@@ -196,20 +177,14 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 
 	var state models.ProfilesWarehouseState
 
-	profileswarehouse := response.Data.GetProfilesWarehouse()
-	err = state.Fill(profileswarehouse)
+	err = state.Fill(api.ProfilesWarehouse1(*warehouse))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read ProfilesWarehouse",
+			"Unable to populate Profiles Warehouse state",
 			err.Error(),
 		)
 
 		return
-	}
-
-	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
-	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
-		state.Settings = previousState.Settings
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -220,7 +195,7 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan models.ProfilesWarehousePlan
+	var plan models.ProfilesWarehouseState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -242,50 +217,30 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 	}
 	modelMap := api.NewModelMap(settings)
 
-	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
-	existingProfilesWarehouse, body, err := r.client.ProfilesWarehousesApi.GetProfilesWarehouse(r.authContext, state.ID.ValueString()).Execute()
-	if body != nil {
-		defer body.Body.Close()
-	}
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to update ProfilesWarehouse",
-			getError(err, body),
-		)
-
-		return
-	}
-	existingSettings := existingProfilesWarehouse.Data.GetProfilesWarehouse().Settings.Get().Get()
-
-	for key := range existingSettings {
-		if settings[key] == nil {
-			settings[key] = nil
-		}
-	}
-
-	out, body, err := r.client.ProfilesWarehousesApi.UpdateProfilesWarehouse(r.authContext, state.ID.ValueString()).UpdateProfilesWarehouseV1Input(api.UpdateProfilesWarehouseV1Input{
-		Enabled:  plan.Enabled.ValueBoolPointer(),
-		Settings: *api.NewNullableModelMap(modelMap),
-		Name:     *api.NewNullableString(plan.Name.ValueStringPointer()),
+	out, body, err := r.client.ProfilesSyncApi.UpdateProfilesWarehouseForSpaceWarehouse(r.authContext, state.SpaceID.ValueString(), state.ID.ValueString()).UpdateProfilesWarehouseForSpaceWarehouseAlphaInput(api.UpdateProfilesWarehouseForSpaceWarehouseAlphaInput{
+		Enabled:    plan.Enabled.ValueBoolPointer(),
+		Settings:   *api.NewNullableModelMap(modelMap),
+		Name:       plan.Name.ValueStringPointer(),
+		SchemaName: plan.SchemaName.ValueStringPointer(),
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update ProfilesWarehouse",
+			"Unable to update Profiles Warehouse",
 			getError(err, body),
 		)
 
 		return
 	}
 
-	profileswarehouse := out.Data.GetProfilesWarehouse()
+	warehouse := out.Data.GetProfilesWarehouse()
 
-	err = state.Fill(api.ProfilesWarehouse(profileswarehouse))
+	err = state.Fill(warehouse)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update ProfilesWarehouse",
+			"Unable to populate Profiles Warehouse state",
 			err.Error(),
 		)
 
@@ -310,13 +265,13 @@ func (r *profilesWarehouseResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	_, body, err := r.client.ProfilesWarehousesApi.DeleteProfilesWarehouse(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.ProfilesSyncApi.RemoveProfilesWarehouseFromSpace(r.authContext, config.SpaceID.ValueString(), config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete ProfilesWarehouse",
+			"Unable to delete Profiles Warehouse",
 			getError(err, body),
 		)
 
@@ -346,4 +301,31 @@ func (r *profilesWarehouseResource) Configure(_ context.Context, req resource.Co
 
 	r.client = config.client
 	r.authContext = config.authContext
+}
+
+func findProfileWarehouse(authContext context.Context, client *api.APIClient, id string, spaceID string) (*api.ProfilesWarehouseAlpha, error) {
+	var pageToken *string
+	*pageToken = "MA=="
+
+	for pageToken != nil {
+		out, body, err := client.ProfilesSyncApi.ListProfilesWarehouseInSpace(authContext, spaceID).Pagination(api.PaginationInput{Count: MaxPageSize, Cursor: pageToken}).Execute()
+		if body != nil {
+			defer body.Body.Close()
+		}
+		if err != nil {
+			return nil, errors.New(getError(err, body))
+		}
+
+		warehouses := out.Data.ProfilesWarehouses
+
+		for _, warehouse := range warehouses {
+			if warehouse.Id == id {
+				return &warehouse, nil
+			}
+		}
+
+		pageToken = out.Data.Pagination.Next.Get()
+	}
+
+	return nil, nil
 }
