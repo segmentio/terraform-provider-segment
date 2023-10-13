@@ -54,6 +54,9 @@ func (r *destinationFilterResource) Schema(_ context.Context, _ resource.SchemaR
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The unique id of this filter.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"if": schema.StringAttribute{
 				Required:    true,

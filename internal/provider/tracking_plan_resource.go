@@ -42,6 +42,9 @@ func (r *trackingPlanResource) Schema(_ context.Context, _ resource.SchemaReques
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The Tracking Plan's identifier.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"slug": schema.StringAttribute{
 				Computed:    true,
@@ -184,7 +187,7 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 	err = state.Fill(api.TrackingPlan(trackingPlan), &rulesOut)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to create Tracking Plan",
+			"Unable to populate Tracking Plan state",
 			err.Error(),
 		)
 
@@ -251,7 +254,7 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to get Tracking Plan rules",
+				"Unable to read Tracking Plan rules",
 				getError(err, body),
 			)
 
@@ -262,7 +265,7 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 		err = state.Fill(trackingPlan, &outRules)
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to get Tracking Plan rules",
+				"Unable to populate Tracking Plan state",
 				err.Error(),
 			)
 
@@ -364,7 +367,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to create Tracking Plan rules",
+			"Unable to replace Tracking Plan rules",
 			getError(err, body),
 		)
 
@@ -375,7 +378,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	err = state.Fill(trackingPlan, &rulesOut)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Tracking Plan",
+			"Unable to populate Tracking Plan state",
 			err.Error(),
 		)
 
