@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
@@ -23,7 +24,7 @@ var (
 	_ resource.ResourceWithImportState = &profilesWarehouseResource{}
 )
 
-func NewprofilesWarehouseResource() resource.Resource {
+func NewProfilesWarehouseResource() resource.Resource {
 	return &profilesWarehouseResource{}
 }
 
@@ -38,6 +39,10 @@ func (r *profilesWarehouseResource) Metadata(_ context.Context, req resource.Met
 
 func (r *profilesWarehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: `A Profiles Sync Warehouse is a central repository of data collected from your workspace. It is what commonly comes to mind when you think about a relational database: structured data that fits into rows and columns.
+		
+		To import a Profiles Warehouse into Terraform, use the following format: 'space-id:warehouse-id'`,
+
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
@@ -187,6 +192,10 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
+	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
+		state.Settings = previousState.Settings
+	}
+
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -280,8 +289,19 @@ func (r *profilesWarehouseResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *profilesWarehouseResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	// Retrieve import ID and save to id attribute
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	idParts := strings.Split(req.ID, ":")
+
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: <space_id>:<warehouse_id>. Got: %q", req.ID),
+		)
+
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("space_id"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), idParts[1])...)
 }
 
 func (r *profilesWarehouseResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -305,7 +325,8 @@ func (r *profilesWarehouseResource) Configure(_ context.Context, req resource.Co
 
 func findProfileWarehouse(authContext context.Context, client *api.APIClient, id string, spaceID string) (*api.ProfilesWarehouseAlpha, error) {
 	var pageToken *string
-	*pageToken = "MA=="
+	firstPageToken := "MA=="
+	pageToken = &firstPageToken
 
 	for pageToken != nil {
 		out, body, err := client.ProfilesSyncApi.ListProfilesWarehouseInSpace(authContext, spaceID).Pagination(api.PaginationInput{Count: MaxPageSize, Cursor: pageToken}).Execute()

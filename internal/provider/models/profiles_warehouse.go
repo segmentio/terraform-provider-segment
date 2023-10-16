@@ -20,7 +20,15 @@ func (w *ProfilesWarehouseState) Fill(warehouse api.ProfilesWarehouse1) error {
 	w.ID = types.StringValue(warehouse.Id)
 	w.SpaceID = types.StringValue(warehouse.SpaceId)
 	w.MetadataID = types.StringValue(warehouse.Metadata.Id)
-	w.Name = types.StringValue(warehouse.SpaceId)
+	if warehouse.Settings.IsSet() {
+		name := warehouse.Settings.Get().Get()["name"]
+		if name != nil {
+			stringName, ok := name.(string)
+			if ok {
+				w.Name = types.StringValue(stringName)
+			}
+		}
+	}
 	w.Enabled = types.BoolValue(warehouse.Enabled)
 	w.SchemaName = types.StringPointerValue(warehouse.SchemaName)
 	settings, err := GetSettings(warehouse.Settings)
