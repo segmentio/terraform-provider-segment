@@ -65,11 +65,11 @@ func getLogos(logos api.Logos) *LogosState {
 	}
 
 	if logos.Mark.IsSet() {
-		logosToAdd.Mark = types.StringValue(*logos.Mark.Get())
+		logosToAdd.Mark = types.StringPointerValue(logos.Mark.Get())
 	}
 
 	if logos.Alt.IsSet() {
-		logosToAdd.Alt = types.StringValue(*logos.Alt.Get())
+		logosToAdd.Alt = types.StringPointerValue(logos.Alt.Get())
 	}
 
 	return &logosToAdd

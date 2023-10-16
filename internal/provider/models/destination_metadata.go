@@ -102,11 +102,7 @@ type DestinationMetadataState struct {
 }
 
 func (d *DestinationMetadataState) getPartnerOwned(owned *bool) types.Bool {
-	var partnerOwned types.Bool
-
-	if owned != nil {
-		partnerOwned = types.BoolValue(*owned)
-	}
+	partnerOwned := types.BoolPointerValue(owned)
 
 	return partnerOwned
 }
@@ -114,17 +110,9 @@ func (d *DestinationMetadataState) getPartnerOwned(owned *bool) types.Bool {
 func (d *DestinationMetadataState) getSupportedPlatforms(platforms api.SupportedPlatforms) *SupportedPlatform {
 	var supportedPlatform SupportedPlatform
 
-	if platforms.Browser != nil {
-		supportedPlatform.Browser = types.BoolValue(*platforms.Browser)
-	}
-
-	if platforms.Server != nil {
-		supportedPlatform.Server = types.BoolValue(*platforms.Server)
-	}
-
-	if platforms.Mobile != nil {
-		supportedPlatform.Mobile = types.BoolValue(*platforms.Mobile)
-	}
+	supportedPlatform.Browser = types.BoolPointerValue(platforms.Browser)
+	supportedPlatform.Server = types.BoolPointerValue(platforms.Server)
+	supportedPlatform.Mobile = types.BoolPointerValue(platforms.Mobile)
 
 	return &supportedPlatform
 }
@@ -132,25 +120,11 @@ func (d *DestinationMetadataState) getSupportedPlatforms(platforms api.Supported
 func (d *DestinationMetadataState) getSupportedFeatures(features api.SupportedFeatures) *SupportedFeature {
 	var supportedFeature SupportedFeature
 
-	if features.CloudModeInstances != nil {
-		supportedFeature.CloudModeInstances = types.StringValue(*features.CloudModeInstances)
-	}
-
-	if features.DeviceModeInstances != nil {
-		supportedFeature.DeviceModeInstances = types.StringValue(*features.DeviceModeInstances)
-	}
-
-	if features.Replay != nil {
-		supportedFeature.Replay = types.BoolValue(*features.Replay)
-	}
-
-	if features.BrowserUnbundling != nil {
-		supportedFeature.BrowseUnbundling = types.BoolValue(*features.BrowserUnbundling)
-	}
-
-	if features.BrowserUnbundlingPublic != nil {
-		supportedFeature.BrowseUnbundlingPublic = types.BoolValue(*features.BrowserUnbundlingPublic)
-	}
+	supportedFeature.CloudModeInstances = types.StringPointerValue(features.CloudModeInstances)
+	supportedFeature.DeviceModeInstances = types.StringPointerValue(features.DeviceModeInstances)
+	supportedFeature.Replay = types.BoolPointerValue(features.Replay)
+	supportedFeature.BrowseUnbundling = types.BoolPointerValue(features.BrowserUnbundling)
+	supportedFeature.BrowseUnbundlingPublic = types.BoolPointerValue(features.BrowserUnbundlingPublic)
 
 	return &supportedFeature
 }
@@ -158,25 +132,11 @@ func (d *DestinationMetadataState) getSupportedFeatures(features api.SupportedFe
 func (d *DestinationMetadataState) getSupportedMethods(methods api.SupportedMethods) *SupportedMethod {
 	var supportedMethod SupportedMethod
 
-	if methods.Pageview != nil {
-		supportedMethod.PageView = types.BoolValue(*methods.Pageview)
-	}
-
-	if methods.Identify != nil {
-		supportedMethod.Identify = types.BoolValue(*methods.Identify)
-	}
-
-	if methods.Alias != nil {
-		supportedMethod.Alias = types.BoolValue(*methods.Alias)
-	}
-
-	if methods.Track != nil {
-		supportedMethod.Track = types.BoolValue(*methods.Track)
-	}
-
-	if methods.Group != nil {
-		supportedMethod.Group = types.BoolValue(*methods.Group)
-	}
+	supportedMethod.PageView = types.BoolPointerValue(methods.Pageview)
+	supportedMethod.Identify = types.BoolPointerValue(methods.Identify)
+	supportedMethod.Alias = types.BoolPointerValue(methods.Alias)
+	supportedMethod.Track = types.BoolPointerValue(methods.Track)
+	supportedMethod.Group = types.BoolPointerValue(methods.Group)
 
 	return &supportedMethod
 }
@@ -200,9 +160,7 @@ func (d *DestinationMetadataState) getComponents(components []api.DestinationMet
 			Code: types.StringValue(c.Code),
 		}
 
-		if c.Owner != nil {
-			componentToAdd.Owner = types.StringValue(*c.Owner)
-		}
+		componentToAdd.Owner = types.StringPointerValue(c.Owner)
 
 		componentsToAdd = append(componentsToAdd, componentToAdd)
 	}
@@ -235,10 +193,10 @@ func (d *DestinationMetadataState) getContacts(contacts []api.Contact) []Contact
 
 	for _, c := range contacts {
 		contactToAdd := Contact{
-			Name:      types.StringValue(*c.Name),
+			Name:      types.StringPointerValue(c.Name),
 			Email:     types.StringValue(c.Email),
-			Role:      types.StringValue(*c.Role),
-			IsPrimary: types.BoolValue(*c.IsPrimary),
+			Role:      types.StringPointerValue(c.Role),
+			IsPrimary: types.BoolPointerValue(c.IsPrimary),
 		}
 
 		contactsToAdd = append(contactsToAdd, contactToAdd)
@@ -315,9 +273,7 @@ func (d *DestinationMetadataState) getFields(fields []api.DestinationMetadataAct
 			AllowNull:   types.BoolValue(f.AllowNull),
 		}
 
-		if f.Placeholder != nil {
-			fieldToAdd.Placeholder = types.StringValue(*f.Placeholder)
-		}
+		fieldToAdd.Placeholder = types.StringPointerValue(f.Placeholder)
 
 		if f.DefaultValue != nil {
 			defaultValue, err := json.Marshal(f.DefaultValue)
@@ -345,11 +301,11 @@ func (d *DestinationMetadataState) getLogosDestinationMetadata(logos api.Logos) 
 	}
 
 	if logos.Mark.IsSet() {
-		logosToAdd.Mark = types.StringValue(*logos.Mark.Get())
+		logosToAdd.Mark = types.StringPointerValue(logos.Mark.Get())
 	}
 
 	if logos.Alt.IsSet() {
-		logosToAdd.Alt = types.StringValue(*logos.Alt.Get())
+		logosToAdd.Alt = types.StringPointerValue(logos.Alt.Get())
 	}
 
 	return &logosToAdd
@@ -365,13 +321,9 @@ func getOptions(options []api.IntegrationOptionBeta) ([]IntegrationOptionState, 
 			Required: types.BoolValue(opt.Required),
 		}
 
-		if opt.Description != nil {
-			integrationOption.Description = types.StringValue(*opt.Description)
-		}
+		integrationOption.Description = types.StringPointerValue(opt.Description)
 
-		if opt.Label != nil {
-			integrationOption.Label = types.StringValue(*opt.Label)
-		}
+		integrationOption.Label = types.StringPointerValue(opt.Label)
 
 		if opt.DefaultValue != nil {
 			defaultValue, err := json.Marshal(opt.DefaultValue)

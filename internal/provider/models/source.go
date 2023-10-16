@@ -34,9 +34,7 @@ type SourceState struct {
 
 func (s *SourceState) Fill(source api.Source4) error {
 	s.ID = types.StringValue(source.Id)
-	if source.Name != nil {
-		s.Name = types.StringValue(*source.Name)
-	}
+	s.Name = types.StringPointerValue(source.Name)
 	s.Slug = types.StringValue(source.Slug)
 	s.Enabled = types.BoolValue(source.Enabled)
 	s.WorkspaceID = types.StringValue(source.WorkspaceId)
