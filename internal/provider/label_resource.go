@@ -152,7 +152,11 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	var label *api.LabelV1
 	for _, l := range labels {
 		if l.Key == types.String.ValueString(state.Key) && l.Value == types.String.ValueString(state.Value) {
-			label = &l
+			label = &api.LabelV1{
+				Key:         l.Key,
+				Value:       l.Value,
+				Description: l.Description,
+			}
 		}
 	}
 
@@ -165,7 +169,7 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	state.Fill(api.LabelV1(*label))
+	state.Fill(*label)
 	if label.Description != nil && *label.Description == "" {
 		label.Description = nil
 	}
