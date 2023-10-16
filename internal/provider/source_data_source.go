@@ -224,7 +224,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	err = state.Fill(source)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source",
+			"Unable to populate Source state",
 			err.Error(),
 		)
 

@@ -81,7 +81,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Destination",
+			"Unable to read Destination",
 			getError(err, body),
 		)
 
@@ -93,7 +93,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 	err = state.Fill(&destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Destination",
+			"Unable to populate Destination state",
 			err.Error(),
 		)
 

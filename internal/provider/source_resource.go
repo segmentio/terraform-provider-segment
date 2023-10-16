@@ -279,6 +279,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	source := out.Data.Source
+	resp.State.SetAttribute(ctx, path.Root("id"), types.StringValue(source.Id))
 
 	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && plan.Name.ValueString() != "" {
 		// This is a workaround for the fact that "name" is allowed to be provided during update but not create
@@ -290,7 +291,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to create Source",
+				"Unable to update Source after creation",
 				getError(err, body),
 			)
 
@@ -329,7 +330,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	err = state.Fill(api.Source4(source))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to create Source",
+			"Unable to populate Source state",
 			err.Error(),
 		)
 
@@ -381,7 +382,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	err = state.Fill(source)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Source",
+			"Unable to populate Source state",
 			err.Error(),
 		)
 
@@ -430,7 +431,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Source",
+			"Unable to read Source before update",
 			getError(err, body),
 		)
 
@@ -478,7 +479,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to replace Source labels",
+				"Unable to replace Source Labels",
 				getError(err, body),
 			)
 
@@ -491,7 +492,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	err = state.Fill(api.Source4(source))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Source",
+			"Unable to populate Source state",
 			err.Error(),
 		)
 

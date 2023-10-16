@@ -157,7 +157,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to get Tracking Plan rules",
+			"Unable to read Tracking Plan rules",
 			getError(err, body),
 		)
 
@@ -168,7 +168,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 	err = state.Fill(trackingPlan, &rulesOut.Data.Rules)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Tracking Plan",
+			"Unable to populate Tracking Plan state",
 			err.Error(),
 		)
 

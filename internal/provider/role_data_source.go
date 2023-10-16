@@ -110,7 +110,7 @@ func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	err = state.Fill(role)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Role",
+			"Unable to populate Role state",
 			err.Error(),
 		)
 

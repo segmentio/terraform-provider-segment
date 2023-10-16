@@ -99,7 +99,7 @@ func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadReque
 	err = state.Fill(warehouse)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Warehouse",
+			"Unable to populate Warehouse state",
 			err.Error(),
 		)
 

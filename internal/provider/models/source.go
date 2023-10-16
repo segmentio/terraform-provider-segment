@@ -45,7 +45,7 @@ func (s *SourceState) Fill(source api.Source4) error {
 	if err != nil {
 		return err
 	}
-	settings, err := s.getSettings(source.Settings)
+	settings, err := GetSettings(source.Settings)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (s *SourceState) getWriteKeys(writeKeys []string) []types.String {
 	return writeKeysToAdd
 }
 
-func (s *SourceState) getSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
+func GetSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
 	if !settings.IsSet() {
 		return jsontypes.NewNormalizedNull(), nil
 	}

@@ -60,7 +60,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source metadata",
+			"Unable to read Source metadata",
 			getError(err, body),
 		)
 
@@ -71,7 +71,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	err = state.Fill(sourceMetadata)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Source Metadata",
+			"Unable to populate Source Metadata state",
 			err.Error(),
 		)
 

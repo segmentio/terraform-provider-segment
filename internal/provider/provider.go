@@ -152,6 +152,7 @@ func (p *segmentProvider) Resources(_ context.Context) []func() resource.Resourc
 		NewUserGroupResource,
 		NewFunctionResource,
 		NewDestinationFilterResource,
+		NewProfilesWarehouseResource,
 	}
 }
 

@@ -554,7 +554,7 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	err = state.Fill(&destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to create Destination",
+			"Unable to populate Destination state",
 			err.Error(),
 		)
 
@@ -600,7 +600,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 	err = state.Fill(&destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Destination",
+			"Unable to populate Destination state",
 			err.Error(),
 		)
 
@@ -662,7 +662,7 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	err = state.Fill(&destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Destination",
+			"Unable to populate Destination state",
 			err.Error(),
 		)
 
@@ -696,7 +696,8 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error deleting Destination", "Could not delete Destination, unexpected error: "+getError(err, body),
+			"Unable to delete Destination",
+			getError(err, body),
 		)
 
 		return

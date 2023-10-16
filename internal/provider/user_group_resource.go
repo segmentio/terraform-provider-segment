@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
@@ -42,6 +44,9 @@ func (r *userGroupResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The id of the user group.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -195,7 +200,7 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to get User Group",
+			"Unable to read User Group",
 			getError(err, body),
 		)
 
@@ -372,7 +377,7 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to get User Group",
+			"Unable to read User Group",
 			getError(err, body),
 		)
 

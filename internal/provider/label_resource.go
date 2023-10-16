@@ -107,7 +107,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to create a label",
+			"Unable to create Label",
 			getError(err, body),
 		)
 
@@ -115,9 +115,8 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	outLabel := out.Data.Label
-	plan.Key = types.StringValue(outLabel.Key)
-	plan.Value = types.StringValue(outLabel.Value)
-	plan.Description = types.StringPointerValue(outLabel.Description)
+	var state models.LabelState
+	state.Fill(api.LabelV1(outLabel))
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -150,15 +149,27 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	labels := response.Data.Labels
 
-	label := api.LabelV1{}
+	var label *api.LabelV1
 	for _, l := range labels {
 		if l.Key == types.String.ValueString(state.Key) && l.Value == types.String.ValueString(state.Value) {
-			label = l
+			label = &api.LabelV1{
+				Key:         l.Key,
+				Value:       l.Value,
+				Description: l.Description,
+			}
 		}
 	}
 
-	state.Key = types.StringValue(label.Key)
-	state.Value = types.StringValue(label.Value)
+	if label == nil {
+		resp.Diagnostics.AddError(
+			"Unable to find Label",
+			fmt.Sprintf("Unable to find Label with key: %q and value: %q", state.Key, state.Value),
+		)
+
+		return
+	}
+
+	state.Fill(*label)
 	if label.Description != nil && *label.Description == "" {
 		label.Description = nil
 	}
