@@ -45,22 +45,12 @@ type TrackingPlanPlan struct {
 
 func (t *TrackingPlanState) Fill(trackingPlan api.TrackingPlan, rules *[]api.RuleV1) error {
 	t.ID = types.StringValue(trackingPlan.Id)
-	if trackingPlan.Name != nil {
-		t.Name = types.StringValue(*trackingPlan.Name)
-	}
-	if trackingPlan.Slug != nil {
-		t.Slug = types.StringValue(*trackingPlan.Slug)
-	}
-	if trackingPlan.Description != nil {
-		t.Description = types.StringValue(*trackingPlan.Description)
-	}
+	t.Name = types.StringPointerValue(trackingPlan.Name)
+	t.Slug = types.StringPointerValue(trackingPlan.Slug)
+	t.Description = types.StringPointerValue(trackingPlan.Description)
 	t.Type = types.StringValue(trackingPlan.Type)
-	if trackingPlan.UpdatedAt != nil {
-		t.UpdatedAt = types.StringValue(*trackingPlan.UpdatedAt)
-	}
-	if trackingPlan.CreatedAt != nil {
-		t.CreatedAt = types.StringValue(*trackingPlan.CreatedAt)
-	}
+	t.UpdatedAt = types.StringPointerValue(trackingPlan.UpdatedAt)
+	t.CreatedAt = types.StringPointerValue(trackingPlan.CreatedAt)
 
 	t.Rules = []RulesState{}
 	if rules != nil {
@@ -69,7 +59,7 @@ func (t *TrackingPlanState) Fill(trackingPlan api.TrackingPlan, rules *[]api.Rul
 
 			r.Type = types.StringValue(rule.Type)
 			if rule.Key != nil {
-				r.Key = types.StringValue(*rule.Key)
+				r.Key = types.StringPointerValue(rule.Key)
 			}
 
 			jsonSchema, err := json.Marshal(rule.JsonSchema)
@@ -89,22 +79,12 @@ func (t *TrackingPlanState) Fill(trackingPlan api.TrackingPlan, rules *[]api.Rul
 
 func (t *TrackingPlanDSState) Fill(trackingPlan api.TrackingPlan, rules *[]api.RuleV1) error {
 	t.ID = types.StringValue(trackingPlan.Id)
-	if trackingPlan.Name != nil {
-		t.Name = types.StringValue(*trackingPlan.Name)
-	}
-	if trackingPlan.Slug != nil {
-		t.Slug = types.StringValue(*trackingPlan.Slug)
-	}
-	if trackingPlan.Description != nil {
-		t.Description = types.StringValue(*trackingPlan.Description)
-	}
+	t.Name = types.StringPointerValue(trackingPlan.Name)
+	t.Slug = types.StringPointerValue(trackingPlan.Slug)
+	t.Description = types.StringPointerValue(trackingPlan.Description)
 	t.Type = types.StringValue(trackingPlan.Type)
-	if trackingPlan.UpdatedAt != nil {
-		t.UpdatedAt = types.StringValue(*trackingPlan.UpdatedAt)
-	}
-	if trackingPlan.CreatedAt != nil {
-		t.CreatedAt = types.StringValue(*trackingPlan.CreatedAt)
-	}
+	t.UpdatedAt = types.StringPointerValue(trackingPlan.UpdatedAt)
+	t.CreatedAt = types.StringPointerValue(trackingPlan.CreatedAt)
 
 	t.Rules = []RulesDSState{}
 	if rules != nil {
@@ -112,29 +92,16 @@ func (t *TrackingPlanDSState) Fill(trackingPlan api.TrackingPlan, rules *[]api.R
 			r := RulesDSState{}
 
 			r.Type = types.StringValue(rule.Type)
-			if rule.Key != nil {
-				r.Key = types.StringValue(*rule.Key)
-			}
-
+			r.Key = types.StringPointerValue(rule.Key)
 			jsonSchema, err := json.Marshal(rule.JsonSchema)
 			if err != nil {
 				return fmt.Errorf("could not marshal json: %w", err)
 			}
 			r.JSONSchema = jsontypes.NewNormalizedValue(string(jsonSchema))
-
 			r.Version = types.Float64Value(float64(rule.Version))
-
-			if rule.CreatedAt != nil {
-				r.CreatedAt = types.StringValue(*rule.CreatedAt)
-			}
-
-			if rule.UpdatedAt != nil {
-				r.UpdatedAt = types.StringValue(*rule.UpdatedAt)
-			}
-
-			if rule.DeprecatedAt != nil {
-				r.DeprecatedAt = types.StringValue(*rule.DeprecatedAt)
-			}
+			r.CreatedAt = types.StringPointerValue(rule.CreatedAt)
+			r.UpdatedAt = types.StringPointerValue(rule.UpdatedAt)
+			r.DeprecatedAt = types.StringPointerValue(rule.DeprecatedAt)
 
 			t.Rules = append(t.Rules, r)
 		}
