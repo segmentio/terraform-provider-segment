@@ -38,7 +38,7 @@ func (r *sourceTrackingPlanConnectionResource) Metadata(_ context.Context, req r
 
 func (r *sourceTrackingPlanConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Represents a connection between a source and a tracking plan",
+		Description: "Represents a connection between a Source and a Tracking Plan",
 		Attributes: map[string]schema.Attribute{
 			"source_id": schema.StringAttribute{
 				Required:    true,

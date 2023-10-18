@@ -3,12 +3,12 @@
 page_title: "segment_source_tracking_plan_connection Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  Represents a connection between a source and a tracking plan
+  Represents a connection between a Source and a Tracking Plan
 ---
 
 # segment_source_tracking_plan_connection (Resource)
 
-Represents a connection between a source and a tracking plan
+Represents a connection between a Source and a Tracking Plan
 
 ## Example Usage
 
