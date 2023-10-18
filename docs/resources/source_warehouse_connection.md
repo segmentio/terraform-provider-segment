@@ -14,7 +14,7 @@ Represents a connection between a source and a warehouse
 
 ```terraform
 # Configures a source warehouse connection
-resource "segment_warehouse" "example" {
+resource "segment_source_warehouse_connection" "example" {
   source_id    = "abc123"
   warehouse_id = "xyz321"
 }
