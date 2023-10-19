@@ -26,6 +26,9 @@ func (d *DestinationSubscriptionState) Fill(subscription api.DestinationSubscrip
 	d.ActionID = types.StringValue(subscription.ActionId)
 	d.ActionSlug = types.StringValue(subscription.ActionSlug)
 	d.Trigger = types.StringValue(subscription.Trigger)
+	if subscription.ModelId != nil && *subscription.ModelId == "" {
+		subscription.ModelId = nil
+	}
 	d.ModelID = types.StringPointerValue(subscription.ModelId)
 	settings, err := GetSettings(subscription.Settings)
 	if err != nil {
