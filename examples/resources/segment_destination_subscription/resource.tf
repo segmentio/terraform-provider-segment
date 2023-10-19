@@ -1,4 +1,4 @@
-# Configures a specific destination
+# Configures a specific destination subscription
 resource "segment_destination_subscription" "send_to_webhook" {
   destination_id = segment_destination.webhook.id
   name           = "Webhook send subscription"
