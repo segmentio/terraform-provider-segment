@@ -40,7 +40,7 @@ func (r *reverseETLModelResource) Schema(_ context.Context, _ resource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "The unique identifier for the subscription.",
+				Description: "The unique identifier for the reverse etl model.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
