@@ -13,8 +13,8 @@ description: |-
 ## Example Usage
 
 ```terraform
-# Configures a specific warehouse
-resource "segment_source_tracking_plan_connection" "example" {
+# Configures a specific Reverse ETL model
+resource "segment_reverse_etl_model" "example" {
   source_id               = segment_source.javascript.id
   name                    = "Example Reverse ETL model"
   enabled                 = true
@@ -46,4 +46,4 @@ resource "segment_source_tracking_plan_connection" "example" {
 
 ### Read-Only
 
-- `id` (String) The unique identifier for the subscription.
+- `id` (String) The unique identifier for the model.
