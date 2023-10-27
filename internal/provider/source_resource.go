@@ -219,6 +219,82 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 					},
 				},
 			},
+			"schema_settings": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "The schema settings associated with the Source.",
+				Attributes: map[string]schema.Attribute{
+					"track": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "Track settings.",
+						Attributes: map[string]schema.Attribute{
+							"allow_unplanned_events": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Enable to allow unplanned track events.",
+							},
+							"allow_unplanned_event_properties": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Enable to allow unplanned track event properties.",
+							},
+							"allow_event_on_violations": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Allow track event on violations.",
+							},
+							"allow_properties_on_violations": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Enable to allow track properties on violations.",
+							},
+							"common_event_on_violations": schema.StringAttribute{
+								Optional:    true,
+								Description: "The common track event on violations.",
+							},
+						},
+					},
+					"identify": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "Identify settings.",
+						Attributes: map[string]schema.Attribute{
+							"allow_unplanned_traits": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Enable to allow unplanned identify traits.",
+							},
+							"allow_traits_on_violations": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Enable to allow identify traits on violations.",
+							},
+							"common_event_on_violations": schema.StringAttribute{
+								Optional:    true,
+								Description: "The common identify event on violations.",
+							},
+						},
+					},
+					"group": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "Group settings.",
+						Attributes: map[string]schema.Attribute{
+							"allow_unplanned_traits": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Enable to allow unplanned group traits.",
+							},
+							"allow_traits_on_violations": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Enable to allow group traits on violations.",
+							},
+							"common_event_on_violations": schema.StringAttribute{
+								Optional:    true,
+								Description: "The common group event on violations.",
+							},
+						},
+					},
+					"forwarding_violations_to": schema.StringAttribute{
+						Optional:    true,
+						Description: "Source id to forward violations to.",
+					},
+					"forwarding_blocked_events_to": schema.StringAttribute{
+						Optional:    true,
+						Description: "Source id to forward blocked events to.",
+					},
+				},
+			},
 		},
 	}
 }

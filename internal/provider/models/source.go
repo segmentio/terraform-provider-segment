@@ -9,27 +9,57 @@ import (
 )
 
 type SourcePlan struct {
-	Enabled     types.Bool           `tfsdk:"enabled"`
-	ID          types.String         `tfsdk:"id"`
-	Labels      types.Set            `tfsdk:"labels"`
-	Metadata    types.Object         `tfsdk:"metadata"`
-	Name        types.String         `tfsdk:"name"`
-	Slug        types.String         `tfsdk:"slug"`
-	WorkspaceID types.String         `tfsdk:"workspace_id"`
-	WriteKeys   types.List           `tfsdk:"write_keys"`
-	Settings    jsontypes.Normalized `tfsdk:"settings"`
+	Enabled        types.Bool           `tfsdk:"enabled"`
+	ID             types.String         `tfsdk:"id"`
+	Labels         types.Set            `tfsdk:"labels"`
+	Metadata       types.Object         `tfsdk:"metadata"`
+	Name           types.String         `tfsdk:"name"`
+	Slug           types.String         `tfsdk:"slug"`
+	WorkspaceID    types.String         `tfsdk:"workspace_id"`
+	WriteKeys      types.List           `tfsdk:"write_keys"`
+	Settings       jsontypes.Normalized `tfsdk:"settings"`
+	SchemaSettings SchemaSettings       `tfsdk:"schema_settings"`
 }
 
 type SourceState struct {
-	Enabled     types.Bool           `tfsdk:"enabled"`
-	ID          types.String         `tfsdk:"id"`
-	Labels      []LabelState         `tfsdk:"labels"`
-	Metadata    *SourceMetadataState `tfsdk:"metadata"`
-	Name        types.String         `tfsdk:"name"`
-	Slug        types.String         `tfsdk:"slug"`
-	WorkspaceID types.String         `tfsdk:"workspace_id"`
-	WriteKeys   []types.String       `tfsdk:"write_keys"`
-	Settings    jsontypes.Normalized `tfsdk:"settings"`
+	Enabled        types.Bool           `tfsdk:"enabled"`
+	ID             types.String         `tfsdk:"id"`
+	Labels         []LabelState         `tfsdk:"labels"`
+	Metadata       *SourceMetadataState `tfsdk:"metadata"`
+	Name           types.String         `tfsdk:"name"`
+	Slug           types.String         `tfsdk:"slug"`
+	WorkspaceID    types.String         `tfsdk:"workspace_id"`
+	WriteKeys      []types.String       `tfsdk:"write_keys"`
+	Settings       jsontypes.Normalized `tfsdk:"settings"`
+	SchemaSettings SchemaSettings       `tfsdk:"schema_settings"`
+}
+
+type SchemaSettings struct {
+	Track                     TrackSettings    `tfsdk:"track"`
+	Identify                  IdentifySettings `tfsdk:"identify"`
+	Group                     GroupSettings    `tfsdk:"group"`
+	ForwardingViolationsTo    types.String     `tfsdk:"forwarding_violations_to"`
+	ForwardingBlockedEventsTo types.String     `tfsdk:"forwarding_blocked_events_to"`
+}
+
+type TrackSettings struct {
+	AllowUnplannedEvents          types.Bool   `tfsdk:"allow_unplanned_events"`
+	AllowUnplannedEventProperties types.Bool   `tfsdk:"allow_unplanned_event_properties"`
+	AllowEventOnViolations        types.Bool   `tfsdk:"allow_event_on_violations"`
+	AllowPropertiesOnViolations   types.Bool   `tfsdk:"allow_properties_on_violations"`
+	CommonEventOnViolations       types.String `tfsdk:"common_event_on_violations"`
+}
+
+type IdentifySettings struct {
+	AllowUnplannedTraits    types.Bool   `tfsdk:"allow_unplanned_traits"`
+	AllowTraitsOnViolations types.Bool   `tfsdk:"allow_traits_on_violations"`
+	CommonEventOnViolations types.String `tfsdk:"common_event_on_violations"`
+}
+
+type GroupSettings struct {
+	AllowUnplannedTraits    types.Bool   `tfsdk:"allow_unplanned_traits"`
+	AllowTraitsOnViolations types.Bool   `tfsdk:"allow_traits_on_violations"`
+	CommonEventOnViolations types.String `tfsdk:"common_event_on_violations"`
 }
 
 func (s *SourceState) Fill(source api.Source4) error {
