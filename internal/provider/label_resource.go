@@ -84,7 +84,7 @@ func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 
 func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan models.LabelState
+	var plan models.LabelResourceState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -115,7 +115,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	outLabel := out.Data.Label
-	var state models.LabelState
+	var state models.LabelResourceState
 	state.Fill(api.LabelV1(outLabel))
 
 	// Set state to fully populated data
@@ -127,7 +127,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 }
 
 func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state models.LabelState
+	var state models.LabelResourceState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -189,7 +189,7 @@ func (r *labelResource) Update(context.Context, resource.UpdateRequest, *resourc
 
 func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
-	var state models.LabelState
+	var state models.LabelResourceState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

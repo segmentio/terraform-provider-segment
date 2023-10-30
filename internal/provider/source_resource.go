@@ -230,19 +230,12 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 							Required:    true,
 							Description: "The value associated with the key of this label.",
 						},
-						"description": schema.StringAttribute{
-							Computed:    true,
-							Description: "An optional description of the purpose of this label.",
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
 					},
 				},
 			},
 			"schema_settings": schema.SingleNestedAttribute{
 				Optional:    true,
-				Description: "The schema settings associated with the Source.",
+				Description: "The schema settings associated with the Source. Upon import, this field will be empty even if the settings have already been configured due to Terraform limitations, but will be populated on the first apply. Fields not present in the config will not be managed by Terraform.",
 				Attributes: map[string]schema.Attribute{
 					"track": schema.SingleNestedAttribute{
 						Optional:    true,
@@ -756,7 +749,7 @@ func (r *sourceResource) Configure(_ context.Context, req resource.ConfigureRequ
 	r.authContext = config.authContext
 }
 
-// Filters out fields that were ommitted from the plan to ensure consistent terraform state
+// Filters out fields that were ommitted from the plan to ensure consistent terraform state.
 func filterOmittedSchemaSettings(plannedState *models.SchemaSettingsState, returnedState *models.SchemaSettingsState) *models.SchemaSettingsState {
 	if plannedState == nil || returnedState == nil {
 		return nil

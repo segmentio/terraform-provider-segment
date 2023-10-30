@@ -119,10 +119,6 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 													Description: "The value associated with the key of this label.",
 													Required:    true,
 												},
-												"description": schema.StringAttribute{
-													Description: "An optional description of the purpose of this label.",
-													Computed:    true,
-												},
 											},
 										},
 									},

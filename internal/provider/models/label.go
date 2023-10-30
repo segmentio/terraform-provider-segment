@@ -9,6 +9,11 @@ import (
 )
 
 type LabelState struct {
+	Key   types.String `tfsdk:"key"`
+	Value types.String `tfsdk:"value"`
+}
+
+type LabelResourceState struct {
 	Key         types.String `tfsdk:"key"`
 	Value       types.String `tfsdk:"value"`
 	Description types.String `tfsdk:"description"`
@@ -22,6 +27,18 @@ func (l *LabelState) ToAPIValue() api.AllowedLabelBeta {
 }
 
 func (l *LabelState) Fill(label api.LabelV1) {
+	l.Key = types.StringValue(label.Key)
+	l.Value = types.StringValue(label.Value)
+}
+
+func (l *LabelResourceState) ToAPIValue() api.AllowedLabelBeta {
+	return api.AllowedLabelBeta{
+		Key:   l.Key.ValueString(),
+		Value: l.Value.ValueString(),
+	}
+}
+
+func (l *LabelResourceState) Fill(label api.LabelV1) {
 	l.Key = types.StringValue(label.Key)
 	l.Value = types.StringValue(label.Value)
 	l.Description = types.StringPointerValue(label.Description)
