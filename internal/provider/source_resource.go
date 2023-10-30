@@ -749,7 +749,7 @@ func (r *sourceResource) Configure(_ context.Context, req resource.ConfigureRequ
 	r.authContext = config.authContext
 }
 
-// Filters out fields that were ommitted from the plan to ensure consistent terraform state.
+// Filters out fields that were omitted from the plan to ensure consistent terraform state.
 func filterOmittedSchemaSettings(plannedState *models.SchemaSettingsState, returnedState *models.SchemaSettingsState) *models.SchemaSettingsState {
 	if plannedState == nil || returnedState == nil {
 		return nil
