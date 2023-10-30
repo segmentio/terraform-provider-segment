@@ -130,27 +130,45 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 								"name": schema.StringAttribute{
 									Computed:    true,
 									Description: "The name identifying this option in the context of a Segment Integration.",
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
 								},
 								"type": schema.StringAttribute{
 									Computed:    true,
 									Description: "Defines the type for this option in the schema. Types are most commonly strings, but may also represent other primitive types, such as booleans, and numbers, as well as complex types, such as objects and arrays.",
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
 								},
 								"required": schema.BoolAttribute{
 									Computed:    true,
 									Description: "Whether this is a required option when setting up the Integration.",
+									PlanModifiers: []planmodifier.Bool{
+										boolplanmodifier.UseStateForUnknown(),
+									},
 								},
 								"description": schema.StringAttribute{
 									Computed:    true,
 									Description: "An optional short text description of the field.",
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
 								},
 								"default_value": schema.StringAttribute{
 									CustomType:  jsontypes.NormalizedType{},
 									Computed:    true,
 									Description: "An optional default value for the field.",
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
 								},
 								"label": schema.StringAttribute{
 									Computed:    true,
 									Description: "An optional label for this field.",
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
 								},
 							},
 						},
@@ -215,6 +233,9 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 						"description": schema.StringAttribute{
 							Computed:    true,
 							Description: "An optional description of the purpose of this label.",
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 					},
 				},
@@ -402,8 +423,41 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		source.Labels = models.APILabelsToLabelsV1(labels)
 	}
 
+	var schemaSettings *api.Settings
+	if !plan.SchemaSettings.IsNull() && !plan.SchemaSettings.IsUnknown() {
+		apiSchemaSettings, diags := models.GetSchemaSettingsFromPlan(ctx, plan.SchemaSettings)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if apiSchemaSettings != nil {
+			settingsOut, body, err := r.client.SourcesApi.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
+				Track:                     apiSchemaSettings.Track,
+				Identify:                  apiSchemaSettings.Identify,
+				Group:                     apiSchemaSettings.Group,
+				ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
+				ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
+			}).Execute()
+			if body != nil {
+				defer body.Body.Close()
+			}
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Unable to update Source schema settings",
+					getError(err, body),
+				)
+
+				return
+			}
+
+			s := api.Settings(settingsOut.Data.Settings)
+			schemaSettings = &s
+		}
+	}
+
 	var state models.SourceState
-	err = state.Fill(api.Source4(source))
+	err = state.Fill(api.Source4(source), schemaSettings)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
@@ -415,6 +469,12 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	state.Settings = plan.Settings
+	plannedSchemaSettings, diags := models.SchemaSettingsPlanToState(ctx, plan.SchemaSettings)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	state.SchemaSettings = filterOmittedSchemaSettings(plannedSchemaSettings, state.SchemaSettings)
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -425,14 +485,14 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 }
 
 func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var config models.SourceState
-	diags := req.State.Get(ctx, &config)
+	var previousState models.SourceState
+	diags := req.State.Get(ctx, &previousState)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	id := config.ID.ValueString()
+	id := previousState.ID.ValueString()
 	if id == "" {
 		resp.Diagnostics.AddError("Unable to read Source", "ID is empty")
 
@@ -454,8 +514,26 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	source := out.Data.Source
 
+	var schemaSettings *api.Settings
+	if previousState.SchemaSettings != nil {
+		settingsOut, body, err := r.client.SourcesApi.ListSchemaSettingsInSource(r.authContext, source.Id).Execute()
+		if body != nil {
+			defer body.Body.Close()
+		}
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to read Source schema settings",
+				getError(err, body),
+			)
+
+			return
+		}
+
+		schemaSettings = &settingsOut.Data.Settings
+	}
+
 	var state models.SourceState
-	err = state.Fill(source)
+	err = state.Fill(source, schemaSettings)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
@@ -463,6 +541,14 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		)
 
 		return
+	}
+
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
+		state.Settings = previousState.Settings
+	}
+	if previousState.SchemaSettings != nil {
+		state.SchemaSettings = filterOmittedSchemaSettings(previousState.SchemaSettings, state.SchemaSettings)
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -565,7 +651,40 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		source.Labels = models.APILabelsToLabelsV1(labels)
 	}
 
-	err = state.Fill(api.Source4(source))
+	var schemaSettings *api.Settings
+	if !plan.SchemaSettings.IsNull() && !plan.SchemaSettings.IsUnknown() {
+		apiSchemaSettings, diags := models.GetSchemaSettingsFromPlan(ctx, plan.SchemaSettings)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if apiSchemaSettings != nil {
+			settingsOut, body, err := r.client.SourcesApi.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
+				Track:                     apiSchemaSettings.Track,
+				Identify:                  apiSchemaSettings.Identify,
+				Group:                     apiSchemaSettings.Group,
+				ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
+				ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
+			}).Execute()
+			if body != nil {
+				defer body.Body.Close()
+			}
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Unable to update Source schema settings",
+					getError(err, body),
+				)
+
+				return
+			}
+
+			s := api.Settings(settingsOut.Data.Settings)
+			schemaSettings = &s
+		}
+	}
+
+	err = state.Fill(api.Source4(source), schemaSettings)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
@@ -577,6 +696,12 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	state.Settings = plan.Settings
+	plannedSchemaSettings, diags := models.SchemaSettingsPlanToState(ctx, plan.SchemaSettings)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	state.SchemaSettings = filterOmittedSchemaSettings(plannedSchemaSettings, state.SchemaSettings)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -629,4 +754,71 @@ func (r *sourceResource) Configure(_ context.Context, req resource.ConfigureRequ
 
 	r.client = config.client
 	r.authContext = config.authContext
+}
+
+// Filters out fields that were ommitted from the plan to ensure consistent terraform state
+func filterOmittedSchemaSettings(plannedState *models.SchemaSettingsState, returnedState *models.SchemaSettingsState) *models.SchemaSettingsState {
+	if plannedState == nil || returnedState == nil {
+		return nil
+	}
+
+	out := models.SchemaSettingsState{}
+
+	if plannedState.Track != nil {
+		out.Track = &models.TrackSettings{}
+
+		if !plannedState.Track.AllowEventOnViolations.IsNull() && !plannedState.Track.AllowEventOnViolations.IsUnknown() {
+			out.Track.AllowEventOnViolations = returnedState.Track.AllowEventOnViolations
+		}
+		if !plannedState.Track.AllowPropertiesOnViolations.IsNull() && !plannedState.Track.AllowPropertiesOnViolations.IsUnknown() {
+			out.Track.AllowPropertiesOnViolations = returnedState.Track.AllowPropertiesOnViolations
+		}
+		if !plannedState.Track.AllowUnplannedEvents.IsNull() && !plannedState.Track.AllowUnplannedEvents.IsUnknown() {
+			out.Track.AllowUnplannedEvents = returnedState.Track.AllowUnplannedEvents
+		}
+		if !plannedState.Track.AllowUnplannedEventProperties.IsNull() && !plannedState.Track.AllowUnplannedEventProperties.IsUnknown() {
+			out.Track.AllowUnplannedEventProperties = returnedState.Track.AllowUnplannedEventProperties
+		}
+		if !plannedState.Track.CommonEventOnViolations.IsNull() && !plannedState.Track.CommonEventOnViolations.IsUnknown() {
+			out.Track.CommonEventOnViolations = returnedState.Track.CommonEventOnViolations
+		}
+	}
+
+	if plannedState.Identify != nil {
+		out.Identify = &models.IdentifySettings{}
+
+		if !plannedState.Identify.AllowTraitsOnViolations.IsNull() && !plannedState.Identify.AllowTraitsOnViolations.IsUnknown() {
+			out.Identify.AllowTraitsOnViolations = returnedState.Identify.AllowTraitsOnViolations
+		}
+		if !plannedState.Identify.AllowUnplannedTraits.IsNull() && !plannedState.Identify.AllowUnplannedTraits.IsUnknown() {
+			out.Identify.AllowUnplannedTraits = returnedState.Identify.AllowUnplannedTraits
+		}
+		if !plannedState.Identify.CommonEventOnViolations.IsNull() && !plannedState.Identify.CommonEventOnViolations.IsUnknown() {
+			out.Identify.CommonEventOnViolations = returnedState.Identify.CommonEventOnViolations
+		}
+	}
+
+	if plannedState.Group != nil {
+		out.Group = &models.GroupSettings{}
+
+		if !plannedState.Group.AllowTraitsOnViolations.IsNull() && !plannedState.Group.AllowTraitsOnViolations.IsUnknown() {
+			out.Group.AllowTraitsOnViolations = returnedState.Group.AllowTraitsOnViolations
+		}
+		if !plannedState.Group.AllowUnplannedTraits.IsNull() && !plannedState.Group.AllowUnplannedTraits.IsUnknown() {
+			out.Group.AllowUnplannedTraits = returnedState.Group.AllowUnplannedTraits
+		}
+		if !plannedState.Group.CommonEventOnViolations.IsNull() && !plannedState.Group.CommonEventOnViolations.IsUnknown() {
+			out.Group.CommonEventOnViolations = returnedState.Group.CommonEventOnViolations
+		}
+	}
+
+	if !plannedState.ForwardingBlockedEventsTo.IsNull() && !plannedState.ForwardingBlockedEventsTo.IsUnknown() {
+		out.ForwardingBlockedEventsTo = returnedState.ForwardingBlockedEventsTo
+	}
+
+	if !plannedState.ForwardingViolationsTo.IsNull() && !plannedState.ForwardingViolationsTo.IsUnknown() {
+		out.ForwardingViolationsTo = returnedState.ForwardingViolationsTo
+	}
+
+	return &out
 }

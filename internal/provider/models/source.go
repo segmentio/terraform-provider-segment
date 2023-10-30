@@ -1,10 +1,13 @@
 package models
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/segmentio/public-api-sdk-go/api"
 )
 
@@ -18,7 +21,7 @@ type SourcePlan struct {
 	WorkspaceID    types.String         `tfsdk:"workspace_id"`
 	WriteKeys      types.List           `tfsdk:"write_keys"`
 	Settings       jsontypes.Normalized `tfsdk:"settings"`
-	SchemaSettings SchemaSettings       `tfsdk:"schema_settings"`
+	SchemaSettings types.Object         `tfsdk:"schema_settings"`
 }
 
 type SourceState struct {
@@ -31,15 +34,23 @@ type SourceState struct {
 	WorkspaceID    types.String         `tfsdk:"workspace_id"`
 	WriteKeys      []types.String       `tfsdk:"write_keys"`
 	Settings       jsontypes.Normalized `tfsdk:"settings"`
-	SchemaSettings SchemaSettings       `tfsdk:"schema_settings"`
+	SchemaSettings *SchemaSettingsState `tfsdk:"schema_settings"`
 }
 
-type SchemaSettings struct {
-	Track                     TrackSettings    `tfsdk:"track"`
-	Identify                  IdentifySettings `tfsdk:"identify"`
-	Group                     GroupSettings    `tfsdk:"group"`
-	ForwardingViolationsTo    types.String     `tfsdk:"forwarding_violations_to"`
-	ForwardingBlockedEventsTo types.String     `tfsdk:"forwarding_blocked_events_to"`
+type SchemaSettingsState struct {
+	Track                     *TrackSettings    `tfsdk:"track"`
+	Identify                  *IdentifySettings `tfsdk:"identify"`
+	Group                     *GroupSettings    `tfsdk:"group"`
+	ForwardingViolationsTo    types.String      `tfsdk:"forwarding_violations_to"`
+	ForwardingBlockedEventsTo types.String      `tfsdk:"forwarding_blocked_events_to"`
+}
+
+type SchemaSettingsPlan struct {
+	Track                     types.Object `tfsdk:"track"`
+	Identify                  types.Object `tfsdk:"identify"`
+	Group                     types.Object `tfsdk:"group"`
+	ForwardingViolationsTo    types.String `tfsdk:"forwarding_violations_to"`
+	ForwardingBlockedEventsTo types.String `tfsdk:"forwarding_blocked_events_to"`
 }
 
 type TrackSettings struct {
@@ -62,7 +73,7 @@ type GroupSettings struct {
 	CommonEventOnViolations types.String `tfsdk:"common_event_on_violations"`
 }
 
-func (s *SourceState) Fill(source api.Source4) error {
+func (s *SourceState) Fill(source api.Source4, schemaSettings *api.Settings) error {
 	s.ID = types.StringValue(source.Id)
 	s.Name = types.StringPointerValue(source.Name)
 	s.Slug = types.StringValue(source.Slug)
@@ -80,6 +91,11 @@ func (s *SourceState) Fill(source api.Source4) error {
 		return err
 	}
 	s.Settings = settings
+
+	if schemaSettings != nil {
+		s.SchemaSettings = &SchemaSettingsState{}
+		s.SchemaSettings.Fill(*schemaSettings)
+	}
 
 	return nil
 }
@@ -107,6 +123,51 @@ func (s *SourceState) getWriteKeys(writeKeys []string) []types.String {
 	return writeKeysToAdd
 }
 
+func (s *SchemaSettingsState) Fill(schemaSettings api.Settings) {
+	s.Track = &TrackSettings{}
+	s.Track.Fill(schemaSettings.Track)
+
+	s.Identify = &IdentifySettings{}
+	s.Identify.Fill(schemaSettings.Identify)
+
+	s.Group = &GroupSettings{}
+	s.Group.Fill(schemaSettings.Group)
+	s.ForwardingViolationsTo = types.StringPointerValue(schemaSettings.ForwardingViolationsTo)
+	s.ForwardingBlockedEventsTo = types.StringPointerValue(schemaSettings.ForwardingBlockedEventsTo)
+}
+
+func (t *TrackSettings) Fill(trackSettings *api.Track) {
+	if trackSettings == nil {
+		return
+	}
+
+	t.AllowUnplannedEvents = types.BoolPointerValue(trackSettings.AllowUnplannedEvents)
+	t.AllowUnplannedEventProperties = types.BoolPointerValue(trackSettings.AllowUnplannedEventProperties)
+	t.AllowEventOnViolations = types.BoolPointerValue(trackSettings.AllowEventOnViolations)
+	t.AllowPropertiesOnViolations = types.BoolPointerValue(trackSettings.AllowPropertiesOnViolations)
+	t.CommonEventOnViolations = types.StringPointerValue(trackSettings.CommonEventOnViolations)
+}
+
+func (i *IdentifySettings) Fill(identifySettings *api.Identify) {
+	if identifySettings == nil {
+		return
+	}
+
+	i.AllowUnplannedTraits = types.BoolPointerValue(identifySettings.AllowUnplannedTraits)
+	i.AllowTraitsOnViolations = types.BoolPointerValue(identifySettings.AllowTraitsOnViolations)
+	i.CommonEventOnViolations = types.StringPointerValue(identifySettings.CommonEventOnViolations)
+}
+
+func (g *GroupSettings) Fill(groupSettings *api.Group) {
+	if groupSettings == nil {
+		return
+	}
+
+	g.AllowUnplannedTraits = types.BoolPointerValue(groupSettings.AllowUnplannedTraits)
+	g.AllowTraitsOnViolations = types.BoolPointerValue(groupSettings.AllowTraitsOnViolations)
+	g.CommonEventOnViolations = types.StringPointerValue(groupSettings.CommonEventOnViolations)
+}
+
 func GetSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
 	if !settings.IsSet() {
 		return jsontypes.NewNormalizedNull(), nil
@@ -118,4 +179,124 @@ func GetSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
 	}
 
 	return jsontypes.NewNormalizedValue(string(jsonSettingsString)), nil
+}
+
+func GetSchemaSettingsFromPlan(ctx context.Context, settings types.Object) (*api.Settings, diag.Diagnostics) {
+	if settings.IsNull() || settings.IsUnknown() {
+		return nil, nil
+	}
+
+	var schemaSettingsPlan SchemaSettingsPlan
+	diags := settings.As(ctx, &schemaSettingsPlan, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var apiTrackSettings *api.Track
+	if !schemaSettingsPlan.Track.IsNull() && !schemaSettingsPlan.Track.IsUnknown() {
+		var trackSettings TrackSettings
+		diags = schemaSettingsPlan.Track.As(ctx, &trackSettings, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		apiTrackSettings = &api.Track{
+			AllowUnplannedEvents:          trackSettings.AllowUnplannedEvents.ValueBoolPointer(),
+			AllowUnplannedEventProperties: trackSettings.AllowUnplannedEventProperties.ValueBoolPointer(),
+			AllowEventOnViolations:        trackSettings.AllowEventOnViolations.ValueBoolPointer(),
+			AllowPropertiesOnViolations:   trackSettings.AllowPropertiesOnViolations.ValueBoolPointer(),
+			CommonEventOnViolations:       trackSettings.CommonEventOnViolations.ValueStringPointer(),
+		}
+	}
+
+	var apiIdentifySettings *api.Identify
+	if !schemaSettingsPlan.Identify.IsNull() && !schemaSettingsPlan.Identify.IsUnknown() {
+		var identifySettings IdentifySettings
+		diags = schemaSettingsPlan.Identify.As(ctx, &identifySettings, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		apiIdentifySettings = &api.Identify{
+			AllowUnplannedTraits:    identifySettings.AllowUnplannedTraits.ValueBoolPointer(),
+			AllowTraitsOnViolations: identifySettings.AllowTraitsOnViolations.ValueBoolPointer(),
+			CommonEventOnViolations: identifySettings.CommonEventOnViolations.ValueStringPointer(),
+		}
+	}
+
+	var apiGroupSettings *api.Group
+	if !schemaSettingsPlan.Group.IsNull() && !schemaSettingsPlan.Group.IsUnknown() {
+		var groupSettings GroupSettings
+		diags = schemaSettingsPlan.Group.As(ctx, &groupSettings, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		apiGroupSettings = &api.Group{
+			AllowUnplannedTraits:    groupSettings.AllowUnplannedTraits.ValueBoolPointer(),
+			AllowTraitsOnViolations: groupSettings.AllowTraitsOnViolations.ValueBoolPointer(),
+			CommonEventOnViolations: groupSettings.CommonEventOnViolations.ValueStringPointer(),
+		}
+	}
+
+	return &api.Settings{
+		Track:                     apiTrackSettings,
+		Identify:                  apiIdentifySettings,
+		Group:                     apiGroupSettings,
+		ForwardingViolationsTo:    schemaSettingsPlan.ForwardingViolationsTo.ValueStringPointer(),
+		ForwardingBlockedEventsTo: schemaSettingsPlan.ForwardingBlockedEventsTo.ValueStringPointer(),
+	}, nil
+}
+
+func SchemaSettingsPlanToState(ctx context.Context, settings types.Object) (*SchemaSettingsState, diag.Diagnostics) {
+	if settings.IsNull() || settings.IsUnknown() {
+		return nil, nil
+	}
+
+	var schemaSettingsPlan SchemaSettingsPlan
+	diags := settings.As(ctx, &schemaSettingsPlan, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var trackSettings *TrackSettings
+	if !schemaSettingsPlan.Track.IsNull() && !schemaSettingsPlan.Track.IsUnknown() {
+		var ts TrackSettings
+		diags = schemaSettingsPlan.Track.As(ctx, &ts, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		trackSettings = &ts
+	}
+
+	var identifySettings *IdentifySettings
+	if !schemaSettingsPlan.Identify.IsNull() && !schemaSettingsPlan.Identify.IsUnknown() {
+		var is IdentifySettings
+		diags = schemaSettingsPlan.Identify.As(ctx, &is, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		identifySettings = &is
+	}
+
+	var groupSettings *GroupSettings
+	if !schemaSettingsPlan.Group.IsNull() && !schemaSettingsPlan.Group.IsUnknown() {
+		var gs GroupSettings
+		diags = schemaSettingsPlan.Group.As(ctx, &gs, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		groupSettings = &gs
+	}
+
+	return &SchemaSettingsState{
+		Track:                     trackSettings,
+		Identify:                  identifySettings,
+		Group:                     groupSettings,
+		ForwardingViolationsTo:    schemaSettingsPlan.ForwardingViolationsTo,
+		ForwardingBlockedEventsTo: schemaSettingsPlan.ForwardingBlockedEventsTo,
+	}, nil
 }

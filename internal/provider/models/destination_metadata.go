@@ -312,7 +312,7 @@ func (d *DestinationMetadataState) getLogosDestinationMetadata(logos api.Logos) 
 }
 
 func getOptions(options []api.IntegrationOptionBeta) ([]IntegrationOptionState, error) {
-	var integrationOptions []IntegrationOptionState
+	integrationOptions := []IntegrationOptionState{}
 
 	for _, opt := range options {
 		integrationOption := IntegrationOptionState{
