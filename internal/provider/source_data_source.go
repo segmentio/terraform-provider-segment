@@ -179,10 +179,82 @@ func (d *sourceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 							Computed:    true,
 							Description: "The value associated with the key of this label.",
 						},
-						"description": schema.StringAttribute{
-							Computed:    true,
-							Description: "An optional description of the purpose of this label.",
+					},
+				},
+			},
+			"schema_settings": schema.SingleNestedAttribute{
+				Computed:    true,
+				Description: "The schema settings associated with the Source.",
+				Attributes: map[string]schema.Attribute{
+					"track": schema.SingleNestedAttribute{
+						Computed:    true,
+						Description: "Track settings.",
+						Attributes: map[string]schema.Attribute{
+							"allow_unplanned_events": schema.BoolAttribute{
+								Computed:    true,
+								Description: "Enable to allow unplanned track events.",
+							},
+							"allow_unplanned_event_properties": schema.BoolAttribute{
+								Computed:    true,
+								Description: "Enable to allow unplanned track event properties.",
+							},
+							"allow_event_on_violations": schema.BoolAttribute{
+								Computed:    true,
+								Description: "Allow track event on violations.",
+							},
+							"allow_properties_on_violations": schema.BoolAttribute{
+								Computed:    true,
+								Description: "Enable to allow track properties on violations.",
+							},
+							"common_event_on_violations": schema.StringAttribute{
+								Computed:    true,
+								Description: "The common track event on violations.",
+							},
 						},
+					},
+					"identify": schema.SingleNestedAttribute{
+						Computed:    true,
+						Description: "Identify settings.",
+						Attributes: map[string]schema.Attribute{
+							"allow_unplanned_traits": schema.BoolAttribute{
+								Computed:    true,
+								Description: "Enable to allow unplanned identify traits.",
+							},
+							"allow_traits_on_violations": schema.BoolAttribute{
+								Computed:    true,
+								Description: "Enable to allow identify traits on violations.",
+							},
+							"common_event_on_violations": schema.StringAttribute{
+								Computed:    true,
+								Description: "The common identify event on violations.",
+							},
+						},
+					},
+					"group": schema.SingleNestedAttribute{
+						Computed:    true,
+						Description: "Group settings.",
+						Attributes: map[string]schema.Attribute{
+							"allow_unplanned_traits": schema.BoolAttribute{
+								Computed:    true,
+								Description: "Enable to allow unplanned group traits.",
+							},
+							"allow_traits_on_violations": schema.BoolAttribute{
+								Computed:    true,
+								Description: "Enable to allow group traits on violations.",
+							},
+							"common_event_on_violations": schema.StringAttribute{
+								Computed:    true,
+								Description: "The common group event on violations.",
+							},
+						},
+					},
+					"forwarding_violations_to": schema.StringAttribute{
+						Computed:    true,
+						Description: "Source id to forward violations to.",
+					},
+					"forwarding_blocked_events_to": schema.StringAttribute{
+						Computed:    true,
+						Description: "Source id to forward blocked events to.",
 					},
 				},
 			},
@@ -220,8 +292,26 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	source := out.Data.Source
 
+	var schemaSettings *api.Settings
+	if config.SchemaSettings != nil {
+		settingsOut, body, err := d.client.SourcesApi.ListSchemaSettingsInSource(d.authContext, source.Id).Execute()
+		if body != nil {
+			defer body.Body.Close()
+		}
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to read Source schema settings",
+				getError(err, body),
+			)
+
+			return
+		}
+
+		schemaSettings = &settingsOut.Data.Settings
+	}
+
 	var state models.SourceState
-	err = state.Fill(source)
+	err = state.Fill(source, schemaSettings)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
