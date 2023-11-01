@@ -38,7 +38,7 @@ func (d *DestinationState) Fill(destination *api.Destination) error {
 	d.SourceID = types.StringValue(destination.SourceId)
 	d.Enabled = types.BoolValue(destination.Enabled)
 	d.Metadata = &destinationMetadata
-	settings, err := d.getSettings(destination.Settings)
+	settings, err := GetSettingsFromMap(destination.Settings)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (d *DestinationState) Fill(destination *api.Destination) error {
 	return nil
 }
 
-func (d *DestinationState) getSettings(settings map[string]interface{}) (jsontypes.Normalized, error) {
+func GetSettingsFromMap(settings map[string]interface{}) (jsontypes.Normalized, error) {
 	jsonSettingsString, err := json.Marshal(settings)
 	if err != nil {
 		return jsontypes.NewNormalizedNull(), err

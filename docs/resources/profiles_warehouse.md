@@ -41,6 +41,8 @@ resource "segment_profiles_warehouse" "example" {
 			
 			 You can find the full list of Warehouse metadata and related settings information in the
 			 '/catalog/warehouses' endpoint.
+			 
+			 Only settings included in the configuration will be managed by Terraform.
 - `space_id` (String) The Space id.
 
 ### Optional

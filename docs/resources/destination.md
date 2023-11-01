@@ -35,7 +35,7 @@ resource "segment_destination" "my_destination" {
 
 - `enabled` (Boolean)
 - `metadata` (Attributes) (see [below for nested schema](#nestedatt--metadata))
-- `settings` (String) The settings associated with the Destination.
+- `settings` (String) The settings associated with the Destination. Only settings included in the configuration will be managed by Terraform.
 - `source_id` (String)
 
 ### Optional

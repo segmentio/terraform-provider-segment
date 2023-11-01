@@ -32,7 +32,7 @@ resource "segment_warehouse" "example" {
 ### Required
 
 - `metadata` (Attributes) The metadata for the Warehouse. (see [below for nested schema](#nestedatt--metadata))
-- `settings` (String) The settings associated with this Warehouse.  Common settings are connection-related configuration used to connect to it, for example host, username, and port.
+- `settings` (String) The settings associated with this Warehouse. Common settings are connection-related configuration used to connect to it, for example host, username, and port. Only settings included in the configuration will be managed by Terraform.
 
 ### Optional
 

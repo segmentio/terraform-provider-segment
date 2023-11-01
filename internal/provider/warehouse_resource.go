@@ -169,7 +169,7 @@ func (r *warehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			},
 			"settings": schema.StringAttribute{
 				Required:    true,
-				Description: "The settings associated with this Warehouse.  Common settings are connection-related configuration used to connect to it, for example host, username, and port.",
+				Description: "The settings associated with this Warehouse. Common settings are connection-related configuration used to connect to it, for example host, username, and port. Only settings included in the configuration will be managed by Terraform.",
 				CustomType:  jsontypes.NormalizedType{},
 			},
 		},
