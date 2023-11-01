@@ -55,6 +55,9 @@ func (r *insertFunctionInstanceResource) Schema(_ context.Context, _ resource.Sc
 			"integration_id": schema.StringAttribute{
 				Required:    true,
 				Description: "The Source or Destination id to be connected.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -66,7 +69,7 @@ func (r *insertFunctionInstanceResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"settings": schema.StringAttribute{
 				Required:    true,
-				Description: `An object that contains settings for this insert Function instance based on the settings present in the insert Function class.`,
+				Description: `An object that contains settings for this insert Function instance based on the settings present in the insert Function class. Only settings included in the configuration will be managed by Terraform.`,
 				CustomType:  jsontypes.NormalizedType{},
 			},
 		},
@@ -108,7 +111,7 @@ func (r *insertFunctionInstanceResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	insertFunctionInstance := out.Data.GetInsertFunctionInstance()
+	insertFunctionInstance := out.Data.InsertFunctionInstance
 
 	var state models.InsertFunctionInstanceState
 	err = state.Fill(insertFunctionInstance)
@@ -142,7 +145,7 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	out, body, err := r.client.FunctionsApi.ListInsertFunctionInstances(r.authContext, previousState.DestinationID.ValueString(), previousState.ID.ValueString()).Execute()
+	out, body, err := r.client.FunctionsApi.GetInsertFunctionInstance(r.authContext, previousState.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -157,7 +160,7 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 
 	var state models.InsertFunctionInstanceState
 
-	err = state.Fill(api.InsertFunctionInstance(out.Data.GetSubscription()))
+	err = state.Fill(api.InsertFunctionInstance(out.Data.InsertFunctionInstance))
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Insert Function instance state",

@@ -192,7 +192,7 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 			},
 			"settings": schema.StringAttribute{
 				Required:    true,
-				Description: "The settings associated with the Source.",
+				Description: "The settings associated with the Source. Only settings included in the configuration will be managed by Terraform.",
 				CustomType:  jsontypes.NormalizedType{},
 			},
 			"workspace_id": schema.StringAttribute{

@@ -85,7 +85,7 @@ func (r *destinationSubscriptionResource) Schema(_ context.Context, _ resource.S
 			},
 			"settings": schema.StringAttribute{
 				Required:    true,
-				Description: `The customer settings for action fields.`,
+				Description: `The customer settings for action fields. Only settings included in the configuration will be managed by Terraform.`,
 				CustomType:  jsontypes.NormalizedType{},
 			},
 		},
