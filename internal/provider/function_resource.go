@@ -100,7 +100,7 @@ func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 							Required:    true,
 							Description: "The type of this Function Setting.",
 							Validators: []validator.String{
-								stringvalidator.RegexMatches(regexp.MustCompile("^[A-Z]+$"), "'type' must be in all uppercase"),
+								stringvalidator.RegexMatches(regexp.MustCompile("^[A-Z_]+$"), "'type' must be in all uppercase"),
 							},
 						},
 						"required": schema.BoolAttribute{
@@ -198,6 +198,11 @@ func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, r
 	function := response.Data.GetFunction()
 	state.Fill(function)
 
+	// Destination functions append workspace name to display name causing inconsistency
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
+		state.DisplayName = previousState.DisplayName
+	}
+
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -248,6 +253,11 @@ func (r *functionResource) Update(ctx context.Context, req resource.UpdateReques
 	function := out.Data.GetFunction()
 
 	state.Fill(api.Function(function))
+
+	// Destination functions append workspace name to display name causing inconsistency
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
+		state.DisplayName = plan.DisplayName
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

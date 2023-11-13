@@ -77,7 +77,7 @@ func (r *destinationResource) Schema(_ context.Context, _ resource.SchemaRequest
 			},
 			"settings": schema.StringAttribute{
 				Required:    true,
-				Description: "The settings associated with the Destination.",
+				Description: "The settings associated with the Destination. Only settings included in the configuration will be managed by Terraform.",
 				CustomType:  jsontypes.NormalizedType{},
 			},
 		},

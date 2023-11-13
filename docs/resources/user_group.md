@@ -84,7 +84,3 @@ Required:
 
 - `key` (String) The key that represents the name of this label.
 - `value` (String) The value associated with the key of this label.
-
-Read-Only:
-
-- `description` (String) An optional description of the purpose of this label.

@@ -85,7 +85,9 @@ func (r *profilesWarehouseResource) Schema(_ context.Context, _ resource.SchemaR
 			 for a Warehouse are described in the 'options' object of the associated Warehouse metadata.
 			
 			 You can find the full list of Warehouse metadata and related settings information in the
-			 '/catalog/warehouses' endpoint.`,
+			 '/catalog/warehouses' endpoint.
+			 
+			 Only settings included in the configuration will be managed by Terraform.`,
 				CustomType: jsontypes.NormalizedType{},
 			},
 		},

@@ -99,10 +99,6 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 													Description: "The value associated with the key of this label.",
 													Computed:    true,
 												},
-												"description": schema.StringAttribute{
-													Description: "An optional description of the purpose of this label.",
-													Computed:    true,
-												},
 											},
 										},
 									},

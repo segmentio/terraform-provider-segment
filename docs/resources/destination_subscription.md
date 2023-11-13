@@ -40,7 +40,7 @@ resource "segment_destination_subscription" "send_to_webhook" {
 - `destination_id` (String) The associated Destination instance id.
 - `enabled` (Boolean) Is the subscription enabled.
 - `name` (String) The name of the subscription.
-- `settings` (String) The customer settings for action fields.
+- `settings` (String) The customer settings for action fields. Only settings included in the configuration will be managed by Terraform.
 - `trigger` (String) FQL string that describes what events should trigger a Destination action.
 
 ### Optional

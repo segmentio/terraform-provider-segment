@@ -35,6 +35,7 @@ data "segment_source" "my_source" {
 - `enabled` (Boolean) Enable to receive data from the Source.
 - `labels` (Attributes List) A list of labels applied to the Source. (see [below for nested schema](#nestedatt--labels))
 - `metadata` (Attributes) The metadata for the Source. (see [below for nested schema](#nestedatt--metadata))
+- `schema_settings` (Attributes) The schema settings associated with the Source. (see [below for nested schema](#nestedatt--schema_settings))
 - `settings` (String) The settings associated with the Source.
 - `slug` (String) The slug used to identify the Source in the Segment app.
 - `workspace_id` (String) The id of the Workspace that owns the Source.
@@ -45,7 +46,6 @@ data "segment_source" "my_source" {
 
 Read-Only:
 
-- `description` (String) An optional description of the purpose of this label.
 - `key` (String) The key that represents the name of this label.
 - `value` (String) The value associated with the key of this label.
 
@@ -85,3 +85,47 @@ Read-Only:
 - `name` (String) The name identifying this option in the context of a Segment Integration.
 - `required` (Boolean) Whether this is a required option when setting up the Integration.
 - `type` (String) Defines the type for this option in the schema. Types are most commonly strings, but may also represent other primitive types, such as booleans, and numbers, as well as complex types, such as objects and arrays.
+
+
+
+<a id="nestedatt--schema_settings"></a>
+### Nested Schema for `schema_settings`
+
+Read-Only:
+
+- `forwarding_blocked_events_to` (String) Source id to forward blocked events to.
+- `forwarding_violations_to` (String) Source id to forward violations to.
+- `group` (Attributes) Group settings. (see [below for nested schema](#nestedatt--schema_settings--group))
+- `identify` (Attributes) Identify settings. (see [below for nested schema](#nestedatt--schema_settings--identify))
+- `track` (Attributes) Track settings. (see [below for nested schema](#nestedatt--schema_settings--track))
+
+<a id="nestedatt--schema_settings--group"></a>
+### Nested Schema for `schema_settings.group`
+
+Read-Only:
+
+- `allow_traits_on_violations` (Boolean) Enable to allow group traits on violations.
+- `allow_unplanned_traits` (Boolean) Enable to allow unplanned group traits.
+- `common_event_on_violations` (String) The common group event on violations.
+
+
+<a id="nestedatt--schema_settings--identify"></a>
+### Nested Schema for `schema_settings.identify`
+
+Read-Only:
+
+- `allow_traits_on_violations` (Boolean) Enable to allow identify traits on violations.
+- `allow_unplanned_traits` (Boolean) Enable to allow unplanned identify traits.
+- `common_event_on_violations` (String) The common identify event on violations.
+
+
+<a id="nestedatt--schema_settings--track"></a>
+### Nested Schema for `schema_settings.track`
+
+Read-Only:
+
+- `allow_event_on_violations` (Boolean) Allow track event on violations.
+- `allow_properties_on_violations` (Boolean) Enable to allow track properties on violations.
+- `allow_unplanned_event_properties` (Boolean) Enable to allow unplanned track event properties.
+- `allow_unplanned_events` (Boolean) Enable to allow unplanned track events.
+- `common_event_on_violations` (String) The common track event on violations.
