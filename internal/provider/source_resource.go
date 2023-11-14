@@ -2,10 +2,8 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"github.com/avast/retry-go/v4"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
@@ -426,24 +424,16 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 
 		if apiSchemaSettings != nil {
-			schemaSettingsOutput, err := retry.DoWithData(func() (api.SourceSettingsOutputV1, error) {
-				settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
-					Track:                     apiSchemaSettings.Track,
-					Identify:                  apiSchemaSettings.Identify,
-					Group:                     apiSchemaSettings.Group,
-					ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
-					ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
-				}).Execute()
-				if body != nil {
-					defer body.Body.Close()
-				}
-				if err != nil {
-					return api.SourceSettingsOutputV1{}, errors.New(getError(err, body))
-				}
-
-				return settingsOut.Data.Settings, nil
-			}, retry.Delay(1000))
-
+			settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
+				Track:                     apiSchemaSettings.Track,
+				Identify:                  apiSchemaSettings.Identify,
+				Group:                     apiSchemaSettings.Group,
+				ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
+				ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
+			}).Execute()
+			if body != nil {
+				defer body.Body.Close()
+			}
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to update Source schema settings",
@@ -453,7 +443,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 				return
 			}
 
-			schemaSettings = &schemaSettingsOutput
+			schemaSettings = &settingsOut.Data.Settings
 		}
 	}
 
@@ -660,24 +650,16 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 
 		if apiSchemaSettings != nil {
-			schemaSettingsOutput, err := retry.DoWithData(func() (api.SourceSettingsOutputV1, error) {
-				settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
-					Track:                     apiSchemaSettings.Track,
-					Identify:                  apiSchemaSettings.Identify,
-					Group:                     apiSchemaSettings.Group,
-					ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
-					ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
-				}).Execute()
-				if body != nil {
-					defer body.Body.Close()
-				}
-				if err != nil {
-					return api.SourceSettingsOutputV1{}, errors.New(getError(err, body))
-				}
-
-				return settingsOut.Data.Settings, nil
-			}, retry.Delay(1000))
-
+			settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
+				Track:                     apiSchemaSettings.Track,
+				Identify:                  apiSchemaSettings.Identify,
+				Group:                     apiSchemaSettings.Group,
+				ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
+				ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
+			}).Execute()
+			if body != nil {
+				defer body.Body.Close()
+			}
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to update Source schema settings",
@@ -687,7 +669,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 				return
 			}
 
-			schemaSettings = &schemaSettingsOutput
+			schemaSettings = &settingsOut.Data.Settings
 		}
 	}
 
