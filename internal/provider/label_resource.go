@@ -116,7 +116,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	outLabel := out.Data.Label
 	var state models.LabelResourceState
-	state.Fill(api.LabelV1(outLabel))
+	state.Fill(outLabel)
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)

@@ -168,7 +168,7 @@ func (r *reverseETLModelResource) Read(ctx context.Context, req resource.ReadReq
 
 	var state models.ReverseETLModelState
 
-	err = state.Fill(api.ReverseEtlModel(out.Data.ReverseEtlModel))
+	err = state.Fill(out.Data.ReverseEtlModel)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Reverse ETL model state",

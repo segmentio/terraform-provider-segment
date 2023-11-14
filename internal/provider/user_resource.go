@@ -262,7 +262,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			return
 		}
 
-		user = api.UserV1(out.Data.User)
+		user = out.Data.User
 	}
 
 	state = models.UserState{}
@@ -409,7 +409,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	state = models.UserState{}
-	err = state.Fill(api.UserV1(out.Data.User))
+	err = state.Fill(out.Data.User)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate user state",

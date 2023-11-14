@@ -141,7 +141,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	var state models.UserDataSourceState
-	err = state.Fill(api.UserV1(out.Data.User))
+	err = state.Fill(out.Data.User)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read user",

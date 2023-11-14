@@ -176,7 +176,7 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 
 	var state models.DestinationSubscriptionState
 
-	err = state.Fill(api.DestinationSubscription(out.Data.GetSubscription()))
+	err = state.Fill(out.Data.GetSubscription())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Destination subscription state",
@@ -239,7 +239,7 @@ func (r *destinationSubscriptionResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	err = state.Fill(api.DestinationSubscription(out.Data.GetSubscription()))
+	err = state.Fill(out.Data.GetSubscription())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Destination subscription state",
