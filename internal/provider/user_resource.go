@@ -145,7 +145,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	_, body, err := r.client.IAMUsersApi.CreateInvites(r.authContext).CreateInvitesV1Input(api.CreateInvitesV1Input{
+	_, body, err := r.client.IAMUsersAPI.CreateInvites(r.authContext).CreateInvitesV1Input(api.CreateInvitesV1Input{
 		Invites: []api.InviteV1{
 			{
 				Email:       plan.Email.ValueString(),
@@ -249,7 +249,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 		user = *foundUser
 	} else { // Handle user
-		out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, state.ID.ValueString()).Execute()
+		out, body, err := r.client.IAMUsersAPI.GetUser(r.authContext, state.ID.ValueString()).Execute()
 		if body != nil {
 			defer body.Body.Close()
 		}
@@ -318,7 +318,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		}
 
 		if foundUser == nil { // Handle invite
-			_, body, err := r.client.IAMUsersApi.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
+			_, body, err := r.client.IAMUsersAPI.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
 			if body != nil {
 				defer body.Body.Close()
 			}
@@ -331,7 +331,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 				return
 			}
 
-			_, body, err = r.client.IAMUsersApi.CreateInvites(r.authContext).CreateInvitesV1Input(api.CreateInvitesV1Input{
+			_, body, err = r.client.IAMUsersAPI.CreateInvites(r.authContext).CreateInvitesV1Input(api.CreateInvitesV1Input{
 				Invites: []api.InviteV1{
 					{
 						Email:       plan.Email.ValueString(),
@@ -380,7 +380,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		userID = state.ID.ValueString()
 	}
 
-	_, body, err := r.client.IAMUsersApi.ReplacePermissionsForUser(r.authContext, userID).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
+	_, body, err := r.client.IAMUsersAPI.ReplacePermissionsForUser(r.authContext, userID).ReplacePermissionsForUserV1Input(api.ReplacePermissionsForUserV1Input{
 		Permissions: models.PermissionsToPermissionsInput(permissions),
 	}).Execute()
 	if body != nil {
@@ -395,7 +395,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	out, body, err := r.client.IAMUsersApi.GetUser(r.authContext, userID).Execute()
+	out, body, err := r.client.IAMUsersAPI.GetUser(r.authContext, userID).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -448,7 +448,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		}
 
 		if foundUser == nil { // Handle invite
-			_, body, err := r.client.IAMUsersApi.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
+			_, body, err := r.client.IAMUsersAPI.DeleteInvites(r.authContext).Emails([]string{state.Email.ValueString()}).Execute()
 			if body != nil {
 				defer body.Body.Close()
 			}
@@ -467,7 +467,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		userID = state.ID.ValueString()
 	}
 
-	_, body, err := r.client.IAMUsersApi.DeleteUsers(r.authContext).UserIds([]string{userID}).Execute()
+	_, body, err := r.client.IAMUsersAPI.DeleteUsers(r.authContext).UserIds([]string{userID}).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -507,7 +507,7 @@ func findUser(authContext context.Context, client *api.APIClient, email string) 
 	pageToken.Set(&firstPageToken)
 
 	for pageToken.IsSet() {
-		out, body, err := client.IAMUsersApi.ListUsers(authContext).Pagination(api.PaginationInput{
+		out, body, err := client.IAMUsersAPI.ListUsers(authContext).Pagination(api.PaginationInput{
 			Count:  MaxPageSize,
 			Cursor: pageToken.Get(),
 		}).Execute()

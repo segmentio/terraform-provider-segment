@@ -73,7 +73,7 @@ type GroupSettings struct {
 	CommonEventOnViolations types.String `tfsdk:"common_event_on_violations"`
 }
 
-func (s *SourceState) Fill(source api.Source4, schemaSettings *api.Settings) error {
+func (s *SourceState) Fill(source api.SourceV1, schemaSettings *api.SourceSettingsOutputV1) error {
 	s.ID = types.StringValue(source.Id)
 	s.Name = types.StringPointerValue(source.Name)
 	s.Slug = types.StringValue(source.Slug)
@@ -82,7 +82,7 @@ func (s *SourceState) Fill(source api.Source4, schemaSettings *api.Settings) err
 	s.WriteKeys = s.getWriteKeys(source.WriteKeys)
 	s.Labels = s.getLabels(source.Labels)
 	s.Metadata = &SourceMetadataState{}
-	err := s.Metadata.Fill(api.SourceMetadata(source.Metadata))
+	err := s.Metadata.Fill(source.Metadata)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (s *SourceState) getWriteKeys(writeKeys []string) []types.String {
 	return writeKeysToAdd
 }
 
-func (s *SchemaSettingsState) Fill(schemaSettings api.Settings) {
+func (s *SchemaSettingsState) Fill(schemaSettings api.SourceSettingsOutputV1) {
 	s.Track = &TrackSettings{}
 	s.Track.Fill(schemaSettings.Track)
 
@@ -136,7 +136,7 @@ func (s *SchemaSettingsState) Fill(schemaSettings api.Settings) {
 	s.ForwardingBlockedEventsTo = types.StringPointerValue(schemaSettings.ForwardingBlockedEventsTo)
 }
 
-func (t *TrackSettings) Fill(trackSettings *api.Track) {
+func (t *TrackSettings) Fill(trackSettings *api.TrackSourceSettingsV1) {
 	if trackSettings == nil {
 		return
 	}
@@ -148,7 +148,7 @@ func (t *TrackSettings) Fill(trackSettings *api.Track) {
 	t.CommonEventOnViolations = types.StringPointerValue(trackSettings.CommonEventOnViolations)
 }
 
-func (i *IdentifySettings) Fill(identifySettings *api.Identify) {
+func (i *IdentifySettings) Fill(identifySettings *api.IdentifySourceSettingsV1) {
 	if identifySettings == nil {
 		return
 	}
@@ -158,7 +158,7 @@ func (i *IdentifySettings) Fill(identifySettings *api.Identify) {
 	i.CommonEventOnViolations = types.StringPointerValue(identifySettings.CommonEventOnViolations)
 }
 
-func (g *GroupSettings) Fill(groupSettings *api.Group) {
+func (g *GroupSettings) Fill(groupSettings *api.GroupSourceSettingsV1) {
 	if groupSettings == nil {
 		return
 	}
@@ -168,12 +168,8 @@ func (g *GroupSettings) Fill(groupSettings *api.Group) {
 	g.CommonEventOnViolations = types.StringPointerValue(groupSettings.CommonEventOnViolations)
 }
 
-func GetSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
-	if !settings.IsSet() {
-		return jsontypes.NewNormalizedNull(), nil
-	}
-
-	jsonSettingsString, err := json.Marshal(settings.Get().Get())
+func GetSettings(settings map[string]interface{}) (jsontypes.Normalized, error) {
+	jsonSettingsString, err := json.Marshal(settings)
 	if err != nil {
 		return jsontypes.NewNormalizedNull(), err
 	}
@@ -181,7 +177,7 @@ func GetSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
 	return jsontypes.NewNormalizedValue(string(jsonSettingsString)), nil
 }
 
-func GetSchemaSettingsFromPlan(ctx context.Context, settings types.Object) (*api.Settings, diag.Diagnostics) {
+func GetSchemaSettingsFromPlan(ctx context.Context, settings types.Object) (*api.SourceSettingsOutputV1, diag.Diagnostics) {
 	if settings.IsNull() || settings.IsUnknown() {
 		return nil, nil
 	}
@@ -192,7 +188,7 @@ func GetSchemaSettingsFromPlan(ctx context.Context, settings types.Object) (*api
 		return nil, diags
 	}
 
-	var apiTrackSettings *api.Track
+	var apiTrackSettings *api.TrackSourceSettingsV1
 	if !schemaSettingsPlan.Track.IsNull() && !schemaSettingsPlan.Track.IsUnknown() {
 		var trackSettings TrackSettings
 		diags = schemaSettingsPlan.Track.As(ctx, &trackSettings, basetypes.ObjectAsOptions{})
@@ -200,7 +196,7 @@ func GetSchemaSettingsFromPlan(ctx context.Context, settings types.Object) (*api
 			return nil, diags
 		}
 
-		apiTrackSettings = &api.Track{
+		apiTrackSettings = &api.TrackSourceSettingsV1{
 			AllowUnplannedEvents:          trackSettings.AllowUnplannedEvents.ValueBoolPointer(),
 			AllowUnplannedEventProperties: trackSettings.AllowUnplannedEventProperties.ValueBoolPointer(),
 			AllowEventOnViolations:        trackSettings.AllowEventOnViolations.ValueBoolPointer(),
@@ -209,7 +205,7 @@ func GetSchemaSettingsFromPlan(ctx context.Context, settings types.Object) (*api
 		}
 	}
 
-	var apiIdentifySettings *api.Identify
+	var apiIdentifySettings *api.IdentifySourceSettingsV1
 	if !schemaSettingsPlan.Identify.IsNull() && !schemaSettingsPlan.Identify.IsUnknown() {
 		var identifySettings IdentifySettings
 		diags = schemaSettingsPlan.Identify.As(ctx, &identifySettings, basetypes.ObjectAsOptions{})
@@ -217,14 +213,14 @@ func GetSchemaSettingsFromPlan(ctx context.Context, settings types.Object) (*api
 			return nil, diags
 		}
 
-		apiIdentifySettings = &api.Identify{
+		apiIdentifySettings = &api.IdentifySourceSettingsV1{
 			AllowUnplannedTraits:    identifySettings.AllowUnplannedTraits.ValueBoolPointer(),
 			AllowTraitsOnViolations: identifySettings.AllowTraitsOnViolations.ValueBoolPointer(),
 			CommonEventOnViolations: identifySettings.CommonEventOnViolations.ValueStringPointer(),
 		}
 	}
 
-	var apiGroupSettings *api.Group
+	var apiGroupSettings *api.GroupSourceSettingsV1
 	if !schemaSettingsPlan.Group.IsNull() && !schemaSettingsPlan.Group.IsUnknown() {
 		var groupSettings GroupSettings
 		diags = schemaSettingsPlan.Group.As(ctx, &groupSettings, basetypes.ObjectAsOptions{})
@@ -232,14 +228,14 @@ func GetSchemaSettingsFromPlan(ctx context.Context, settings types.Object) (*api
 			return nil, diags
 		}
 
-		apiGroupSettings = &api.Group{
+		apiGroupSettings = &api.GroupSourceSettingsV1{
 			AllowUnplannedTraits:    groupSettings.AllowUnplannedTraits.ValueBoolPointer(),
 			AllowTraitsOnViolations: groupSettings.AllowTraitsOnViolations.ValueBoolPointer(),
 			CommonEventOnViolations: groupSettings.CommonEventOnViolations.ValueStringPointer(),
 		}
 	}
 
-	return &api.Settings{
+	return &api.SourceSettingsOutputV1{
 		Track:                     apiTrackSettings,
 		Identify:                  apiIdentifySettings,
 		Group:                     apiGroupSettings,

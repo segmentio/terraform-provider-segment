@@ -82,7 +82,7 @@ func (d *warehouseDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	response, body, err := d.client.WarehousesApi.GetWarehouse(d.authContext, state.ID.ValueString()).Execute()
+	response, body, err := d.client.WarehousesAPI.GetWarehouse(d.authContext, state.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

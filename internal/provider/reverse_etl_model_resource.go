@@ -99,9 +99,8 @@ func (r *reverseETLModelResource) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(scheduleConfig)
 
-	out, body, err := r.client.ReverseETLApi.CreateReverseEtlModel(r.authContext).CreateReverseEtlModelInput(api.CreateReverseEtlModelInput{
+	out, body, err := r.client.ReverseETLAPI.CreateReverseEtlModel(r.authContext).CreateReverseEtlModelInput(api.CreateReverseEtlModelInput{
 		Name:                  plan.Name.ValueString(),
 		SourceId:              plan.SourceID.ValueString(),
 		Description:           plan.Description.ValueString(),
@@ -109,7 +108,7 @@ func (r *reverseETLModelResource) Create(ctx context.Context, req resource.Creat
 		ScheduleStrategy:      plan.ScheduleStrategy.ValueString(),
 		Query:                 plan.Query.ValueString(),
 		QueryIdentifierColumn: plan.QueryIdentifierColumn.ValueString(),
-		ScheduleConfig:        *api.NewNullableModelMap(modelMap),
+		ScheduleConfig:        scheduleConfig,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
@@ -154,7 +153,7 @@ func (r *reverseETLModelResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	out, body, err := r.client.ReverseETLApi.GetReverseEtlModel(r.authContext, previousState.ID.ValueString()).Execute()
+	out, body, err := r.client.ReverseETLAPI.GetReverseEtlModel(r.authContext, previousState.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -207,14 +206,13 @@ func (r *reverseETLModelResource) Update(ctx context.Context, req resource.Updat
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(scheduleConfig)
 
-	out, body, err := r.client.ReverseETLApi.UpdateReverseEtlModel(r.authContext, state.ID.ValueString()).UpdateReverseEtlModelInput(api.UpdateReverseEtlModelInput{
+	out, body, err := r.client.ReverseETLAPI.UpdateReverseEtlModel(r.authContext, state.ID.ValueString()).UpdateReverseEtlModelInput(api.UpdateReverseEtlModelInput{
 		Name:                  plan.Name.ValueStringPointer(),
 		Description:           plan.Description.ValueStringPointer(),
 		Enabled:               plan.Enabled.ValueBoolPointer(),
 		ScheduleStrategy:      plan.ScheduleStrategy.ValueStringPointer(),
-		ScheduleConfig:        *api.NewNullableModelMap(modelMap),
+		ScheduleConfig:        scheduleConfig,
 		Query:                 plan.Query.ValueStringPointer(),
 		QueryIdentifierColumn: plan.QueryIdentifierColumn.ValueStringPointer(),
 	}).Execute()
@@ -255,7 +253,7 @@ func (r *reverseETLModelResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	_, body, err := r.client.ReverseETLApi.DeleteReverseEtlModel(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.ReverseETLAPI.DeleteReverseEtlModel(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

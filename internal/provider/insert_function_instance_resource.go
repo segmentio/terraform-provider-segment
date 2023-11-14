@@ -92,7 +92,7 @@ func (r *insertFunctionInstanceResource) Create(ctx context.Context, req resourc
 	}
 
 	enabled := plan.Enabled.ValueBool()
-	out, body, err := r.client.FunctionsApi.CreateInsertFunctionInstance(r.authContext).CreateInsertFunctionInstanceAlphaInput(api.CreateInsertFunctionInstanceAlphaInput{
+	out, body, err := r.client.FunctionsAPI.CreateInsertFunctionInstance(r.authContext).CreateInsertFunctionInstanceAlphaInput(api.CreateInsertFunctionInstanceAlphaInput{
 		Name:          plan.Name.ValueString(),
 		FunctionId:    plan.FunctionID.ValueString(),
 		IntegrationId: plan.IntegrationID.ValueString(),
@@ -145,7 +145,7 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	out, body, err := r.client.FunctionsApi.GetInsertFunctionInstance(r.authContext, previousState.ID.ValueString()).Execute()
+	out, body, err := r.client.FunctionsAPI.GetInsertFunctionInstance(r.authContext, previousState.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -160,7 +160,7 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 
 	var state models.InsertFunctionInstanceState
 
-	err = state.Fill(api.InsertFunctionInstance(out.Data.InsertFunctionInstance))
+	err = state.Fill(out.Data.InsertFunctionInstance)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Insert Function instance state",
@@ -203,7 +203,7 @@ func (r *insertFunctionInstanceResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	out, body, err := r.client.FunctionsApi.UpdateInsertFunctionInstance(r.authContext, state.ID.ValueString()).UpdateInsertFunctionInstanceAlphaInput(api.UpdateInsertFunctionInstanceAlphaInput{
+	out, body, err := r.client.FunctionsAPI.UpdateInsertFunctionInstance(r.authContext, state.ID.ValueString()).UpdateInsertFunctionInstanceAlphaInput(api.UpdateInsertFunctionInstanceAlphaInput{
 		Enabled:  plan.Enabled.ValueBoolPointer(),
 		Name:     plan.Name.ValueStringPointer(),
 		Settings: settings,
@@ -220,7 +220,7 @@ func (r *insertFunctionInstanceResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	err = state.Fill(api.InsertFunctionInstance(out.Data.InsertFunctionInstance))
+	err = state.Fill(out.Data.InsertFunctionInstance)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Insert Function instance state",
@@ -248,7 +248,7 @@ func (r *insertFunctionInstanceResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	_, body, err := r.client.FunctionsApi.DeleteInsertFunctionInstance(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.FunctionsAPI.DeleteInsertFunctionInstance(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

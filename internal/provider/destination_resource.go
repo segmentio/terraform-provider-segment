@@ -535,7 +535,7 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	// Generate API request body from plan
-	out, body, err := r.client.DestinationsApi.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
+	out, body, err := r.client.DestinationsAPI.CreateDestination(r.authContext).CreateDestinationV1Input(input).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -548,10 +548,8 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	destination := api.Destination(out.Data.Destination)
-
 	var state models.DestinationState
-	err = state.Fill(&destination)
+	err = state.Fill(&out.Data.Destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Destination state",
@@ -581,7 +579,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	out, body, err := r.client.DestinationsApi.GetDestination(r.authContext, previousState.ID.ValueString()).Execute()
+	out, body, err := r.client.DestinationsAPI.GetDestination(r.authContext, previousState.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -643,7 +641,7 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	// Generate API request body from plan
-	out, body, err := r.client.DestinationsApi.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
+	out, body, err := r.client.DestinationsAPI.UpdateDestination(r.authContext, plan.ID.ValueString()).UpdateDestinationV1Input(input).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -656,10 +654,8 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	destination := api.Destination(out.Data.Destination)
-
 	var state models.DestinationState
-	err = state.Fill(&destination)
+	err = state.Fill(&out.Data.Destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Destination state",
@@ -690,7 +686,7 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, body, err := r.client.DestinationsApi.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
+	_, body, err := r.client.DestinationsAPI.DeleteDestination(r.authContext, state.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

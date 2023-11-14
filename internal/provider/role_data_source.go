@@ -83,7 +83,7 @@ func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	out, body, err := d.client.IAMRolesApi.ListRoles(d.authContext).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
+	out, body, err := d.client.IAMRolesAPI.ListRoles(d.authContext).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

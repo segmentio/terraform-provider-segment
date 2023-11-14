@@ -15,7 +15,7 @@ type InsertFunctionInstanceState struct {
 	Settings      jsontypes.Normalized `tfsdk:"settings"`
 }
 
-func (i *InsertFunctionInstanceState) Fill(instance api.InsertFunctionInstance) error {
+func (i *InsertFunctionInstanceState) Fill(instance api.InsertFunctionInstanceAlpha) error {
 	i.ID = types.StringValue(instance.Id)
 	i.FunctionID = types.StringValue(instance.ClassId)
 	i.IntegrationID = types.StringValue(instance.IntegrationId)

@@ -8,11 +8,14 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-go v0.19.0
 	github.com/hashicorp/terraform-plugin-testing v1.5.1
-	github.com/segmentio/public-api-sdk-go v0.0.0-20231101181027-db50b48ed4f0
+	github.com/segmentio/public-api-sdk-go v0.0.0-20231114153454-3be55fde5c99
 	gotest.tools/gotestsum v1.11.0
 )
 
-require github.com/bitfield/gotestdox v0.2.1 // indirect
+require (
+	github.com/avast/retry-go/v4 v4.5.1 // indirect
+	github.com/bitfield/gotestdox v0.2.1 // indirect
+)
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -74,7 +77,6 @@ require (
 	golang.org/x/exp v0.0.0-20230809150735-7b3493d9a819 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/oauth2 v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect

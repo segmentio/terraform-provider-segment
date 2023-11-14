@@ -395,7 +395,7 @@ func (d *destinationMetadataDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
-	response, body, err := d.client.CatalogApi.GetDestinationMetadata(d.authContext, state.ID.ValueString()).Execute()
+	response, body, err := d.client.CatalogAPI.GetDestinationMetadata(d.authContext, state.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

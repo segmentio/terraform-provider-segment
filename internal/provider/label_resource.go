@@ -91,7 +91,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	label := api.Label{
+	label := api.LabelV1{
 		Key:   types.String.ValueString(plan.Key),
 		Value: types.String.ValueString(plan.Value),
 	}
@@ -99,7 +99,7 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 	label.Description = types.String.ValueStringPointer(plan.Description)
 
 	// Generate API request body from plan
-	out, body, err := r.client.LabelsApi.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
+	out, body, err := r.client.LabelsAPI.CreateLabel(r.authContext).CreateLabelV1Input(api.CreateLabelV1Input{
 		Label: label,
 	}).Execute()
 	if body != nil {
@@ -134,7 +134,7 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	response, body, err := r.client.LabelsApi.ListLabels(r.authContext).Execute()
+	response, body, err := r.client.LabelsAPI.ListLabels(r.authContext).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -196,7 +196,7 @@ func (r *labelResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	_, body, err := r.client.LabelsApi.DeleteLabel(r.authContext, state.Key.ValueString(), state.Value.ValueString()).Execute()
+	_, body, err := r.client.LabelsAPI.DeleteLabel(r.authContext, state.Key.ValueString(), state.Value.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

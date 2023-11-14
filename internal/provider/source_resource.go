@@ -2,8 +2,10 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/avast/retry-go/v4"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
@@ -348,13 +350,12 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(settings)
 
-	out, body, err := r.client.SourcesApi.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
+	out, body, err := r.client.SourcesAPI.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
 		Slug:       plan.Slug.ValueString(),
 		Enabled:    plan.Enabled.ValueBool(),
 		MetadataId: metadataID,
-		Settings:   *api.NewNullableModelMap(modelMap),
+		Settings:   settings,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
@@ -373,7 +374,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && plan.Name.ValueString() != "" {
 		// This is a workaround for the fact that "name" is allowed to be provided during update but not create
-		updateOut, body, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
+		updateOut, body, err := r.client.SourcesAPI.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
 			Name: plan.Name.ValueStringPointer(),
 		}).Execute()
 		if body != nil {
@@ -398,7 +399,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	if len(labels) > 0 {
-		_, body, err := r.client.SourcesApi.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
+		_, body, err := r.client.SourcesAPI.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
 			Labels: models.APILabelsToLabelsV1(labels),
 		}).Execute()
 		if body != nil {
@@ -416,7 +417,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		source.Labels = models.APILabelsToLabelsV1(labels)
 	}
 
-	var schemaSettings *api.Settings
+	var schemaSettings *api.SourceSettingsOutputV1
 	if !plan.SchemaSettings.IsNull() && !plan.SchemaSettings.IsUnknown() {
 		apiSchemaSettings, diags := models.GetSchemaSettingsFromPlan(ctx, plan.SchemaSettings)
 		resp.Diagnostics.Append(diags...)
@@ -425,16 +426,24 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 
 		if apiSchemaSettings != nil {
-			settingsOut, body, err := r.client.SourcesApi.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
-				Track:                     apiSchemaSettings.Track,
-				Identify:                  apiSchemaSettings.Identify,
-				Group:                     apiSchemaSettings.Group,
-				ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
-				ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
-			}).Execute()
-			if body != nil {
-				defer body.Body.Close()
-			}
+			schemaSettingsOutput, err := retry.DoWithData(func() (api.SourceSettingsOutputV1, error) {
+				settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
+					Track:                     apiSchemaSettings.Track,
+					Identify:                  apiSchemaSettings.Identify,
+					Group:                     apiSchemaSettings.Group,
+					ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
+					ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
+				}).Execute()
+				if body != nil {
+					defer body.Body.Close()
+				}
+				if err != nil {
+					return api.SourceSettingsOutputV1{}, errors.New(getError(err, body))
+				}
+
+				return settingsOut.Data.Settings, nil
+			}, retry.Delay(1000))
+
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to update Source schema settings",
@@ -444,13 +453,12 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 				return
 			}
 
-			s := api.Settings(settingsOut.Data.Settings)
-			schemaSettings = &s
+			schemaSettings = &schemaSettingsOutput
 		}
 	}
 
 	var state models.SourceState
-	err = state.Fill(api.Source4(source), schemaSettings)
+	err = state.Fill(source, schemaSettings)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
@@ -492,7 +500,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	out, body, err := r.client.SourcesApi.GetSource(r.authContext, id).Execute()
+	out, body, err := r.client.SourcesAPI.GetSource(r.authContext, id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -507,9 +515,9 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	source := out.Data.Source
 
-	var schemaSettings *api.Settings
+	var schemaSettings *api.SourceSettingsOutputV1
 	if previousState.SchemaSettings != nil {
-		settingsOut, body, err := r.client.SourcesApi.ListSchemaSettingsInSource(r.authContext, source.Id).Execute()
+		settingsOut, body, err := r.client.SourcesAPI.ListSchemaSettingsInSource(r.authContext, source.Id).Execute()
 		if body != nil {
 			defer body.Body.Close()
 		}
@@ -572,7 +580,6 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(settings)
 
 	var name *string
 	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && plan.Name.ValueString() != "" {
@@ -580,7 +587,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
-	existingSource, body, err := r.client.SourcesApi.GetSource(r.authContext, state.ID.ValueString()).Execute()
+	existingSource, body, err := r.client.SourcesAPI.GetSource(r.authContext, state.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -592,7 +599,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 		return
 	}
-	existingSettings := existingSource.Data.GetSource().Settings.Get().Get()
+	existingSettings := existingSource.Data.GetSource().Settings
 
 	for key := range existingSettings {
 		if settings[key] == nil {
@@ -600,11 +607,11 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 	}
 
-	out, body, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
+	out, body, err := r.client.SourcesAPI.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
 		Slug:     plan.Slug.ValueStringPointer(),
 		Enabled:  plan.Enabled.ValueBoolPointer(),
 		Name:     name,
-		Settings: *api.NewNullableModelMap(modelMap),
+		Settings: settings,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
@@ -626,7 +633,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 	if len(labels) > 0 {
-		_, body, err := r.client.SourcesApi.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
+		_, body, err := r.client.SourcesAPI.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
 			Labels: models.APILabelsToLabelsV1(labels),
 		}).Execute()
 		if body != nil {
@@ -644,7 +651,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		source.Labels = models.APILabelsToLabelsV1(labels)
 	}
 
-	var schemaSettings *api.Settings
+	var schemaSettings *api.SourceSettingsOutputV1
 	if !plan.SchemaSettings.IsNull() && !plan.SchemaSettings.IsUnknown() {
 		apiSchemaSettings, diags := models.GetSchemaSettingsFromPlan(ctx, plan.SchemaSettings)
 		resp.Diagnostics.Append(diags...)
@@ -653,16 +660,24 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 
 		if apiSchemaSettings != nil {
-			settingsOut, body, err := r.client.SourcesApi.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
-				Track:                     apiSchemaSettings.Track,
-				Identify:                  apiSchemaSettings.Identify,
-				Group:                     apiSchemaSettings.Group,
-				ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
-				ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
-			}).Execute()
-			if body != nil {
-				defer body.Body.Close()
-			}
+			schemaSettingsOutput, err := retry.DoWithData(func() (api.SourceSettingsOutputV1, error) {
+				settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
+					Track:                     apiSchemaSettings.Track,
+					Identify:                  apiSchemaSettings.Identify,
+					Group:                     apiSchemaSettings.Group,
+					ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
+					ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
+				}).Execute()
+				if body != nil {
+					defer body.Body.Close()
+				}
+				if err != nil {
+					return api.SourceSettingsOutputV1{}, errors.New(getError(err, body))
+				}
+
+				return settingsOut.Data.Settings, nil
+			}, retry.Delay(1000))
+
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Unable to update Source schema settings",
@@ -672,12 +687,11 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 				return
 			}
 
-			s := api.Settings(settingsOut.Data.Settings)
-			schemaSettings = &s
+			schemaSettings = &schemaSettingsOutput
 		}
 	}
 
-	err = state.Fill(api.Source4(source), schemaSettings)
+	err = state.Fill(source, schemaSettings)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
@@ -711,7 +725,7 @@ func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	_, body, err := r.client.SourcesApi.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.SourcesAPI.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

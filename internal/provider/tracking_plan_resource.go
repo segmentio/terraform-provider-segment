@@ -126,7 +126,7 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 		description = plan.Description.ValueStringPointer()
 	}
 
-	out, body, err := r.client.TrackingPlansApi.CreateTrackingPlan(r.authContext).CreateTrackingPlanV1Input(api.CreateTrackingPlanV1Input{
+	out, body, err := r.client.TrackingPlansAPI.CreateTrackingPlan(r.authContext).CreateTrackingPlanV1Input(api.CreateTrackingPlanV1Input{
 		Name:        plan.Name.ValueString(),
 		Type:        plan.Type.ValueString(),
 		Description: description,
@@ -168,7 +168,7 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 		rulesOut = append(rulesOut, apiRule)
 	}
 
-	_, body, err = r.client.TrackingPlansApi.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
+	_, body, err = r.client.TrackingPlansAPI.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
 		Rules: replaceRules,
 	}).Execute()
 	if body != nil {
@@ -184,7 +184,7 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	var state models.TrackingPlanState
-	err = state.Fill(api.TrackingPlan(trackingPlan), &rulesOut)
+	err = state.Fill(trackingPlan, &rulesOut)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Tracking Plan state",
@@ -217,7 +217,7 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	out, body, err := r.client.TrackingPlansApi.GetTrackingPlan(r.authContext, id).Execute()
+	out, body, err := r.client.TrackingPlansAPI.GetTrackingPlan(r.authContext, id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -248,7 +248,7 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 		}
 		state.Rules = rules
 	} else {
-		out, body, err := r.client.TrackingPlansApi.ListRulesFromTrackingPlan(r.authContext, id).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
+		out, body, err := r.client.TrackingPlansAPI.ListRulesFromTrackingPlan(r.authContext, id).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
 		if body != nil {
 			defer body.Body.Close()
 		}
@@ -305,7 +305,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 		description = plan.Description.ValueStringPointer()
 	}
 
-	_, body, err := r.client.TrackingPlansApi.UpdateTrackingPlan(r.authContext, config.ID.ValueString()).UpdateTrackingPlanV1Input(api.UpdateTrackingPlanV1Input{
+	_, body, err := r.client.TrackingPlansAPI.UpdateTrackingPlan(r.authContext, config.ID.ValueString()).UpdateTrackingPlanV1Input(api.UpdateTrackingPlanV1Input{
 		Name:        name,
 		Description: description,
 	}).Execute()
@@ -321,7 +321,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	out, body, err := r.client.TrackingPlansApi.GetTrackingPlan(r.authContext, config.ID.ValueString()).Execute()
+	out, body, err := r.client.TrackingPlansAPI.GetTrackingPlan(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -359,7 +359,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 		rulesOut = append(rulesOut, apiRule)
 	}
 
-	_, body, err = r.client.TrackingPlansApi.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
+	_, body, err = r.client.TrackingPlansAPI.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
 		Rules: replaceRules,
 	}).Execute()
 	if body != nil {
@@ -400,7 +400,7 @@ func (r *trackingPlanResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	_, body, err := r.client.TrackingPlansApi.DeleteTrackingPlan(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.TrackingPlansAPI.DeleteTrackingPlan(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

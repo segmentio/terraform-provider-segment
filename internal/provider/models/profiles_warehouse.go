@@ -16,17 +16,15 @@ type ProfilesWarehouseState struct {
 	Settings   jsontypes.Normalized `tfsdk:"settings"`
 }
 
-func (w *ProfilesWarehouseState) Fill(warehouse api.ProfilesWarehouse1) error {
+func (w *ProfilesWarehouseState) Fill(warehouse api.ProfilesWarehouseAlpha) error {
 	w.ID = types.StringValue(warehouse.Id)
 	w.SpaceID = types.StringValue(warehouse.SpaceId)
 	w.MetadataID = types.StringValue(warehouse.Metadata.Id)
-	if warehouse.Settings.IsSet() {
-		name := warehouse.Settings.Get().Get()["name"]
-		if name != nil {
-			stringName, ok := name.(string)
-			if ok {
-				w.Name = types.StringValue(stringName)
-			}
+	name := warehouse.Settings["name"]
+	if name != nil {
+		stringName, ok := name.(string)
+		if ok {
+			w.Name = types.StringValue(stringName)
 		}
 	}
 	w.Enabled = types.BoolValue(warehouse.Enabled)

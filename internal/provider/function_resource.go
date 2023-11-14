@@ -132,7 +132,7 @@ func (r *functionResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	out, body, err := r.client.FunctionsApi.CreateFunction(r.authContext).CreateFunctionV1Input(api.CreateFunctionV1Input{
+	out, body, err := r.client.FunctionsAPI.CreateFunction(r.authContext).CreateFunctionV1Input(api.CreateFunctionV1Input{
 		Code:         plan.Code.ValueString(),
 		Description:  plan.Description.ValueStringPointer(),
 		DisplayName:  plan.DisplayName.ValueString(),
@@ -180,7 +180,7 @@ func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	response, body, err := r.client.FunctionsApi.GetFunction(r.authContext, previousState.ID.ValueString()).Execute()
+	response, body, err := r.client.FunctionsAPI.GetFunction(r.authContext, previousState.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -231,7 +231,7 @@ func (r *functionResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	out, body, err := r.client.FunctionsApi.UpdateFunction(r.authContext, state.ID.ValueString()).UpdateFunctionV1Input(api.UpdateFunctionV1Input{
+	out, body, err := r.client.FunctionsAPI.UpdateFunction(r.authContext, state.ID.ValueString()).UpdateFunctionV1Input(api.UpdateFunctionV1Input{
 		Code:        plan.Code.ValueStringPointer(),
 		Description: plan.Description.ValueStringPointer(),
 		DisplayName: plan.DisplayName.ValueStringPointer(),
@@ -274,7 +274,7 @@ func (r *functionResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	_, body, err := r.client.FunctionsApi.DeleteFunction(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.FunctionsAPI.DeleteFunction(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

@@ -145,7 +145,7 @@ func (r *destinationFilterResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Generate API request body from plan
-	out, body, err := r.client.DestinationFiltersApi.CreateFilterForDestination(r.authContext, plan.DestinationID.ValueString()).CreateFilterForDestinationV1Input(api.CreateFilterForDestinationV1Input{
+	out, body, err := r.client.DestinationFiltersAPI.CreateFilterForDestination(r.authContext, plan.DestinationID.ValueString()).CreateFilterForDestinationV1Input(api.CreateFilterForDestinationV1Input{
 		SourceId:    plan.SourceID.ValueString(),
 		If:          plan.If.ValueString(),
 		Title:       plan.Title.ValueString(),
@@ -194,7 +194,7 @@ func (r *destinationFilterResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	out, body, err := r.client.DestinationFiltersApi.GetFilterInDestination(r.authContext, previousState.DestinationID.ValueString(), previousState.ID.ValueString()).Execute()
+	out, body, err := r.client.DestinationFiltersAPI.GetFilterInDestination(r.authContext, previousState.DestinationID.ValueString(), previousState.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -207,7 +207,7 @@ func (r *destinationFilterResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	destinationFilter := api.Filter2(out.Data.Filter)
+	destinationFilter := out.Data.Filter
 
 	var state models.DestinationFilterState
 	err = state.Fill(&destinationFilter)
@@ -257,7 +257,7 @@ func (r *destinationFilterResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	// Generate API request body from plan
-	out, body, err := r.client.DestinationFiltersApi.UpdateFilterForDestination(r.authContext, state.DestinationID.ValueString(), state.ID.ValueString()).UpdateFilterForDestinationV1Input(api.UpdateFilterForDestinationV1Input{
+	out, body, err := r.client.DestinationFiltersAPI.UpdateFilterForDestination(r.authContext, state.DestinationID.ValueString(), state.ID.ValueString()).UpdateFilterForDestinationV1Input(api.UpdateFilterForDestinationV1Input{
 		If:          plan.If.ValueStringPointer(),
 		Title:       plan.Title.ValueStringPointer(),
 		Enabled:     plan.Enabled.ValueBoolPointer(),
@@ -276,7 +276,7 @@ func (r *destinationFilterResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	destinationFilter := api.Filter2(out.Data.Filter)
+	destinationFilter := out.Data.Filter
 
 	err = state.Fill(&destinationFilter)
 	if err != nil {
@@ -306,7 +306,7 @@ func (r *destinationFilterResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	_, body, err := r.client.DestinationFiltersApi.RemoveFilterFromDestination(r.authContext, state.DestinationID.ValueString(), state.ID.ValueString()).Execute()
+	_, body, err := r.client.DestinationFiltersAPI.RemoveFilterFromDestination(r.authContext, state.DestinationID.ValueString(), state.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

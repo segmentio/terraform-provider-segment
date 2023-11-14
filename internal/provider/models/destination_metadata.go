@@ -107,7 +107,7 @@ func (d *DestinationMetadataState) getPartnerOwned(owned *bool) types.Bool {
 	return partnerOwned
 }
 
-func (d *DestinationMetadataState) getSupportedPlatforms(platforms api.SupportedPlatforms) *SupportedPlatform {
+func (d *DestinationMetadataState) getSupportedPlatforms(platforms api.DestinationMetadataPlatformsV1) *SupportedPlatform {
 	var supportedPlatform SupportedPlatform
 
 	supportedPlatform.Browser = types.BoolPointerValue(platforms.Browser)
@@ -117,7 +117,7 @@ func (d *DestinationMetadataState) getSupportedPlatforms(platforms api.Supported
 	return &supportedPlatform
 }
 
-func (d *DestinationMetadataState) getSupportedFeatures(features api.SupportedFeatures) *SupportedFeature {
+func (d *DestinationMetadataState) getSupportedFeatures(features api.DestinationMetadataFeaturesV1) *SupportedFeature {
 	var supportedFeature SupportedFeature
 
 	supportedFeature.CloudModeInstances = types.StringPointerValue(features.CloudModeInstances)
@@ -129,7 +129,7 @@ func (d *DestinationMetadataState) getSupportedFeatures(features api.SupportedFe
 	return &supportedFeature
 }
 
-func (d *DestinationMetadataState) getSupportedMethods(methods api.SupportedMethods) *SupportedMethod {
+func (d *DestinationMetadataState) getSupportedMethods(methods api.DestinationMetadataMethodsV1) *SupportedMethod {
 	var supportedMethod SupportedMethod
 
 	supportedMethod.PageView = types.BoolPointerValue(methods.Pageview)
@@ -295,7 +295,7 @@ func (d *DestinationMetadataState) getFields(fields []api.DestinationMetadataAct
 	return fieldsToAdd, nil
 }
 
-func (d *DestinationMetadataState) getLogosDestinationMetadata(logos api.Logos) *LogosState {
+func (d *DestinationMetadataState) getLogosDestinationMetadata(logos api.LogosBeta) *LogosState {
 	logosToAdd := LogosState{
 		Default: types.StringValue(logos.Default),
 	}
@@ -339,7 +339,7 @@ func getOptions(options []api.IntegrationOptionBeta) ([]IntegrationOptionState, 
 	return integrationOptions, nil
 }
 
-func (d *DestinationMetadataState) Fill(destinationMetadata api.DestinationMetadata) error {
+func (d *DestinationMetadataState) Fill(destinationMetadata api.DestinationMetadataV1) error {
 	d.ID = types.StringValue(destinationMetadata.Id)
 	d.Name = types.StringValue(destinationMetadata.Name)
 	d.Description = types.StringValue(destinationMetadata.Description)

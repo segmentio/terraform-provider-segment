@@ -127,7 +127,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	out, body, err := d.client.IAMUsersApi.GetUser(d.authContext, id).Execute()
+	out, body, err := d.client.IAMUsersAPI.GetUser(d.authContext, id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
