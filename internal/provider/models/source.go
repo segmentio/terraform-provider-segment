@@ -169,6 +169,10 @@ func (g *GroupSettings) Fill(groupSettings *api.GroupSourceSettingsV1) {
 }
 
 func GetSettings(settings map[string]interface{}) (jsontypes.Normalized, error) {
+	if settings == nil {
+		return jsontypes.NewNormalizedNull(), nil
+	}
+
 	jsonSettingsString, err := json.Marshal(settings)
 	if err != nil {
 		return jsontypes.NewNormalizedNull(), err
