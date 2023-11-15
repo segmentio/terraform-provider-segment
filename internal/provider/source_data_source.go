@@ -277,7 +277,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	out, body, err := d.client.SourcesApi.GetSource(d.authContext, id).Execute()
+	out, body, err := d.client.SourcesAPI.GetSource(d.authContext, id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -292,9 +292,9 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	source := out.Data.Source
 
-	var schemaSettings *api.Settings
+	var schemaSettings *api.SourceSettingsOutputV1
 	if config.SchemaSettings != nil {
-		settingsOut, body, err := d.client.SourcesApi.ListSchemaSettingsInSource(d.authContext, source.Id).Execute()
+		settingsOut, body, err := d.client.SourcesAPI.ListSchemaSettingsInSource(d.authContext, source.Id).Execute()
 		if body != nil {
 			defer body.Body.Close()
 		}

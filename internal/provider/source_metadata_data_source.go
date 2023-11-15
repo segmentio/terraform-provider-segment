@@ -54,7 +54,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	response, body, err := d.client.CatalogApi.GetSourceMetadata(d.authContext, id).Execute()
+	response, body, err := d.client.CatalogAPI.GetSourceMetadata(d.authContext, id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

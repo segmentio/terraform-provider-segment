@@ -129,7 +129,7 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	out, body, err := r.client.IAMGroupsApi.CreateUserGroup(r.authContext).CreateUserGroupV1Input(api.CreateUserGroupV1Input{
+	out, body, err := r.client.IAMGroupsAPI.CreateUserGroup(r.authContext).CreateUserGroupV1Input(api.CreateUserGroupV1Input{
 		Name: plan.Name.ValueString(),
 	}).Execute()
 	if body != nil {
@@ -154,7 +154,7 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	_, body, err = r.client.IAMGroupsApi.ReplacePermissionsForUserGroup(r.authContext, userGroup.Id).ReplacePermissionsForUserGroupV1Input(api.ReplacePermissionsForUserGroupV1Input{
+	_, body, err = r.client.IAMGroupsAPI.ReplacePermissionsForUserGroup(r.authContext, userGroup.Id).ReplacePermissionsForUserGroupV1Input(api.ReplacePermissionsForUserGroupV1Input{
 		Permissions: models.PermissionsToPermissionsInput(permissions),
 	}).Execute()
 	if body != nil {
@@ -174,7 +174,7 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 		members = append(members, member.ValueString())
 	}
 	if len(members) > 0 {
-		_, body, err = r.client.IAMGroupsApi.ReplaceUsersInUserGroup(r.authContext, userGroup.Id).ReplaceUsersInUserGroupV1Input(api.ReplaceUsersInUserGroupV1Input{
+		_, body, err = r.client.IAMGroupsAPI.ReplaceUsersInUserGroup(r.authContext, userGroup.Id).ReplaceUsersInUserGroupV1Input(api.ReplaceUsersInUserGroupV1Input{
 			Emails: members,
 		}).Execute()
 		if body != nil {
@@ -190,7 +190,7 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 		}
 	}
 
-	getOut, body, err := r.client.IAMGroupsApi.GetUserGroup(r.authContext, userGroup.Id).Execute()
+	getOut, body, err := r.client.IAMGroupsAPI.GetUserGroup(r.authContext, userGroup.Id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -202,10 +202,9 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 
 		return
 	}
-	userGroup = api.UserGroup(getOut.Data.GetUserGroup())
 
 	var state models.UserGroupState
-	err = state.Fill(userGroup, members)
+	err = state.Fill(getOut.Data.UserGroup, members)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate User Group state",
@@ -231,7 +230,7 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	out, body, err := r.client.IAMGroupsApi.GetUserGroup(r.authContext, config.ID.ValueString()).Execute()
+	out, body, err := r.client.IAMGroupsAPI.GetUserGroup(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -245,7 +244,7 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	userGroup := out.Data.GetUserGroup()
 
-	usersOut, body, err := r.client.IAMGroupsApi.ListUsersFromUserGroup(r.authContext, config.ID.ValueString()).Pagination(api.PaginationInput{Count: MaxPageSize}).Execute()
+	usersOut, body, err := r.client.IAMGroupsAPI.ListUsersFromUserGroup(r.authContext, config.ID.ValueString()).Pagination(api.PaginationInput{Count: MaxPageSize}).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -258,7 +257,7 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	invitesOut, body, err := r.client.IAMGroupsApi.ListInvitesFromUserGroup(r.authContext, config.ID.ValueString()).Pagination(api.PaginationInput{Count: MaxPageSize}).Execute()
+	invitesOut, body, err := r.client.IAMGroupsAPI.ListInvitesFromUserGroup(r.authContext, config.ID.ValueString()).Pagination(api.PaginationInput{Count: MaxPageSize}).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -278,7 +277,7 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	members = append(members, invitesOut.Data.Emails...)
 
 	var state models.UserGroupState
-	err = state.Fill(api.UserGroup(userGroup), members)
+	err = state.Fill(userGroup, members)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate User Group state",
@@ -310,7 +309,7 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	_, body, err := r.client.IAMGroupsApi.UpdateUserGroup(r.authContext, config.ID.ValueString()).UpdateUserGroupV1Input(api.UpdateUserGroupV1Input{
+	_, body, err := r.client.IAMGroupsAPI.UpdateUserGroup(r.authContext, config.ID.ValueString()).UpdateUserGroupV1Input(api.UpdateUserGroupV1Input{
 		Name: plan.Name.ValueString(),
 	}).Execute()
 	if body != nil {
@@ -331,7 +330,7 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	_, body, err = r.client.IAMGroupsApi.ReplacePermissionsForUserGroup(r.authContext, config.ID.ValueString()).ReplacePermissionsForUserGroupV1Input(api.ReplacePermissionsForUserGroupV1Input{
+	_, body, err = r.client.IAMGroupsAPI.ReplacePermissionsForUserGroup(r.authContext, config.ID.ValueString()).ReplacePermissionsForUserGroupV1Input(api.ReplacePermissionsForUserGroupV1Input{
 		Permissions: models.PermissionsToPermissionsInput(permissions),
 	}).Execute()
 	if body != nil {
@@ -351,7 +350,7 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 		members = append(members, member.ValueString())
 	}
 	if len(members) > 0 {
-		_, body, err = r.client.IAMGroupsApi.ReplaceUsersInUserGroup(r.authContext, config.ID.ValueString()).ReplaceUsersInUserGroupV1Input(api.ReplaceUsersInUserGroupV1Input{
+		_, body, err = r.client.IAMGroupsAPI.ReplaceUsersInUserGroup(r.authContext, config.ID.ValueString()).ReplaceUsersInUserGroupV1Input(api.ReplaceUsersInUserGroupV1Input{
 			Emails: members,
 		}).Execute()
 		if body != nil {
@@ -367,7 +366,7 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 		}
 	}
 
-	getOut, body, err := r.client.IAMGroupsApi.GetUserGroup(r.authContext, config.ID.ValueString()).Execute()
+	getOut, body, err := r.client.IAMGroupsAPI.GetUserGroup(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -379,10 +378,9 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 
 		return
 	}
-	userGroup := api.UserGroup(getOut.Data.GetUserGroup())
 
 	var state models.UserGroupState
-	err = state.Fill(userGroup, members)
+	err = state.Fill(getOut.Data.UserGroup, members)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate User Group state",
@@ -407,7 +405,7 @@ func (r *userGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	_, body, err := r.client.IAMGroupsApi.DeleteUserGroup(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.IAMGroupsAPI.DeleteUserGroup(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

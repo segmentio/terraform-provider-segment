@@ -136,7 +136,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	out, body, err := d.client.TrackingPlansApi.GetTrackingPlan(d.authContext, id).Execute()
+	out, body, err := d.client.TrackingPlansAPI.GetTrackingPlan(d.authContext, id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -151,7 +151,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	trackingPlan := out.Data.GetTrackingPlan()
 
-	rulesOut, body, err := d.client.TrackingPlansApi.ListRulesFromTrackingPlan(d.authContext, id).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
+	rulesOut, body, err := d.client.TrackingPlansAPI.ListRulesFromTrackingPlan(d.authContext, id).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

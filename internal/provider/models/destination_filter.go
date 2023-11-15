@@ -62,7 +62,7 @@ func ActionsPlanToAPIActions(ctx context.Context, actions types.Set) ([]api.Dest
 	return apiFilters, diag.Diagnostics{}
 }
 
-func (d *DestinationFilterState) Fill(filter *api.Filter2) error {
+func (d *DestinationFilterState) Fill(filter *api.DestinationFilterV1) error {
 	d.ID = types.StringValue(filter.Id)
 	d.If = types.StringValue(filter.If)
 	d.DestinationID = types.StringValue(filter.DestinationId)

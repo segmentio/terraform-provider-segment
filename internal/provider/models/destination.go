@@ -26,9 +26,9 @@ type DestinationPlan struct {
 	Settings jsontypes.Normalized `tfsdk:"settings"`
 }
 
-func (d *DestinationState) Fill(destination *api.Destination) error {
+func (d *DestinationState) Fill(destination *api.DestinationV1) error {
 	var destinationMetadata DestinationMetadataState
-	err := destinationMetadata.Fill(api.DestinationMetadata(destination.Metadata))
+	err := destinationMetadata.Fill(destination.Metadata)
 	if err != nil {
 		return err
 	}

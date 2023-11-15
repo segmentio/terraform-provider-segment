@@ -106,15 +106,14 @@ func (r *destinationSubscriptionResource) Create(ctx context.Context, req resour
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(settings)
 
-	out, body, err := r.client.DestinationsApi.CreateDestinationSubscription(r.authContext, plan.DestinationID.ValueString()).CreateDestinationSubscriptionAlphaInput(api.CreateDestinationSubscriptionAlphaInput{
+	out, body, err := r.client.DestinationsAPI.CreateDestinationSubscription(r.authContext, plan.DestinationID.ValueString()).CreateDestinationSubscriptionAlphaInput(api.CreateDestinationSubscriptionAlphaInput{
 		Name:     plan.Name.ValueString(),
 		ActionId: plan.ActionID.ValueString(),
 		Trigger:  plan.Trigger.ValueString(),
 		Enabled:  plan.Enabled.ValueBool(),
 		ModelId:  plan.ModelID.ValueStringPointer(),
-		Settings: *api.NewNullableModelMap(modelMap),
+		Settings: settings,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
@@ -162,7 +161,7 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	out, body, err := r.client.DestinationsApi.GetSubscriptionFromDestination(r.authContext, previousState.DestinationID.ValueString(), previousState.ID.ValueString()).Execute()
+	out, body, err := r.client.DestinationsAPI.GetSubscriptionFromDestination(r.authContext, previousState.DestinationID.ValueString(), previousState.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -177,7 +176,7 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 
 	var state models.DestinationSubscriptionState
 
-	err = state.Fill(api.DestinationSubscription(out.Data.GetSubscription()))
+	err = state.Fill(out.Data.GetSubscription())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Destination subscription state",
@@ -219,14 +218,13 @@ func (r *destinationSubscriptionResource) Update(ctx context.Context, req resour
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(settings)
 
-	out, body, err := r.client.DestinationsApi.UpdateSubscriptionForDestination(r.authContext, state.DestinationID.ValueString(), state.ID.ValueString()).UpdateSubscriptionForDestinationAlphaInput(api.UpdateSubscriptionForDestinationAlphaInput{
-		Input: api.Input{
+	out, body, err := r.client.DestinationsAPI.UpdateSubscriptionForDestination(r.authContext, state.DestinationID.ValueString(), state.ID.ValueString()).UpdateSubscriptionForDestinationAlphaInput(api.UpdateSubscriptionForDestinationAlphaInput{
+		Input: api.DestinationSubscriptionUpdateInput{
 			Name:     plan.Name.ValueStringPointer(),
 			Trigger:  plan.Trigger.ValueStringPointer(),
 			Enabled:  plan.Enabled.ValueBoolPointer(),
-			Settings: *api.NewNullableModelMap(modelMap),
+			Settings: settings,
 		},
 	}).Execute()
 	if body != nil {
@@ -241,7 +239,7 @@ func (r *destinationSubscriptionResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	err = state.Fill(api.DestinationSubscription(out.Data.GetSubscription()))
+	err = state.Fill(out.Data.GetSubscription())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Destination subscription state",
@@ -269,7 +267,7 @@ func (r *destinationSubscriptionResource) Delete(ctx context.Context, req resour
 		return
 	}
 
-	_, body, err := r.client.DestinationsApi.RemoveSubscriptionFromDestination(r.authContext, config.DestinationID.ValueString(), config.ID.ValueString()).Execute()
+	_, body, err := r.client.DestinationsAPI.RemoveSubscriptionFromDestination(r.authContext, config.DestinationID.ValueString(), config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

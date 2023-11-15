@@ -72,7 +72,7 @@ func (r *sourceTrackingPlanConnectionResource) Create(ctx context.Context, req r
 		return
 	}
 
-	_, body, err := r.client.TrackingPlansApi.AddSourceToTrackingPlan(r.authContext, plan.TrackingPlanID.ValueString()).AddSourceToTrackingPlanV1Input(api.AddSourceToTrackingPlanV1Input{
+	_, body, err := r.client.TrackingPlansAPI.AddSourceToTrackingPlan(r.authContext, plan.TrackingPlanID.ValueString()).AddSourceToTrackingPlanV1Input(api.AddSourceToTrackingPlanV1Input{
 		SourceId: plan.SourceID.ValueString(),
 	}).Execute()
 	if body != nil {
@@ -118,7 +118,7 @@ func (r *sourceTrackingPlanConnectionResource) Read(ctx context.Context, req res
 
 			return
 		}
-		response, body, err := r.client.TrackingPlansApi.ListSourcesFromTrackingPlan(r.authContext, state.TrackingPlanID.ValueString()).Pagination(api.PaginationInput{
+		response, body, err := r.client.TrackingPlansAPI.ListSourcesFromTrackingPlan(r.authContext, state.TrackingPlanID.ValueString()).Pagination(api.PaginationInput{
 			Cursor: &paginationNext,
 			Count:  MaxPageSize,
 		}).Execute()
@@ -181,7 +181,7 @@ func (r *sourceTrackingPlanConnectionResource) Delete(ctx context.Context, req r
 		return
 	}
 
-	_, body, err := r.client.TrackingPlansApi.RemoveSourceFromTrackingPlan(r.authContext, config.TrackingPlanID.ValueString()).SourceId(config.SourceID.ValueString()).Execute()
+	_, body, err := r.client.TrackingPlansAPI.RemoveSourceFromTrackingPlan(r.authContext, config.TrackingPlanID.ValueString()).SourceId(config.SourceID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

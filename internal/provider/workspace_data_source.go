@@ -57,7 +57,7 @@ func (d *workspaceDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 func (d *workspaceDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state workspaceDataSourceModel
 
-	workspace, body, err := d.client.WorkspacesApi.GetWorkspace(d.authContext).Execute()
+	workspace, body, err := d.client.WorkspacesAPI.GetWorkspace(d.authContext).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

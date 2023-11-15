@@ -75,7 +75,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	response, body, err := d.client.DestinationsApi.GetDestination(d.authContext, state.ID.ValueString()).Execute()
+	response, body, err := d.client.DestinationsAPI.GetDestination(d.authContext, state.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

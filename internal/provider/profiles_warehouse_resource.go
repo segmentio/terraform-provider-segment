@@ -108,12 +108,11 @@ func (r *profilesWarehouseResource) Create(ctx context.Context, req resource.Cre
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(settings)
 
-	out, body, err := r.client.ProfilesSyncApi.CreateProfilesWarehouse(r.authContext, plan.SpaceID.ValueString()).CreateProfilesWarehouseAlphaInput(api.CreateProfilesWarehouseAlphaInput{
+	out, body, err := r.client.ProfilesSyncAPI.CreateProfilesWarehouse(r.authContext, plan.SpaceID.ValueString()).CreateProfilesWarehouseAlphaInput(api.CreateProfilesWarehouseAlphaInput{
 		Enabled:    plan.Enabled.ValueBoolPointer(),
 		MetadataId: plan.MetadataID.ValueString(),
-		Settings:   *api.NewNullableModelMap(modelMap),
+		Settings:   settings,
 		Name:       plan.Name.ValueStringPointer(),
 		SchemaName: plan.SchemaName.ValueStringPointer(),
 	}).Execute()
@@ -132,7 +131,7 @@ func (r *profilesWarehouseResource) Create(ctx context.Context, req resource.Cre
 	profilesWarehouse := out.Data.GetProfilesWarehouse()
 
 	var state models.ProfilesWarehouseState
-	err = state.Fill(api.ProfilesWarehouse1(profilesWarehouse))
+	err = state.Fill(profilesWarehouse)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Profiles Warehouse state",
@@ -184,7 +183,7 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 
 	var state models.ProfilesWarehouseState
 
-	err = state.Fill(api.ProfilesWarehouse1(*warehouse))
+	err = state.Fill(*warehouse)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Profiles Warehouse state",
@@ -226,11 +225,10 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(settings)
 
-	out, body, err := r.client.ProfilesSyncApi.UpdateProfilesWarehouseForSpaceWarehouse(r.authContext, state.SpaceID.ValueString(), state.ID.ValueString()).UpdateProfilesWarehouseForSpaceWarehouseAlphaInput(api.UpdateProfilesWarehouseForSpaceWarehouseAlphaInput{
+	out, body, err := r.client.ProfilesSyncAPI.UpdateProfilesWarehouseForSpaceWarehouse(r.authContext, state.SpaceID.ValueString(), state.ID.ValueString()).UpdateProfilesWarehouseForSpaceWarehouseAlphaInput(api.UpdateProfilesWarehouseForSpaceWarehouseAlphaInput{
 		Enabled:    plan.Enabled.ValueBoolPointer(),
-		Settings:   *api.NewNullableModelMap(modelMap),
+		Settings:   settings,
 		Name:       plan.Name.ValueStringPointer(),
 		SchemaName: plan.SchemaName.ValueStringPointer(),
 	}).Execute()
@@ -276,7 +274,7 @@ func (r *profilesWarehouseResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	_, body, err := r.client.ProfilesSyncApi.RemoveProfilesWarehouseFromSpace(r.authContext, config.SpaceID.ValueString(), config.ID.ValueString()).Execute()
+	_, body, err := r.client.ProfilesSyncAPI.RemoveProfilesWarehouseFromSpace(r.authContext, config.SpaceID.ValueString(), config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -331,7 +329,7 @@ func findProfileWarehouse(authContext context.Context, client *api.APIClient, id
 	pageToken = &firstPageToken
 
 	for pageToken != nil {
-		out, body, err := client.ProfilesSyncApi.ListProfilesWarehouseInSpace(authContext, spaceID).Pagination(api.PaginationInput{Count: MaxPageSize, Cursor: pageToken}).Execute()
+		out, body, err := client.ProfilesSyncAPI.ListProfilesWarehouseInSpace(authContext, spaceID).Pagination(api.PaginationInput{Count: MaxPageSize, Cursor: pageToken}).Execute()
 		if body != nil {
 			defer body.Body.Close()
 		}

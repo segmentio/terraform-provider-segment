@@ -43,7 +43,7 @@ type TrackingPlanPlan struct {
 	Rules       types.Set    `tfsdk:"rules"`
 }
 
-func (t *TrackingPlanState) Fill(trackingPlan api.TrackingPlan, rules *[]api.RuleV1) error {
+func (t *TrackingPlanState) Fill(trackingPlan api.TrackingPlanV1, rules *[]api.RuleV1) error {
 	t.ID = types.StringValue(trackingPlan.Id)
 	t.Name = types.StringPointerValue(trackingPlan.Name)
 	t.Slug = types.StringPointerValue(trackingPlan.Slug)
@@ -77,7 +77,7 @@ func (t *TrackingPlanState) Fill(trackingPlan api.TrackingPlan, rules *[]api.Rul
 	return nil
 }
 
-func (t *TrackingPlanDSState) Fill(trackingPlan api.TrackingPlan, rules *[]api.RuleV1) error {
+func (t *TrackingPlanDSState) Fill(trackingPlan api.TrackingPlanV1, rules *[]api.RuleV1) error {
 	t.ID = types.StringValue(trackingPlan.Id)
 	t.Name = types.StringPointerValue(trackingPlan.Name)
 	t.Slug = types.StringPointerValue(trackingPlan.Slug)
