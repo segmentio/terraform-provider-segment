@@ -178,7 +178,7 @@ func (r *sourceTrackingPlanConnectionResource) Create(ctx context.Context, req r
 
 			return nil
 		},
-		retry.Delay(1000),
+		retry.Delay(DefaultRetryDelay),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(
