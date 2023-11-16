@@ -2,58 +2,48 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"github.com/avast/retry-go/v4"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
+
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/segmentio/public-api-sdk-go/api"
-	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 )
 
 var (
-	_ resource.Resource              = &sourceTrackingPlanConnectionResource{}
-	_ resource.ResourceWithConfigure = &sourceTrackingPlanConnectionResource{}
+	_ resource.Resource                = &sourceSchemaSettingsResource{}
+	_ resource.ResourceWithConfigure   = &sourceSchemaSettingsResource{}
+	_ resource.ResourceWithImportState = &sourceSchemaSettingsResource{}
 )
 
-func NewSourceTrackingPlanConnectionResource() resource.Resource {
-	return &sourceTrackingPlanConnectionResource{}
+func NewSourceSchemaSettingsResource() resource.Resource {
+	return &sourceSchemaSettingsResource{}
 }
 
-type sourceTrackingPlanConnectionResource struct {
+type sourceSchemaSettingsResource struct {
 	client      *api.APIClient
 	authContext context.Context
 }
 
-func (r *sourceTrackingPlanConnectionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_source_tracking_plan_connection"
+func (r *sourceSchemaSettingsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_source_schema_settings"
 }
 
-func (r *sourceTrackingPlanConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *sourceSchemaSettingsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Represents a connection between a Source and a Tracking Plan",
 		Attributes: map[string]schema.Attribute{
-			"source_id": schema.StringAttribute{
+			"id": schema.StringAttribute{
 				Required:    true,
 				Description: "The id of the Source.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"tracking_plan_id": schema.StringAttribute{
 				Required:    true,
-				Description: "The id of the Tracking Plan.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+				Description: "The id of the Tracking Plan this Source is connected to.",
 			},
 			"schema_settings": schema.SingleNestedAttribute{
-				Optional:    true,
+				Required:    true,
 				Description: "The schema settings associated with the Source. Upon import, this field will be empty even if the settings have already been configured due to Terraform limitations, but will be populated on the first apply. Fields not present in the config will not be managed by Terraform.",
 				Attributes: map[string]schema.Attribute{
 					"track": schema.SingleNestedAttribute{
@@ -132,40 +122,31 @@ func (r *sourceTrackingPlanConnectionResource) Schema(_ context.Context, _ resou
 	}
 }
 
-func (r *sourceTrackingPlanConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan models.SourceTrackingPlanConnectionPlan
+func (r *sourceSchemaSettingsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan models.SourceSchemaSettingsPlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if plan.TrackingPlanID.String() == "" || plan.SourceID.String() == "" {
-		resp.Diagnostics.AddError("Unable to create connection between Source and Tracking Plan", "At least one ID is empty")
+	out, body, err := r.client.SourcesAPI.GetSource(r.authContext, plan.ID.ValueString()).Execute()
+	if body != nil {
+		defer body.Body.Close()
+	}
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to read Source",
+			getError(err, body),
+		)
 
 		return
 	}
 
-	err := retry.Do(
-		func() error {
-			_, body, err := r.client.TrackingPlansAPI.AddSourceToTrackingPlan(r.authContext, plan.TrackingPlanID.ValueString()).AddSourceToTrackingPlanV1Input(api.AddSourceToTrackingPlanV1Input{
-				SourceId: plan.SourceID.ValueString(),
-			}).Execute()
-			if body != nil {
-				defer body.Body.Close()
-			}
-			if err != nil {
-				return errors.New(getError(err, body))
-			}
-
-			return nil
-		},
-		retry.Delay(1000),
-	)
-	if err != nil {
+	if !out.Data.TrackingPlanId.IsSet() || out.Data.TrackingPlanId.Get() == nil || *out.Data.TrackingPlanId.Get() != plan.TrackingPlanID.ValueString() {
 		resp.Diagnostics.AddError(
-			"Unable to create Source-Tracking Plan connection",
-			err.Error(),
+			"Source is not connected to specified Tracking Plan",
+			fmt.Sprintf("Source ID: '%s', Tracking Plan ID: '%s'", plan.ID.ValueString(), plan.TrackingPlanID.ValueString()),
 		)
 
 		return
@@ -179,7 +160,7 @@ func (r *sourceTrackingPlanConnectionResource) Create(ctx context.Context, req r
 	}
 
 	if apiSchemaSettings != nil {
-		settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, plan.SourceID.ValueString()).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
+		settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, plan.ID.ValueString()).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
 			Track:                     apiSchemaSettings.Track,
 			Identify:                  apiSchemaSettings.Identify,
 			Group:                     apiSchemaSettings.Group,
@@ -201,8 +182,8 @@ func (r *sourceTrackingPlanConnectionResource) Create(ctx context.Context, req r
 		schemaSettings = &settingsOut.Data.Settings
 	}
 
-	var state models.SourceTrackingPlanConnectionState
-	state.Fill(plan.SourceID.ValueString(), plan.TrackingPlanID.ValueString(), schemaSettings)
+	var state models.SourceSchemaSettingsState
+	state.Fill(plan.ID.ValueString(), plan.TrackingPlanID.ValueString(), schemaSettings)
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	plannedSchemaSettings, diags := models.SchemaSettingsPlanToState(ctx, plan.SchemaSettings)
@@ -220,17 +201,22 @@ func (r *sourceTrackingPlanConnectionResource) Create(ctx context.Context, req r
 	}
 }
 
-func (r *sourceTrackingPlanConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var previousState models.SourceTrackingPlanConnectionState
-
+func (r *sourceSchemaSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var previousState models.SourceSchemaSettingsState
 	diags := req.State.Get(ctx, &previousState)
-
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	out, body, err := r.client.SourcesAPI.GetSource(r.authContext, previousState.SourceID.ValueString()).Execute()
+	id := previousState.ID.ValueString()
+	if id == "" {
+		resp.Diagnostics.AddError("Unable to read Source", "ID is empty")
+
+		return
+	}
+
+	out, body, err := r.client.SourcesAPI.GetSource(r.authContext, id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -244,21 +230,17 @@ func (r *sourceTrackingPlanConnectionResource) Read(ctx context.Context, req res
 	}
 
 	if !out.Data.TrackingPlanId.IsSet() || *out.Data.TrackingPlanId.Get() != previousState.TrackingPlanID.ValueString() {
-		diags = resp.State.Set(ctx, &models.SourceTrackingPlanConnectionState{
-			SourceID:       types.StringValue("not_found"),
-			TrackingPlanID: types.StringValue("not_found"),
-		})
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
+		resp.Diagnostics.AddError(
+			"Source is not connected to specified Tracking Plan",
+			fmt.Sprintf("Source ID: '%s', Tracking Plan ID: '%s'", previousState.ID.ValueString(), previousState.TrackingPlanID.ValueString()),
+		)
 
 		return
 	}
 
 	var schemaSettings *api.SourceSettingsOutputV1
 	if previousState.SchemaSettings != nil {
-		settingsOut, body, err := r.client.SourcesAPI.ListSchemaSettingsInSource(r.authContext, previousState.SourceID.ValueString()).Execute()
+		settingsOut, body, err := r.client.SourcesAPI.ListSchemaSettingsInSource(r.authContext, previousState.ID.ValueString()).Execute()
 		if body != nil {
 			defer body.Body.Close()
 		}
@@ -274,28 +256,28 @@ func (r *sourceTrackingPlanConnectionResource) Read(ctx context.Context, req res
 		schemaSettings = &settingsOut.Data.Settings
 	}
 
-	var state models.SourceTrackingPlanConnectionState
-	state.Fill(previousState.SourceID.ValueString(), previousState.TrackingPlanID.ValueString(), schemaSettings)
+	var state models.SourceSchemaSettingsState
+	state.Fill(previousState.ID.ValueString(), previousState.TrackingPlanID.ValueString(), schemaSettings)
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
-	previousState.SchemaSettings = filterOmittedSchemaSettings(previousState.SchemaSettings, previousState.SchemaSettings)
+	state.SchemaSettings = filterOmittedSchemaSettings(previousState.SchemaSettings, state.SchemaSettings)
 
-	diags = resp.State.Set(ctx, &previousState)
+	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 }
 
-func (r *sourceTrackingPlanConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan models.SourceTrackingPlanConnectionPlan
+func (r *sourceSchemaSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan models.SourceSchemaSettingsPlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	out, body, err := r.client.SourcesAPI.GetSource(r.authContext, plan.SourceID.ValueString()).Execute()
+	out, body, err := r.client.SourcesAPI.GetSource(r.authContext, plan.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -311,7 +293,7 @@ func (r *sourceTrackingPlanConnectionResource) Update(ctx context.Context, req r
 	if !out.Data.TrackingPlanId.IsSet() || *out.Data.TrackingPlanId.Get() != plan.TrackingPlanID.ValueString() {
 		resp.Diagnostics.AddError(
 			"Source is not connected to specified Tracking Plan",
-			fmt.Sprintf("Source ID: '%s', Tracking Plan ID: '%s'", plan.SourceID.ValueString(), plan.TrackingPlanID.ValueString()),
+			fmt.Sprintf("Source ID: '%s', Tracking Plan ID: '%s'", plan.ID.ValueString(), plan.TrackingPlanID.ValueString()),
 		)
 
 		return
@@ -325,7 +307,7 @@ func (r *sourceTrackingPlanConnectionResource) Update(ctx context.Context, req r
 	}
 
 	if apiSchemaSettings != nil {
-		settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, plan.SourceID.ValueString()).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
+		settingsOut, body, err := r.client.SourcesAPI.UpdateSchemaSettingsInSource(r.authContext, plan.ID.ValueString()).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
 			Track:                     apiSchemaSettings.Track,
 			Identify:                  apiSchemaSettings.Identify,
 			Group:                     apiSchemaSettings.Group,
@@ -347,8 +329,8 @@ func (r *sourceTrackingPlanConnectionResource) Update(ctx context.Context, req r
 		schemaSettings = &settingsOut.Data.Settings
 	}
 
-	var state models.SourceTrackingPlanConnectionState
-	state.Fill(plan.SourceID.ValueString(), plan.TrackingPlanID.ValueString(), schemaSettings)
+	var state models.SourceSchemaSettingsState
+	state.Fill(plan.ID.ValueString(), plan.TrackingPlanID.ValueString(), schemaSettings)
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	plannedSchemaSettings, diags := models.SchemaSettingsPlanToState(ctx, plan.SchemaSettings)
@@ -366,35 +348,16 @@ func (r *sourceTrackingPlanConnectionResource) Update(ctx context.Context, req r
 	}
 }
 
-func (r *sourceTrackingPlanConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var config models.SourceTrackingPlanConnectionPlan
-	diags := req.State.Get(ctx, &config)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if config.TrackingPlanID.String() == "" || config.SourceID.String() == "" {
-		resp.Diagnostics.AddError("Unable to remove Source-Tracking Plan connection", "At least one ID is empty")
-
-		return
-	}
-
-	_, body, err := r.client.TrackingPlansAPI.RemoveSourceFromTrackingPlan(r.authContext, config.TrackingPlanID.ValueString()).SourceId(config.SourceID.ValueString()).Execute()
-	if body != nil {
-		defer body.Body.Close()
-	}
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to remove Source-Tracking Plan connection",
-			getError(err, body),
-		)
-
-		return
-	}
+func (r *sourceSchemaSettingsResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
+	// The schema settings always exist, so deleting this resource doesn't do anything besides stop managing it in Terraform
 }
 
-func (r *sourceTrackingPlanConnectionResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *sourceSchemaSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *sourceSchemaSettingsResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -411,4 +374,71 @@ func (r *sourceTrackingPlanConnectionResource) Configure(_ context.Context, req 
 
 	r.client = config.client
 	r.authContext = config.authContext
+}
+
+// Filters out fields that were omitted from the plan to ensure consistent terraform state.
+func filterOmittedSchemaSettings(plannedState *models.SchemaSettingsState, returnedState *models.SchemaSettingsState) *models.SchemaSettingsState {
+	if plannedState == nil || returnedState == nil {
+		return nil
+	}
+
+	out := models.SchemaSettingsState{}
+
+	if plannedState.Track != nil {
+		out.Track = &models.TrackSettings{}
+
+		if !plannedState.Track.AllowEventOnViolations.IsNull() && !plannedState.Track.AllowEventOnViolations.IsUnknown() {
+			out.Track.AllowEventOnViolations = returnedState.Track.AllowEventOnViolations
+		}
+		if !plannedState.Track.AllowPropertiesOnViolations.IsNull() && !plannedState.Track.AllowPropertiesOnViolations.IsUnknown() {
+			out.Track.AllowPropertiesOnViolations = returnedState.Track.AllowPropertiesOnViolations
+		}
+		if !plannedState.Track.AllowUnplannedEvents.IsNull() && !plannedState.Track.AllowUnplannedEvents.IsUnknown() {
+			out.Track.AllowUnplannedEvents = returnedState.Track.AllowUnplannedEvents
+		}
+		if !plannedState.Track.AllowUnplannedEventProperties.IsNull() && !plannedState.Track.AllowUnplannedEventProperties.IsUnknown() {
+			out.Track.AllowUnplannedEventProperties = returnedState.Track.AllowUnplannedEventProperties
+		}
+		if !plannedState.Track.CommonEventOnViolations.IsNull() && !plannedState.Track.CommonEventOnViolations.IsUnknown() {
+			out.Track.CommonEventOnViolations = returnedState.Track.CommonEventOnViolations
+		}
+	}
+
+	if plannedState.Identify != nil {
+		out.Identify = &models.IdentifySettings{}
+
+		if !plannedState.Identify.AllowTraitsOnViolations.IsNull() && !plannedState.Identify.AllowTraitsOnViolations.IsUnknown() {
+			out.Identify.AllowTraitsOnViolations = returnedState.Identify.AllowTraitsOnViolations
+		}
+		if !plannedState.Identify.AllowUnplannedTraits.IsNull() && !plannedState.Identify.AllowUnplannedTraits.IsUnknown() {
+			out.Identify.AllowUnplannedTraits = returnedState.Identify.AllowUnplannedTraits
+		}
+		if !plannedState.Identify.CommonEventOnViolations.IsNull() && !plannedState.Identify.CommonEventOnViolations.IsUnknown() {
+			out.Identify.CommonEventOnViolations = returnedState.Identify.CommonEventOnViolations
+		}
+	}
+
+	if plannedState.Group != nil {
+		out.Group = &models.GroupSettings{}
+
+		if !plannedState.Group.AllowTraitsOnViolations.IsNull() && !plannedState.Group.AllowTraitsOnViolations.IsUnknown() {
+			out.Group.AllowTraitsOnViolations = returnedState.Group.AllowTraitsOnViolations
+		}
+		if !plannedState.Group.AllowUnplannedTraits.IsNull() && !plannedState.Group.AllowUnplannedTraits.IsUnknown() {
+			out.Group.AllowUnplannedTraits = returnedState.Group.AllowUnplannedTraits
+		}
+		if !plannedState.Group.CommonEventOnViolations.IsNull() && !plannedState.Group.CommonEventOnViolations.IsUnknown() {
+			out.Group.CommonEventOnViolations = returnedState.Group.CommonEventOnViolations
+		}
+	}
+
+	if !plannedState.ForwardingBlockedEventsTo.IsNull() && !plannedState.ForwardingBlockedEventsTo.IsUnknown() {
+		out.ForwardingBlockedEventsTo = returnedState.ForwardingBlockedEventsTo
+	}
+
+	if !plannedState.ForwardingViolationsTo.IsNull() && !plannedState.ForwardingViolationsTo.IsUnknown() {
+		out.ForwardingViolationsTo = returnedState.ForwardingViolationsTo
+	}
+
+	return &out
 }
