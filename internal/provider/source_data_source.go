@@ -263,7 +263,7 @@ func (d *sourceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 }
 
 func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var config models.SourceState
+	var config models.SourceDataSourceState
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -293,7 +293,8 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	source := out.Data.Source
 
 	var schemaSettings *api.SourceSettingsOutputV1
-	if config.SchemaSettings != nil {
+
+	if out.Data.TrackingPlanId.IsSet() && out.Data.TrackingPlanId.Get() != nil {
 		settingsOut, body, err := d.client.SourcesAPI.ListSchemaSettingsInSource(d.authContext, source.Id).Execute()
 		if body != nil {
 			defer body.Body.Close()
@@ -310,7 +311,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		schemaSettings = &settingsOut.Data.Settings
 	}
 
-	var state models.SourceState
+	var state models.SourceDataSourceState
 	err = state.Fill(source, schemaSettings)
 	if err != nil {
 		resp.Diagnostics.AddError(

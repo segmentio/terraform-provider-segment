@@ -12,7 +12,10 @@ require (
 	gotest.tools/gotestsum v1.11.0
 )
 
-require github.com/bitfield/gotestdox v0.2.1 // indirect
+require (
+	github.com/avast/retry-go/v4 v4.5.1 // indirect
+	github.com/bitfield/gotestdox v0.2.1 // indirect
+)
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
