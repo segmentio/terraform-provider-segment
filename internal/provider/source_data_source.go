@@ -293,7 +293,8 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	source := out.Data.Source
 
 	var schemaSettings *api.SourceSettingsOutputV1
-	if config.SchemaSettings != nil {
+
+	if out.Data.TrackingPlanId.IsSet() && out.Data.TrackingPlanId.Get() != nil {
 		settingsOut, body, err := d.client.SourcesAPI.ListSchemaSettingsInSource(d.authContext, source.Id).Execute()
 		if body != nil {
 			defer body.Body.Close()

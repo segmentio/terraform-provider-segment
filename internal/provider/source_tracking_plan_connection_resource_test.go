@@ -10,121 +10,194 @@ import (
 
 func TestAccSourceTrackingPlanConnectionResource(t *testing.T) {
 	t.Parallel()
-	created := 0
+	updatedSchemaSettings := 0
 
 	fakeServer := httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			w.Header().Set("content-type", "application/json")
 
-			payload := `{
-				"data": {
-					"sources": [
-						{
-							"id": "my-source-id",
-							"slug": "my-source-slug",
-							"name": "My source",
-							"workspaceId": "my-workspace-id",
-							"enabled": false,
-							"writeKeys": [
-								"my-write-key"
-							],
-							"metadata": {
-								"id": "my-metadata-id",
-								"slug": "javascript",
-								"name": "Javascript",
-								"categories": [
-									"Website"
-								],
-								"description": "This is our most flexible and powerful tracking system, using analytics.js.  Track and analyze information about your visitors and customers, and every action that they take, in any of our 140 integrations, business intelligence tools, or directly with SQL tools.",
-								"logos": {
-									"default": "https://cdn.filepicker.io/api/file/aRgo4XJQZausZxD4gZQq",
-									"alt": "https://cdn.filepicker.io/api/file/aRgo4XJQZausZxD4gZQq",
-									"mark": "https://cdn.filepicker.io/api/file/kBpmEoSSaakidAvoFmzd"
-								},
-								"options": [],
-								"isCloudEventSource": false
-							},
-							"settings": {
-								"beep": "beep"
-							},
-							"labels": [
-								{
-									"key": "product",
-									"value": "b"
-								}
-							]
-						}
-					],
-					"pagination": {
-						"current": "MA==",
-						"totalEntries": 1
-					}
-				}
-			}`
-
-			if req.Method == http.MethodGet && created >= 2 {
-				payload = `{
-					"data": {
-						"sources": [
-							{
-								"id": "my-other-source-id",
-								"slug": "my-other-source-slug",
-								"name": "My source",
+			payload := ""
+			if req.URL.Path == "/sources/my-source-id" && req.Method == http.MethodGet {
+				payload = `
+					{
+						"data": {
+							"source": {
+								"id": "my-source-id",
+								"slug": "my-source-slug",
+								"name": "My source name",
 								"workspaceId": "my-workspace-id",
-								"enabled": false,
-								"writeKeys": [
-									"my-write-key"
-								],
+								"enabled": true,
+								"writeKeys": ["my-write-key"],
 								"metadata": {
 									"id": "my-metadata-id",
-									"slug": "javascript",
-									"name": "Javascript",
-									"categories": [
-										"Website"
-									],
-									"description": "This is our most flexible and powerful tracking system, using analytics.js.  Track and analyze information about your visitors and customers, and every action that they take, in any of our 140 integrations, business intelligence tools, or directly with SQL tools.",
+									"slug": "my-metadata-slug",
+									"name": "My metadata name",
+									"categories": ["my-category"],
+									"description": "My metadata description",
 									"logos": {
-										"default": "https://cdn.filepicker.io/api/file/aRgo4XJQZausZxD4gZQq",
-										"alt": "https://cdn.filepicker.io/api/file/aRgo4XJQZausZxD4gZQq",
-										"mark": "https://cdn.filepicker.io/api/file/kBpmEoSSaakidAvoFmzd"
+										"default": "https://example.segment.com/image.png",
+										"alt": "https://example.segment.com/image.png",
+										"mark": "https://example.segment.com/image.png"
 									},
-									"options": [],
+									"options": [
+										{
+											"name": "sid",
+											"required": true,
+											"type": "string",
+											"defaultValue": "",
+											"description": "Your Segment SID",
+											"defaultValue": "default-sid"
+										}
+									],
 									"isCloudEventSource": false
 								},
 								"settings": {
-									"beep": "beep"
+									"myKey": "myValue"
 								},
 								"labels": [
 									{
-										"key": "product",
-										"value": "b"
+										"key": "my-label-key",
+										"value": "my-label-value"
 									}
 								]
-							}
-						],
-						"pagination": {
-							"current": "MA==",
-							"totalEntries": 1
+							},
+							"trackingPlanId": "my-tracking-plan-id"
 						}
 					}
-				}`
-			}
-
-			if req.Method == http.MethodPost {
-				created++
+				`
+			} else if req.URL.Path == "/tracking-plans/my-tracking-plan-id/sources" && req.Method == http.MethodPost {
 				payload = `{
 					"data": {
 						"status": "CONNECTED"
 					}
 				}`
-			}
-
-			if req.Method == http.MethodDelete {
+			} else if req.URL.Path == "/tracking-plans/my-tracking-plan-id/sources" && req.Method == http.MethodDelete {
 				payload = `{
 					"data": {
 						"status": "SUCCESS"
 					}
 				}`
+			} else if req.URL.Path == "/sources/my-source-id/settings" && req.Method == http.MethodGet {
+				if updatedSchemaSettings <= 1 {
+					payload = `
+						{
+							"data": {
+								"sourceId": "my-source-id",
+								"settings": {
+									"track": {
+										"allowUnplannedEvents": true,
+										"allowUnplannedEventProperties": true,
+										"allowEventOnViolations": true,
+										"allowPropertiesOnViolations": true,
+										"commonEventOnViolations": "OMIT_PROPERTIES"
+									},
+									"group": {
+										"allowTraitsOnViolations": true,
+										"allowUnplannedTraits": true,
+										"commonEventOnViolations": "ALLOW"
+									},
+									"identify": {
+										"allowTraitsOnViolations": true,
+										"allowUnplannedTraits": true,
+										"commonEventOnViolations": "BLOCK"
+									},
+									"forwardingBlockedEventsTo": "my-other-source-id",
+									"forwardingViolationsTo": "my-other-source-id"
+								}
+							}
+						}
+					`
+				} else {
+					payload = `
+						{
+							"data": {
+								"sourceId": "my-source-id",
+								"settings": {
+									"track": {
+										"allowUnplannedEvents": true,
+										"allowUnplannedEventProperties": true,
+										"allowEventOnViolations": false,
+										"allowPropertiesOnViolations": true,
+										"commonEventOnViolations": "ALLOW"
+									},
+									"group": {
+										"allowTraitsOnViolations": true,
+										"allowUnplannedTraits": true,
+										"commonEventOnViolations": "ALLOW"
+									},
+									"identify": {
+										"allowTraitsOnViolations": false,
+										"allowUnplannedTraits": false,
+										"commonEventOnViolations": "ALLOW"
+									},
+									"forwardingBlockedEventsTo": "my-other-other-source-id"
+								}
+							}
+						}
+					`
+				}
+
+			} else if req.URL.Path == "/sources/my-source-id/settings" && req.Method == http.MethodPatch {
+				if updatedSchemaSettings == 0 {
+					payload = `
+						{
+							"data": {
+								"sourceId": "my-source-id",
+								"settings": {
+									"track": {
+										"allowUnplannedEvents": true,
+										"allowUnplannedEventProperties": true,
+										"allowEventOnViolations": true,
+										"allowPropertiesOnViolations": true,
+										"commonEventOnViolations": "OMIT_PROPERTIES"
+									},
+									"group": {
+										"allowTraitsOnViolations": true,
+										"allowUnplannedTraits": true,
+										"commonEventOnViolations": "ALLOW"
+									},
+									"identify": {
+										"allowTraitsOnViolations": true,
+										"allowUnplannedTraits": true,
+										"commonEventOnViolations": "BLOCK"
+									},
+									"forwardingBlockedEventsTo": "my-other-source-id",
+									"forwardingViolationsTo": "my-other-source-id"
+								}
+							}
+						}
+					`
+				} else {
+					payload = `
+						{
+							"data": {
+								"sourceId": "my-source-id",
+								"settings": {
+									"track": {
+										"allowUnplannedEvents": true,
+										"allowUnplannedEventProperties": true,
+										"allowEventOnViolations": false,
+										"allowPropertiesOnViolations": true,
+										"commonEventOnViolations": "ALLOW"
+									},
+									"group": {
+										"allowTraitsOnViolations": true,
+										"allowUnplannedTraits": true,
+										"commonEventOnViolations": "ALLOW"
+									},
+									"identify": {
+										"allowTraitsOnViolations": false,
+										"allowUnplannedTraits": false,
+										"commonEventOnViolations": "ALLOW"
+									},
+									"forwardingBlockedEventsTo": "my-other-other-source-id"
+								}
+							}
+						}
+					`
+				}
+
+				updatedSchemaSettings++
 			}
 
 			_, _ = w.Write([]byte(payload))
@@ -153,20 +226,71 @@ func TestAccSourceTrackingPlanConnectionResource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "source_id", "my-source-id"),
 					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "tracking_plan_id", "my-tracking-plan-id"),
+					resource.TestCheckNoResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings"),
 				),
 			},
 			// Update and Read testing
 			{
 				Config: providerConfig + `
 						resource "segment_source_tracking_plan_connection" "test" {
-							source_id = "my-other-source-id"
-							tracking_plan_id = "my-other-tracking-plan-id"
+							source_id = "my-source-id"
+							tracking_plan_id = "my-tracking-plan-id"
+							schema_settings = {
+								forwarding_blocked_events_to = "my-other-source-id"
+								forwarding_violations_to = "my-other-source-id"
+								track = {
+									allow_unplanned_events = true
+									allow_event_on_violations = true
+									allow_properties_on_violations = true
+									common_event_on_violations = "OMIT_PROPERTIES"
+								}
+								identify = {
+									allow_traits_on_violations = true
+									common_event_on_violations = "BLOCK"
+								}
+							}
 						}
 					`,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "source_id", "my-other-source-id"),
-					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "tracking_plan_id", "my-other-tracking-plan-id"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "source_id", "my-source-id"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "tracking_plan_id", "my-tracking-plan-id"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.forwarding_blocked_events_to", "my-other-source-id"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.forwarding_violations_to", "my-other-source-id"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.track.allow_unplanned_events", "true"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.track.allow_event_on_violations", "true"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.track.allow_properties_on_violations", "true"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.track.common_event_on_violations", "OMIT_PROPERTIES"),
+					resource.TestCheckNoResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.track.allow_unplanned_event_properties"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.identify.common_event_on_violations", "BLOCK"),
+					resource.TestCheckResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.identify.allow_traits_on_violations", "true"),
+					resource.TestCheckNoResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.identify.allow_unplanned_traits"),
+					resource.TestCheckNoResourceAttr("segment_source_tracking_plan_connection.test", "schema_settings.group"),
 				),
+			},
+			{
+				ResourceName: "segment_source_tracking_plan_connection.test",
+				Config: providerConfig + `
+					resource "segment_source_tracking_plan_connection" "test" {
+						source_id = "my-source-id"
+						tracking_plan_id = "my-tracking-plan-id"
+						schema_settings = {
+							forwarding_blocked_events_to = "my-other-source-id"
+							forwarding_violations_to = "my-other-source-id"
+							track = {
+								allow_unplanned_events = true
+								allow_event_on_violations = true
+								allow_properties_on_violations = true
+								common_event_on_violations = "OMIT_PROPERTIES"
+							}
+							identify = {
+								allow_traits_on_violations = true
+								common_event_on_violations = "BLOCK"
+							}
+						}
+					}
+				`,
+				ImportState:   true,
+				ImportStateId: "my-source-id:my-tracking-plan-id",
 			},
 		},
 	})
