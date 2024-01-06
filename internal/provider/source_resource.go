@@ -233,82 +233,6 @@ func (r *sourceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 					},
 				},
 			},
-			"schema_settings": schema.SingleNestedAttribute{
-				Optional:    true,
-				Description: "The schema settings associated with the Source. Upon import, this field will be empty even if the settings have already been configured due to Terraform limitations, but will be populated on the first apply. Fields not present in the config will not be managed by Terraform.",
-				Attributes: map[string]schema.Attribute{
-					"track": schema.SingleNestedAttribute{
-						Optional:    true,
-						Description: "Track settings.",
-						Attributes: map[string]schema.Attribute{
-							"allow_unplanned_events": schema.BoolAttribute{
-								Optional:    true,
-								Description: "Enable to allow unplanned track events.",
-							},
-							"allow_unplanned_event_properties": schema.BoolAttribute{
-								Optional:    true,
-								Description: "Enable to allow unplanned track event properties.",
-							},
-							"allow_event_on_violations": schema.BoolAttribute{
-								Optional:    true,
-								Description: "Allow track event on violations.",
-							},
-							"allow_properties_on_violations": schema.BoolAttribute{
-								Optional:    true,
-								Description: "Enable to allow track properties on violations.",
-							},
-							"common_event_on_violations": schema.StringAttribute{
-								Optional:    true,
-								Description: "The common track event on violations.",
-							},
-						},
-					},
-					"identify": schema.SingleNestedAttribute{
-						Optional:    true,
-						Description: "Identify settings.",
-						Attributes: map[string]schema.Attribute{
-							"allow_unplanned_traits": schema.BoolAttribute{
-								Optional:    true,
-								Description: "Enable to allow unplanned identify traits.",
-							},
-							"allow_traits_on_violations": schema.BoolAttribute{
-								Optional:    true,
-								Description: "Enable to allow identify traits on violations.",
-							},
-							"common_event_on_violations": schema.StringAttribute{
-								Optional:    true,
-								Description: "The common identify event on violations.",
-							},
-						},
-					},
-					"group": schema.SingleNestedAttribute{
-						Optional:    true,
-						Description: "Group settings.",
-						Attributes: map[string]schema.Attribute{
-							"allow_unplanned_traits": schema.BoolAttribute{
-								Optional:    true,
-								Description: "Enable to allow unplanned group traits.",
-							},
-							"allow_traits_on_violations": schema.BoolAttribute{
-								Optional:    true,
-								Description: "Enable to allow group traits on violations.",
-							},
-							"common_event_on_violations": schema.StringAttribute{
-								Optional:    true,
-								Description: "The common group event on violations.",
-							},
-						},
-					},
-					"forwarding_violations_to": schema.StringAttribute{
-						Optional:    true,
-						Description: "Source id to forward violations to.",
-					},
-					"forwarding_blocked_events_to": schema.StringAttribute{
-						Optional:    true,
-						Description: "Source id to forward blocked events to.",
-					},
-				},
-			},
 		},
 	}
 }
@@ -348,13 +272,12 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(settings)
 
-	out, body, err := r.client.SourcesApi.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
+	out, body, err := r.client.SourcesAPI.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
 		Slug:       plan.Slug.ValueString(),
 		Enabled:    plan.Enabled.ValueBool(),
 		MetadataId: metadataID,
-		Settings:   *api.NewNullableModelMap(modelMap),
+		Settings:   settings,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
@@ -373,7 +296,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && plan.Name.ValueString() != "" {
 		// This is a workaround for the fact that "name" is allowed to be provided during update but not create
-		updateOut, body, err := r.client.SourcesApi.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
+		updateOut, body, err := r.client.SourcesAPI.UpdateSource(r.authContext, out.Data.Source.Id).UpdateSourceV1Input(api.UpdateSourceV1Input{
 			Name: plan.Name.ValueStringPointer(),
 		}).Execute()
 		if body != nil {
@@ -398,7 +321,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	if len(labels) > 0 {
-		_, body, err := r.client.SourcesApi.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
+		_, body, err := r.client.SourcesAPI.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
 			Labels: models.APILabelsToLabelsV1(labels),
 		}).Execute()
 		if body != nil {
@@ -416,41 +339,8 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		source.Labels = models.APILabelsToLabelsV1(labels)
 	}
 
-	var schemaSettings *api.Settings
-	if !plan.SchemaSettings.IsNull() && !plan.SchemaSettings.IsUnknown() {
-		apiSchemaSettings, diags := models.GetSchemaSettingsFromPlan(ctx, plan.SchemaSettings)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
-		if apiSchemaSettings != nil {
-			settingsOut, body, err := r.client.SourcesApi.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
-				Track:                     apiSchemaSettings.Track,
-				Identify:                  apiSchemaSettings.Identify,
-				Group:                     apiSchemaSettings.Group,
-				ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
-				ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
-			}).Execute()
-			if body != nil {
-				defer body.Body.Close()
-			}
-			if err != nil {
-				resp.Diagnostics.AddError(
-					"Unable to update Source schema settings",
-					getError(err, body),
-				)
-
-				return
-			}
-
-			s := api.Settings(settingsOut.Data.Settings)
-			schemaSettings = &s
-		}
-	}
-
 	var state models.SourceState
-	err = state.Fill(api.Source4(source), schemaSettings)
+	err = state.Fill(source)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
@@ -462,12 +352,6 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	state.Settings = plan.Settings
-	plannedSchemaSettings, diags := models.SchemaSettingsPlanToState(ctx, plan.SchemaSettings)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	state.SchemaSettings = filterOmittedSchemaSettings(plannedSchemaSettings, state.SchemaSettings)
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -492,7 +376,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	out, body, err := r.client.SourcesApi.GetSource(r.authContext, id).Execute()
+	out, body, err := r.client.SourcesAPI.GetSource(r.authContext, id).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -507,26 +391,8 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	source := out.Data.Source
 
-	var schemaSettings *api.Settings
-	if previousState.SchemaSettings != nil {
-		settingsOut, body, err := r.client.SourcesApi.ListSchemaSettingsInSource(r.authContext, source.Id).Execute()
-		if body != nil {
-			defer body.Body.Close()
-		}
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Unable to read Source schema settings",
-				getError(err, body),
-			)
-
-			return
-		}
-
-		schemaSettings = &settingsOut.Data.Settings
-	}
-
 	var state models.SourceState
-	err = state.Fill(source, schemaSettings)
+	err = state.Fill(source)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
@@ -539,9 +405,6 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
 		state.Settings = previousState.Settings
-	}
-	if previousState.SchemaSettings != nil {
-		state.SchemaSettings = filterOmittedSchemaSettings(previousState.SchemaSettings, state.SchemaSettings)
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -572,7 +435,6 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	modelMap := api.NewModelMap(settings)
 
 	var name *string
 	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && plan.Name.ValueString() != "" {
@@ -580,7 +442,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	// The default behavior of updating settings is to upsert. However, to eliminate settings that are no longer necessary, nil is assigned to fields that are no longer found in the resource.
-	existingSource, body, err := r.client.SourcesApi.GetSource(r.authContext, state.ID.ValueString()).Execute()
+	existingSource, body, err := r.client.SourcesAPI.GetSource(r.authContext, state.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -592,7 +454,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 		return
 	}
-	existingSettings := existingSource.Data.GetSource().Settings.Get().Get()
+	existingSettings := existingSource.Data.GetSource().Settings
 
 	for key := range existingSettings {
 		if settings[key] == nil {
@@ -600,11 +462,11 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 	}
 
-	out, body, err := r.client.SourcesApi.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
+	out, body, err := r.client.SourcesAPI.UpdateSource(r.authContext, state.ID.ValueString()).UpdateSourceV1Input(api.UpdateSourceV1Input{
 		Slug:     plan.Slug.ValueStringPointer(),
 		Enabled:  plan.Enabled.ValueBoolPointer(),
 		Name:     name,
-		Settings: *api.NewNullableModelMap(modelMap),
+		Settings: settings,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
@@ -626,7 +488,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 	if len(labels) > 0 {
-		_, body, err := r.client.SourcesApi.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
+		_, body, err := r.client.SourcesAPI.ReplaceLabelsInSource(r.authContext, source.Id).ReplaceLabelsInSourceV1Input(api.ReplaceLabelsInSourceV1Input{
 			Labels: models.APILabelsToLabelsV1(labels),
 		}).Execute()
 		if body != nil {
@@ -644,40 +506,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		source.Labels = models.APILabelsToLabelsV1(labels)
 	}
 
-	var schemaSettings *api.Settings
-	if !plan.SchemaSettings.IsNull() && !plan.SchemaSettings.IsUnknown() {
-		apiSchemaSettings, diags := models.GetSchemaSettingsFromPlan(ctx, plan.SchemaSettings)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
-		if apiSchemaSettings != nil {
-			settingsOut, body, err := r.client.SourcesApi.UpdateSchemaSettingsInSource(r.authContext, source.Id).UpdateSchemaSettingsInSourceV1Input(api.UpdateSchemaSettingsInSourceV1Input{
-				Track:                     apiSchemaSettings.Track,
-				Identify:                  apiSchemaSettings.Identify,
-				Group:                     apiSchemaSettings.Group,
-				ForwardingViolationsTo:    apiSchemaSettings.ForwardingViolationsTo,
-				ForwardingBlockedEventsTo: apiSchemaSettings.ForwardingBlockedEventsTo,
-			}).Execute()
-			if body != nil {
-				defer body.Body.Close()
-			}
-			if err != nil {
-				resp.Diagnostics.AddError(
-					"Unable to update Source schema settings",
-					getError(err, body),
-				)
-
-				return
-			}
-
-			s := api.Settings(settingsOut.Data.Settings)
-			schemaSettings = &s
-		}
-	}
-
-	err = state.Fill(api.Source4(source), schemaSettings)
+	err = state.Fill(source)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to populate Source state",
@@ -689,12 +518,6 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	state.Settings = plan.Settings
-	plannedSchemaSettings, diags := models.SchemaSettingsPlanToState(ctx, plan.SchemaSettings)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	state.SchemaSettings = filterOmittedSchemaSettings(plannedSchemaSettings, state.SchemaSettings)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -711,7 +534,7 @@ func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	_, body, err := r.client.SourcesApi.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.SourcesAPI.DeleteSource(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -747,71 +570,4 @@ func (r *sourceResource) Configure(_ context.Context, req resource.ConfigureRequ
 
 	r.client = config.client
 	r.authContext = config.authContext
-}
-
-// Filters out fields that were omitted from the plan to ensure consistent terraform state.
-func filterOmittedSchemaSettings(plannedState *models.SchemaSettingsState, returnedState *models.SchemaSettingsState) *models.SchemaSettingsState {
-	if plannedState == nil || returnedState == nil {
-		return nil
-	}
-
-	out := models.SchemaSettingsState{}
-
-	if plannedState.Track != nil {
-		out.Track = &models.TrackSettings{}
-
-		if !plannedState.Track.AllowEventOnViolations.IsNull() && !plannedState.Track.AllowEventOnViolations.IsUnknown() {
-			out.Track.AllowEventOnViolations = returnedState.Track.AllowEventOnViolations
-		}
-		if !plannedState.Track.AllowPropertiesOnViolations.IsNull() && !plannedState.Track.AllowPropertiesOnViolations.IsUnknown() {
-			out.Track.AllowPropertiesOnViolations = returnedState.Track.AllowPropertiesOnViolations
-		}
-		if !plannedState.Track.AllowUnplannedEvents.IsNull() && !plannedState.Track.AllowUnplannedEvents.IsUnknown() {
-			out.Track.AllowUnplannedEvents = returnedState.Track.AllowUnplannedEvents
-		}
-		if !plannedState.Track.AllowUnplannedEventProperties.IsNull() && !plannedState.Track.AllowUnplannedEventProperties.IsUnknown() {
-			out.Track.AllowUnplannedEventProperties = returnedState.Track.AllowUnplannedEventProperties
-		}
-		if !plannedState.Track.CommonEventOnViolations.IsNull() && !plannedState.Track.CommonEventOnViolations.IsUnknown() {
-			out.Track.CommonEventOnViolations = returnedState.Track.CommonEventOnViolations
-		}
-	}
-
-	if plannedState.Identify != nil {
-		out.Identify = &models.IdentifySettings{}
-
-		if !plannedState.Identify.AllowTraitsOnViolations.IsNull() && !plannedState.Identify.AllowTraitsOnViolations.IsUnknown() {
-			out.Identify.AllowTraitsOnViolations = returnedState.Identify.AllowTraitsOnViolations
-		}
-		if !plannedState.Identify.AllowUnplannedTraits.IsNull() && !plannedState.Identify.AllowUnplannedTraits.IsUnknown() {
-			out.Identify.AllowUnplannedTraits = returnedState.Identify.AllowUnplannedTraits
-		}
-		if !plannedState.Identify.CommonEventOnViolations.IsNull() && !plannedState.Identify.CommonEventOnViolations.IsUnknown() {
-			out.Identify.CommonEventOnViolations = returnedState.Identify.CommonEventOnViolations
-		}
-	}
-
-	if plannedState.Group != nil {
-		out.Group = &models.GroupSettings{}
-
-		if !plannedState.Group.AllowTraitsOnViolations.IsNull() && !plannedState.Group.AllowTraitsOnViolations.IsUnknown() {
-			out.Group.AllowTraitsOnViolations = returnedState.Group.AllowTraitsOnViolations
-		}
-		if !plannedState.Group.AllowUnplannedTraits.IsNull() && !plannedState.Group.AllowUnplannedTraits.IsUnknown() {
-			out.Group.AllowUnplannedTraits = returnedState.Group.AllowUnplannedTraits
-		}
-		if !plannedState.Group.CommonEventOnViolations.IsNull() && !plannedState.Group.CommonEventOnViolations.IsUnknown() {
-			out.Group.CommonEventOnViolations = returnedState.Group.CommonEventOnViolations
-		}
-	}
-
-	if !plannedState.ForwardingBlockedEventsTo.IsNull() && !plannedState.ForwardingBlockedEventsTo.IsUnknown() {
-		out.ForwardingBlockedEventsTo = returnedState.ForwardingBlockedEventsTo
-	}
-
-	if !plannedState.ForwardingViolationsTo.IsNull() && !plannedState.ForwardingViolationsTo.IsUnknown() {
-		out.ForwardingViolationsTo = returnedState.ForwardingViolationsTo
-	}
-
-	return &out
 }

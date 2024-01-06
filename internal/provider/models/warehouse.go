@@ -26,7 +26,7 @@ type WarehousePlan struct {
 	Settings    jsontypes.Normalized `tfsdk:"settings"`
 }
 
-func (w *WarehouseState) Fill(warehouse api.Warehouse) error {
+func (w *WarehouseState) Fill(warehouse api.WarehouseV1) error {
 	warehouseMetadata := WarehouseMetadataState{}
 	err := warehouseMetadata.Fill(warehouse.Metadata)
 	if err != nil {
@@ -42,29 +42,21 @@ func (w *WarehouseState) Fill(warehouse api.Warehouse) error {
 		return err
 	}
 	w.Settings = settings
-	if warehouse.Settings.IsSet() {
-		name := warehouse.Settings.Get().Get()["name"]
-		if name != nil {
-			stringName, ok := name.(string)
-			if ok {
-				w.Name = types.StringValue(stringName)
-			}
+	name := warehouse.Settings["name"]
+	if name != nil {
+		stringName, ok := name.(string)
+		if ok {
+			w.Name = types.StringValue(stringName)
 		}
 	}
 
 	return nil
 }
 
-func (w *WarehouseState) getSettings(settings api.NullableModelMap) (jsontypes.Normalized, error) {
-	if !settings.IsSet() {
-		return jsontypes.NewNormalizedNull(), nil
-	}
-
-	unwrappedSettings := settings.Get().Get()
-
+func (w *WarehouseState) getSettings(settings map[string]interface{}) (jsontypes.Normalized, error) {
 	// We remove "name" from the returned settings to surface it as a top level attribute
 	settingsWithoutName := make(map[string]interface{})
-	for k, v := range unwrappedSettings {
+	for k, v := range settings {
 		if k != "name" {
 			settingsWithoutName[k] = v
 		}

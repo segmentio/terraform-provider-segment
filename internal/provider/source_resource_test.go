@@ -492,20 +492,6 @@ func TestAccSourceResource(t *testing.T) {
 								value = "my-label-value"
 							}
 						]
-						schema_settings = {
-							forwarding_blocked_events_to = "my-other-source-id"
-							forwarding_violations_to = "my-other-source-id"
-							track = {
-								allow_unplanned_events = true
-								allow_event_on_violations = true
-								allow_properties_on_violations = true
-								common_event_on_violations = "OMIT_PROPERTIES"
-							}
-							identify = {
-								allow_traits_on_violations = true
-								common_event_on_violations = "BLOCK"
-							}
-						}
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -536,17 +522,6 @@ func TestAccSourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_source.test", "labels.#", "1"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.0.key", "my-label-key"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.0.value", "my-label-value"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.forwarding_blocked_events_to", "my-other-source-id"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.forwarding_violations_to", "my-other-source-id"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.allow_unplanned_events", "true"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.allow_event_on_violations", "true"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.allow_properties_on_violations", "true"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.common_event_on_violations", "OMIT_PROPERTIES"),
-					resource.TestCheckNoResourceAttr("segment_source.test", "schema_settings.track.allow_unplanned_event_properties"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.identify.common_event_on_violations", "BLOCK"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.identify.allow_traits_on_violations", "true"),
-					resource.TestCheckNoResourceAttr("segment_source.test", "schema_settings.identify.allow_unplanned_traits"),
-					resource.TestCheckNoResourceAttr("segment_source.test", "schema_settings.group"),
 				),
 			},
 			{
@@ -567,26 +542,6 @@ func TestAccSourceResource(t *testing.T) {
 								value = "my-label-value"
 							}
 						]
-						schema_settings = {
-							forwarding_blocked_events_to = "my-other-other-source-id"
-							track = {
-								allow_unplanned_events = true
-								allow_unplanned_event_properties = true
-								allow_event_on_violations = false
-								allow_properties_on_violations = true
-								common_event_on_violations = "ALLOW"
-							}
-							identify = {
-								allow_traits_on_violations = false
-								allow_unplanned_traits = false
-								common_event_on_violations = "ALLOW"
-							}
-							group = {
-								allow_traits_on_violations = true
-								allow_unplanned_traits = true
-								common_event_on_violations = "ALLOW"
-							}
-						}
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -617,19 +572,6 @@ func TestAccSourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_source.test", "labels.#", "1"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.0.key", "my-label-key"),
 					resource.TestCheckResourceAttr("segment_source.test", "labels.0.value", "my-label-value"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.forwarding_blocked_events_to", "my-other-other-source-id"),
-					resource.TestCheckNoResourceAttr("segment_source.test", "schema_settings.forwarding_violations_to"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.allow_unplanned_events", "true"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.allow_event_on_violations", "false"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.allow_properties_on_violations", "true"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.common_event_on_violations", "ALLOW"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.track.allow_unplanned_event_properties", "true"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.identify.common_event_on_violations", "ALLOW"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.identify.allow_traits_on_violations", "false"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.identify.allow_unplanned_traits", "false"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.group.allow_traits_on_violations", "true"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.group.allow_unplanned_traits", "true"),
-					resource.TestCheckResourceAttr("segment_source.test", "schema_settings.group.common_event_on_violations", "ALLOW"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

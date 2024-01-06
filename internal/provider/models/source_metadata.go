@@ -32,12 +32,12 @@ type LogosState struct {
 	Mark    types.String `tfsdk:"mark"`
 }
 
-func (s *SourceMetadataState) Fill(sourceMetadata api.SourceMetadata) error {
+func (s *SourceMetadataState) Fill(sourceMetadata api.SourceMetadataV1) error {
 	s.ID = types.StringValue(sourceMetadata.Id)
 	s.Name = types.StringValue(sourceMetadata.Name)
 	s.Description = types.StringValue(sourceMetadata.Description)
 	s.Slug = types.StringValue(sourceMetadata.Slug)
-	s.Logos = getLogos(api.Logos(sourceMetadata.Logos))
+	s.Logos = getLogos(sourceMetadata.Logos)
 	options, err := getOptions(sourceMetadata.Options)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func getCategories(categories []string) []types.String {
 	return categoriesToAdd
 }
 
-func getLogos(logos api.Logos) *LogosState {
+func getLogos(logos api.LogosBeta) *LogosState {
 	logosToAdd := LogosState{
 		Default: types.StringValue(logos.Default),
 	}

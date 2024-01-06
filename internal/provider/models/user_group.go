@@ -19,7 +19,7 @@ type UserGroupPlan struct {
 	Permissions types.Set      `tfsdk:"permissions"`
 }
 
-func (u *UserGroupState) Fill(userGroup api.UserGroup, members []string) error {
+func (u *UserGroupState) Fill(userGroup api.UserGroupV1, members []string) error {
 	u.ID = types.StringValue(userGroup.Id)
 	u.Name = types.StringValue(userGroup.Name)
 

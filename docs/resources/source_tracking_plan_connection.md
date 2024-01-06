@@ -3,12 +3,12 @@
 page_title: "segment_source_tracking_plan_connection Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  Represents a connection between a Source and a Tracking Plan
+  Represents a connection between a Source and a Tracking Plan. To import a connection into Terraform, use the following format: 'sourceid:trackingplan_id'.
 ---
 
 # segment_source_tracking_plan_connection (Resource)
 
-Represents a connection between a Source and a Tracking Plan
+Represents a connection between a Source and a Tracking Plan. To import a connection into Terraform, use the following format: 'source_id:tracking_plan_id'.
 
 ## Example Usage
 
@@ -17,6 +17,26 @@ Represents a connection between a Source and a Tracking Plan
 resource "segment_source_tracking_plan_connection" "example" {
   source_id        = "abc123"
   tracking_plan_id = "xyz321"
+  schema_settings = {
+    forwarding_blocked_events_to = segment_source.my_source.id
+    track = {
+      allow_unplanned_events           = true
+      allow_unplanned_event_properties = true
+      allow_event_on_violations        = false
+      allow_properties_on_violations   = true
+      common_event_on_violations       = "ALLOW"
+    }
+    identify = {
+      allow_traits_on_violations = false
+      allow_unplanned_traits     = false
+      common_event_on_violations = "ALLOW"
+    }
+    group = {
+      allow_traits_on_violations = true
+      allow_unplanned_traits     = true
+      common_event_on_violations = "ALLOW"
+    }
+  }
 }
 ```
 
@@ -27,3 +47,49 @@ resource "segment_source_tracking_plan_connection" "example" {
 
 - `source_id` (String) The id of the Source.
 - `tracking_plan_id` (String) The id of the Tracking Plan.
+
+### Optional
+
+- `schema_settings` (Attributes) The schema settings associated with the Source. Upon import, this field will be empty even if the settings have already been configured due to Terraform limitations, but will be populated on the first apply. Fields not present in the config will not be managed by Terraform. (see [below for nested schema](#nestedatt--schema_settings))
+
+<a id="nestedatt--schema_settings"></a>
+### Nested Schema for `schema_settings`
+
+Optional:
+
+- `forwarding_blocked_events_to` (String) Source id to forward blocked events to.
+- `forwarding_violations_to` (String) Source id to forward violations to.
+- `group` (Attributes) Group settings. (see [below for nested schema](#nestedatt--schema_settings--group))
+- `identify` (Attributes) Identify settings. (see [below for nested schema](#nestedatt--schema_settings--identify))
+- `track` (Attributes) Track settings. (see [below for nested schema](#nestedatt--schema_settings--track))
+
+<a id="nestedatt--schema_settings--group"></a>
+### Nested Schema for `schema_settings.group`
+
+Optional:
+
+- `allow_traits_on_violations` (Boolean) Enable to allow group traits on violations.
+- `allow_unplanned_traits` (Boolean) Enable to allow unplanned group traits.
+- `common_event_on_violations` (String) The common group event on violations.
+
+
+<a id="nestedatt--schema_settings--identify"></a>
+### Nested Schema for `schema_settings.identify`
+
+Optional:
+
+- `allow_traits_on_violations` (Boolean) Enable to allow identify traits on violations.
+- `allow_unplanned_traits` (Boolean) Enable to allow unplanned identify traits.
+- `common_event_on_violations` (String) The common identify event on violations.
+
+
+<a id="nestedatt--schema_settings--track"></a>
+### Nested Schema for `schema_settings.track`
+
+Optional:
+
+- `allow_event_on_violations` (Boolean) Allow track event on violations.
+- `allow_properties_on_violations` (Boolean) Enable to allow track properties on violations.
+- `allow_unplanned_event_properties` (Boolean) Enable to allow unplanned track event properties.
+- `allow_unplanned_events` (Boolean) Enable to allow unplanned track events.
+- `common_event_on_violations` (String) The common track event on violations.
