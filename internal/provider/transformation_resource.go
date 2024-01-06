@@ -150,7 +150,7 @@ func (r *transformationResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	out, body, err := r.client.TransformationsApi.CreateTransformation(r.authContext).CreateTransformationV1Input(api.CreateTransformationV1Input{
+	out, body, err := r.client.TransformationsAPI.CreateTransformation(r.authContext).CreateTransformationV1Input(api.CreateTransformationV1Input{
 		Name:                         plan.Name.ValueString(),
 		SourceId:                     plan.SourceID.ValueString(),
 		DestinationMetadataId:        plan.DestinationMetadataID.ValueStringPointer(),
@@ -196,7 +196,7 @@ func (r *transformationResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	out, body, err := r.client.TransformationsApi.GetTransformation(r.authContext, previousState.ID.ValueString()).Execute()
+	out, body, err := r.client.TransformationsAPI.GetTransformation(r.authContext, previousState.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
@@ -211,7 +211,7 @@ func (r *transformationResource) Read(ctx context.Context, req resource.ReadRequ
 
 	var state models.TransformationState
 
-	state.Fill(api.Transformation5(out.Data.Transformation))
+	state.Fill(out.Data.Transformation)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -253,7 +253,7 @@ func (r *transformationResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	out, body, err := r.client.TransformationsApi.UpdateTransformation(r.authContext, state.ID.ValueString()).UpdateTransformationV1Input(api.UpdateTransformationV1Input{
+	out, body, err := r.client.TransformationsAPI.UpdateTransformation(r.authContext, state.ID.ValueString()).UpdateTransformationV1Input(api.UpdateTransformationV1Input{
 		Name:                         plan.Name.ValueStringPointer(),
 		Enabled:                      plan.Enabled.ValueBoolPointer(),
 		If:                           plan.If.ValueStringPointer(),
@@ -276,7 +276,7 @@ func (r *transformationResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	state.Fill(api.Transformation5(out.Data.Transformation))
+	state.Fill(out.Data.Transformation)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -293,7 +293,7 @@ func (r *transformationResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	_, body, err := r.client.TransformationsApi.DeleteTransformation(r.authContext, config.ID.ValueString()).Execute()
+	_, body, err := r.client.TransformationsAPI.DeleteTransformation(r.authContext, config.ID.ValueString()).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}

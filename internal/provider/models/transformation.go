@@ -54,7 +54,7 @@ type FQLDefinedProperty struct {
 	PropertyName types.String `tfsdk:"property_name"`
 }
 
-func (t *TransformationState) Fill(transformation api.Transformation5) {
+func (t *TransformationState) Fill(transformation api.TransformationV1) {
 	t.ID = types.StringValue(transformation.Id)
 	t.SourceID = types.StringValue(transformation.SourceId)
 	t.DestinationMetadataID = types.StringPointerValue(transformation.DestinationMetadataId)
