@@ -1,3 +1,6 @@
+## 0.9.0 (January 8, 2024)
+Adds support for Transformation resource.
+
 ## 0.8.0 (November 16, 2023)
 **BREAKING CHANGE**
 
