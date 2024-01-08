@@ -156,6 +156,7 @@ func (p *segmentProvider) Resources(_ context.Context) []func() resource.Resourc
 		NewDestinationSubscriptionResource,
 		NewSourceTrackingPlanConnectionResource,
 		NewReverseETLModelResource,
+		NewTransformationResource,
 		NewInsertFunctionInstanceResource,
 	}
 }
