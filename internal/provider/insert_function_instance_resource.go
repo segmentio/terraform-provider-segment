@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
@@ -94,7 +95,7 @@ func (r *insertFunctionInstanceResource) Create(ctx context.Context, req resourc
 	enabled := plan.Enabled.ValueBool()
 	out, body, err := r.client.FunctionsAPI.CreateInsertFunctionInstance(r.authContext).CreateInsertFunctionInstanceAlphaInput(api.CreateInsertFunctionInstanceAlphaInput{
 		Name:          plan.Name.ValueString(),
-		FunctionId:    plan.FunctionID.ValueString(),
+		FunctionId:    strings.TrimPrefix(plan.FunctionID.ValueString(), "ifnd_"),
 		IntegrationId: plan.IntegrationID.ValueString(),
 		Enabled:       &enabled,
 		Settings:      settings,
@@ -126,6 +127,9 @@ func (r *insertFunctionInstanceResource) Create(ctx context.Context, req resourc
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	state.Settings = plan.Settings
+
+	// This is to satisfy terraform requirements that the input fields must match the returned ones. The input FunctionID can be prefixed with "ifnd_" and the returned one is not.
+	state.FunctionID = plan.FunctionID
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, state)
@@ -172,6 +176,11 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 
 	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
 		state.Settings = previousState.Settings
+	}
+
+	// This is to satisfy terraform requirements that the input fields must match the returned ones. The input FunctionID can be prefixed with "ifnd_" and the returned one is not.
+	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
+		state.FunctionID = previousState.FunctionID
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -232,6 +241,9 @@ func (r *insertFunctionInstanceResource) Update(ctx context.Context, req resourc
 
 	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
 	state.Settings = plan.Settings
+
+	// This is to satisfy terraform requirements that the input fields must match the returned ones. The input FunctionID can be prefixed with "ifnd_" and the returned one is not.
+	state.FunctionID = plan.FunctionID
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
