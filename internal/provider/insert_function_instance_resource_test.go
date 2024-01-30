@@ -12,6 +12,8 @@ func TestAccInsertFunctionInstanceResource(t *testing.T) {
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
+		t.Parallel()
+
 		updated := 0
 		fakeServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -179,6 +181,8 @@ func TestAccInsertFunctionInstanceResource(t *testing.T) {
 	})
 
 	t.Run("with prefix", func(t *testing.T) {
+		t.Parallel()
+
 		updated := 0
 		fakeServer := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
