@@ -3,7 +3,8 @@
 page_title: "segment_profiles_warehouse Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  Configures a Profiles Sync Warehouse. For more information, visit the Segment docs https://segment.com/docs/unify/profiles-sync/overview/.\n\n## Import
+  Configures a Profiles Sync Warehouse. For more information, visit the Segment docs https://segment.com/docs/unify/profiles-sync/overview/.
+  Import
   In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <space_id>:<warehouse_id>. For example:
   terraform
   import {
@@ -18,7 +19,9 @@ description: |-
 
 # segment_profiles_warehouse (Resource)
 
-Configures a Profiles Sync Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/unify/profiles-sync/overview/).\n\n## Import
+Configures a Profiles Sync Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/unify/profiles-sync/overview/).
+
+## Import
 
 In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<space_id>:<warehouse_id>`. For example:
 

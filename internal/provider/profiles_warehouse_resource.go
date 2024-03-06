@@ -40,7 +40,7 @@ func (r *profilesWarehouseResource) Metadata(_ context.Context, req resource.Met
 
 func (r *profilesWarehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: `Configures a Profiles Sync Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/unify/profiles-sync/overview/).\n\n` +
+		Description: "Configures a Profiles Sync Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/unify/profiles-sync/overview/).\n\n" +
 			docs.GenerateImportDocs("<space_id>:<warehouse_id>", "segment_profiles_warehouse"),
 
 		Attributes: map[string]schema.Attribute{
