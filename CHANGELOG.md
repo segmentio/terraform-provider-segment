@@ -1,3 +1,12 @@
+## 0.10.2 (March 6, 2024)
+Fixes a rendering bug for `segment_profiles_warehouse` resource docs.
+
+## 0.10.1 (March 6, 2024)
+Adds import documentation for each resource. Also clean up documentation.
+
+## 0.10.0 (January 30, 2024)
+Fixes bug where segment_function IDs for insert destinations could not be passed directly into a segment_insert_function_instance resource.
+
 ## 0.9.0 (January 8, 2024)
 Adds support for Transformation resource.
 
