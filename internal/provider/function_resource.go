@@ -156,6 +156,8 @@ func (r *functionResource) Create(ctx context.Context, req resource.CreateReques
 
 	function := out.Data.GetFunction()
 
+	resp.State.SetAttribute(ctx, path.Root("id"), function.Id)
+
 	var state models.FunctionState
 	state.Fill(api.Function(function))
 

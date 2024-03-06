@@ -148,6 +148,8 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 
 	trackingPlan := out.Data.GetTrackingPlan()
 
+	resp.State.SetAttribute(ctx, path.Root("id"), trackingPlan.Id)
+
 	var rules []models.RulesState
 	plan.Rules.ElementsAs(ctx, &rules, false)
 

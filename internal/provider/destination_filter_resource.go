@@ -166,6 +166,8 @@ func (r *destinationFilterResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	destinationfilter := out.Data.Filter
+	resp.State.SetAttribute(ctx, path.Root("id"), destinationfilter.Id)
+	resp.State.SetAttribute(ctx, path.Root("destination_id"), destinationfilter.DestinationId)
 
 	var state models.DestinationFilterState
 	err = state.Fill(&destinationfilter)

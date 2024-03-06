@@ -239,6 +239,8 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 
 	warehouse := out.Data.GetWarehouse()
 
+	resp.State.SetAttribute(ctx, path.Root("id"), warehouse.Id)
+
 	var state models.WarehouseState
 	err = state.Fill(warehouse)
 	if err != nil {

@@ -178,6 +178,8 @@ func (r *transformationResource) Create(ctx context.Context, req resource.Create
 
 	transformation := out.Data.GetTransformation()
 
+	resp.State.SetAttribute(ctx, path.Root("id"), transformation.Id)
+
 	var state models.TransformationState
 	state.Fill(transformation)
 
