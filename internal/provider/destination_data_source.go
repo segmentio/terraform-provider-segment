@@ -33,7 +33,7 @@ func (d *destinationDataSource) Metadata(_ context.Context, req datasource.Metad
 
 func (d *destinationDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The destination",
+		Description: "Reads a Destination. For more information, visit the [Segment docs](https://segment.com/docs/connections/destinations/).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "The unique identifier of this instance of a Destination. Config API note: analogous to `name`.",

@@ -160,7 +160,7 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 // Schema defines the schema for the data source.
 func (d *warehouseMetadataDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The warehouse metadata",
+		Description: "Reads a Warehouse metadata. For more information, visit the [Segment docs](https://segment.com/docs/connections/storage/catalog/).",
 		Attributes:  warehouseMetadataSchema(),
 	}
 }

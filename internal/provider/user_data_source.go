@@ -50,7 +50,7 @@ func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequ
 
 func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "A user belonging to a Segment Workspace.",
+		Description: "Reads a user. For more information, visit the [Segment docs](https://segment.com/docs/segment-app/iam/concepts/#team-members).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,

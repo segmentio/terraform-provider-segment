@@ -33,7 +33,7 @@ func (d *warehouseDataSource) Metadata(_ context.Context, req datasource.Metadat
 
 func (d *warehouseDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The warehouse",
+		Description: "Configures a Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/connections/storage/).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,

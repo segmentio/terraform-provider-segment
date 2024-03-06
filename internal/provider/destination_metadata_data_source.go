@@ -379,7 +379,7 @@ func (d *destinationMetadataDataSource) Metadata(_ context.Context, req datasour
 // Schema defines the schema for the data source.
 func (d *destinationMetadataDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The destination metadata",
+		Description: "Reads a Destination metadata. For more information, visit the [Segment docs](https://segment.com/docs/connections/destinations/catalog/).",
 		Attributes:  destinationMetadataSchema(),
 	}
 }

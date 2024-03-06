@@ -50,6 +50,7 @@ func (d *trackingPlanDataSource) Metadata(_ context.Context, req datasource.Meta
 
 func (d *trackingPlanDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Configures a Tracking Plan. For more information, visit the [Segment docs](https://segment.com/docs/protocols/tracking-plan/create/).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,

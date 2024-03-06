@@ -36,7 +36,7 @@ func (d *workspaceDataSource) Metadata(_ context.Context, req datasource.Metadat
 
 func (d *workspaceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The Workspace.",
+		Description: "Reads the Workspace.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
