@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -40,6 +41,8 @@ func (r *userGroupResource) Metadata(_ context.Context, req resource.MetadataReq
 
 func (r *userGroupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Configures a User Group. For more information, visit the [Segment docs](https://segment.com/docs/segment-app/iam/concepts/#user-groups).\n\n" +
+			docs.GenerateImportDocs("<id>", "segment_user_group"),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

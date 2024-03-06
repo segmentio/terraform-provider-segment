@@ -38,7 +38,9 @@ func (r *sourceWarehouseConnectionResource) Metadata(_ context.Context, req reso
 
 func (r *sourceWarehouseConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Represents a connection between a source and a warehouse",
+		Description: "Configures a connection between a source and a warehouse.\n\n" +
+			`## Import
+This resource is not intended to be imported. Instead, you can create a new connection between the Source and the Warehouse, and any existing connections will be handled automatically.`,
 		Attributes: map[string]schema.Attribute{
 			"source_id": schema.StringAttribute{
 				Required:    true,

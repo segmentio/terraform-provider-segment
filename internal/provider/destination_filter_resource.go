@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -47,9 +48,8 @@ func (r *destinationFilterResource) Metadata(_ context.Context, req resource.Met
 // Schema defines the schema for the resource.
 func (r *destinationFilterResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: `Destination filters let you send or block events, properties, and user traits from reaching a destination. Enabled filters are applied on every matching event in transit to this destination.
-		
-		To import a Destination filter into Terraform, use the following format: 'destination-id:filter-id'`,
+		Description: "Configures a filter for a destination. For more information, visit the [Segment docs](https://segment.com/docs/connections/destinations/destination-filters/).\n\n" +
+			docs.GenerateImportDocs("<destination_id>:<filter_id>", "segment_destination_filter"),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

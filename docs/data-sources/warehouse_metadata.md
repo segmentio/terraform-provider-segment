@@ -3,12 +3,12 @@
 page_title: "segment_warehouse_metadata Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  The warehouse metadata
+  Reads a Warehouse metadata. For more information, visit the Segment docs https://segment.com/docs/connections/storage/catalog/.
 ---
 
 # segment_warehouse_metadata (Data Source)
 
-The warehouse metadata
+Reads a Warehouse metadata. For more information, visit the [Segment docs](https://segment.com/docs/connections/storage/catalog/).
 
 ## Example Usage
 

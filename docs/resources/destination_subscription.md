@@ -3,12 +3,40 @@
 page_title: "segment_destination_subscription Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
+  Configures a Destination subscription to an action. For more information, visit the Segment docs https://segment.com/docs/connections/destinations/actions/.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <id>. For example:
+  terraform
+  import {
+    to = segment_destination_subscription.example
+    id = "<id>"
+  }
   
+  Otherwise, use terraform import with <id>. For example:
+  console
+  terraform import segment_destination_subscription.example <id>
 ---
 
 # segment_destination_subscription (Resource)
 
+Configures a Destination subscription to an action. For more information, visit the [Segment docs](https://segment.com/docs/connections/destinations/actions/).
 
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<id>`. For example:
+
+```terraform
+import {
+  to = segment_destination_subscription.example
+  id = "<id>"
+}
+```
+
+Otherwise, use `terraform import` with `<id>`. For example:
+
+```console
+terraform import segment_destination_subscription.example <id>
+```
 
 ## Example Usage
 

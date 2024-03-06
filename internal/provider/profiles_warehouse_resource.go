@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -39,9 +40,8 @@ func (r *profilesWarehouseResource) Metadata(_ context.Context, req resource.Met
 
 func (r *profilesWarehouseResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: `A Profiles Sync Warehouse is a central repository of data collected from your workspace. It is what commonly comes to mind when you think about a relational database: structured data that fits into rows and columns.
-		
-		To import a Profiles Warehouse into Terraform, use the following format: 'space-id:warehouse-id'`,
+		Description: `Configures a Profiles Sync Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/unify/profiles-sync/overview/).\n\n` +
+			docs.GenerateImportDocs("<space_id>:<warehouse_id>", "segment_profiles_warehouse"),
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

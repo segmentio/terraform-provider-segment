@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -38,6 +39,8 @@ func (r *insertFunctionInstanceResource) Metadata(_ context.Context, req resourc
 
 func (r *insertFunctionInstanceResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Configures an Insert Function. For more information, visit the [Segment docs](https://segment.com/docs/connections/functions/insert-functions/).\n\n" +
+			docs.GenerateImportDocs("<id>", "segment_insert_function_instance"),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

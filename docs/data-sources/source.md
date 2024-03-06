@@ -3,12 +3,12 @@
 page_title: "segment_source Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  
+  Reads a Source. For more information, visit the Segment docs https://segment.com/docs/connections/sources/.
 ---
 
 # segment_source (Data Source)
 
-
+Reads a Source. For more information, visit the [Segment docs](https://segment.com/docs/connections/sources/).
 
 ## Example Usage
 

@@ -3,12 +3,12 @@
 page_title: "segment_warehouse Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  The warehouse
+  Configures a Warehouse. For more information, visit the Segment docs https://segment.com/docs/connections/storage/.
 ---
 
 # segment_warehouse (Data Source)
 
-The warehouse
+Configures a Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/connections/storage/).
 
 ## Example Usage
 

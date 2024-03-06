@@ -52,6 +52,7 @@ func (d *sourceDataSource) Metadata(_ context.Context, req datasource.MetadataRe
 
 func (d *sourceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Reads a Source. For more information, visit the [Segment docs](https://segment.com/docs/connections/sources/).",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,

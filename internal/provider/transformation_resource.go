@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -37,6 +38,8 @@ func (r *transformationResource) Metadata(_ context.Context, req resource.Metada
 
 func (r *transformationResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Configures a Transformation. For more information, visit the [Segment docs](https://segment.com/docs/protocols/transform/).\n\n" +
+			docs.GenerateImportDocs("<id>", "segment_transformation"),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

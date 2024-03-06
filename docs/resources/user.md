@@ -3,12 +3,44 @@
 page_title: "segment_user Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  A user or invite belonging to a Segment Workspace. Only users may be imported.
+  Configures a user or invite. For more information, visit the Segment docs https://segment.com/docs/segment-app/iam/concepts/#team-members.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <user_id>. For example:
+  terraform
+  import {
+    to = segment_user.example
+    id = "<user_id>"
+  }
+  
+  Otherwise, use terraform import with <user_id>. For example:
+  console
+  terraform import segment_user.example <user_id>
+  
+  Only users may be imported.
 ---
 
 # segment_user (Resource)
 
-A user or invite belonging to a Segment Workspace. Only users may be imported.
+Configures a user or invite. For more information, visit the [Segment docs](https://segment.com/docs/segment-app/iam/concepts/#team-members).
+
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<user_id>`. For example:
+
+```terraform
+import {
+  to = segment_user.example
+  id = "<user_id>"
+}
+```
+
+Otherwise, use `terraform import` with `<user_id>`. For example:
+
+```console
+terraform import segment_user.example <user_id>
+```
+
+ **Only users may be imported.**
 
 ## Example Usage
 

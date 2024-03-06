@@ -3,12 +3,17 @@
 page_title: "segment_source_warehouse_connection Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  Represents a connection between a source and a warehouse
+  Configures a connection between a source and a warehouse.
+  Import
+  This resource is not intended to be imported. Instead, you can create a new connection between the Source and the Warehouse, and any existing connections will be handled automatically.
 ---
 
 # segment_source_warehouse_connection (Resource)
 
-Represents a connection between a source and a warehouse
+Configures a connection between a source and a warehouse.
+
+## Import
+This resource is not intended to be imported. Instead, you can create a new connection between the Source and the Warehouse, and any existing connections will be handled automatically.
 
 ## Example Usage
 

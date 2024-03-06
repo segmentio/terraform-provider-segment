@@ -1,6 +1,8 @@
 module github.com/segmentio/terraform-provider-segment
 
-go 1.19
+go 1.21
+
+toolchain go1.21.7
 
 require (
 	github.com/avast/retry-go/v4 v4.5.1

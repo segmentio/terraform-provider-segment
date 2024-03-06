@@ -3,12 +3,40 @@
 page_title: "segment_source_tracking_plan_connection Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  Represents a connection between a Source and a Tracking Plan. To import a connection into Terraform, use the following format: 'sourceid:trackingplan_id'.
+  Configures a connection between a Source and a Tracking Plan. For more information, visit the Segment docs https://segment.com/docs/protocols/validate/connect-sources/.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <source_id>:<tracking_plan_id>. For example:
+  terraform
+  import {
+    to = segment_source_tracking_plan_connection.example
+    id = "<source_id>:<tracking_plan_id>"
+  }
+  
+  Otherwise, use terraform import with <source_id>:<tracking_plan_id>. For example:
+  console
+  terraform import segment_source_tracking_plan_connection.example <source_id>:<tracking_plan_id>
 ---
 
 # segment_source_tracking_plan_connection (Resource)
 
-Represents a connection between a Source and a Tracking Plan. To import a connection into Terraform, use the following format: 'source_id:tracking_plan_id'.
+Configures a connection between a Source and a Tracking Plan. For more information, visit the [Segment docs](https://segment.com/docs/protocols/validate/connect-sources/).
+
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<source_id>:<tracking_plan_id>`. For example:
+
+```terraform
+import {
+  to = segment_source_tracking_plan_connection.example
+  id = "<source_id>:<tracking_plan_id>"
+}
+```
+
+Otherwise, use `terraform import` with `<source_id>:<tracking_plan_id>`. For example:
+
+```console
+terraform import segment_source_tracking_plan_connection.example <source_id>:<tracking_plan_id>
+```
 
 ## Example Usage
 

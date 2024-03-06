@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -38,6 +39,8 @@ func (r *destinationSubscriptionResource) Metadata(_ context.Context, req resour
 
 func (r *destinationSubscriptionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Configures a Destination subscription to an action. For more information, visit the [Segment docs](https://segment.com/docs/connections/destinations/actions/).\n\n" +
+			docs.GenerateImportDocs("<id>", "segment_destination_subscription"),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
