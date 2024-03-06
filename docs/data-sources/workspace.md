@@ -3,12 +3,12 @@
 page_title: "segment_workspace Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  The Workspace.
+  Reads the Workspace.
 ---
 
 # segment_workspace (Data Source)
 
-The Workspace.
+Reads the Workspace.
 
 ## Example Usage
 

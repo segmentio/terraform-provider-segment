@@ -3,12 +3,40 @@
 page_title: "segment_transformation Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
+  Configures a Transformation. For more information, visit the Segment docs https://segment.com/docs/protocols/transform/.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <id>. For example:
+  terraform
+  import {
+    to = segment_transformation.example
+    id = "<id>"
+  }
   
+  Otherwise, use terraform import with <id>. For example:
+  console
+  terraform import segment_transformation.example <id>
 ---
 
 # segment_transformation (Resource)
 
+Configures a Transformation. For more information, visit the [Segment docs](https://segment.com/docs/protocols/transform/).
 
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<id>`. For example:
+
+```terraform
+import {
+  to = segment_transformation.example
+  id = "<id>"
+}
+```
+
+Otherwise, use `terraform import` with `<id>`. For example:
+
+```console
+terraform import segment_transformation.example <id>
+```
 
 ## Example Usage
 

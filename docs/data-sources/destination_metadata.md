@@ -3,12 +3,12 @@
 page_title: "segment_destination_metadata Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  The destination metadata
+  Reads a Destination metadata. For more information, visit the Segment docs https://segment.com/docs/connections/destinations/catalog/.
 ---
 
 # segment_destination_metadata (Data Source)
 
-The destination metadata
+Reads a Destination metadata. For more information, visit the [Segment docs](https://segment.com/docs/connections/destinations/catalog/).
 
 ## Example Usage
 

@@ -3,15 +3,40 @@
 page_title: "segment_destination_filter Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  Destination filters let you send or block events, properties, and user traits from reaching a destination. Enabled filters are applied on every matching event in transit to this destination.
-      To import a Destination filter into Terraform, use the following format: 'destination-id:filter-id'
+  Configures a filter for a destination. For more information, visit the Segment docs https://segment.com/docs/connections/destinations/destination-filters/.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <destination_id>:<filter_id>. For example:
+  terraform
+  import {
+    to = segment_destination_filter.example
+    id = "<destination_id>:<filter_id>"
+  }
+  
+  Otherwise, use terraform import with <destination_id>:<filter_id>. For example:
+  console
+  terraform import segment_destination_filter.example <destination_id>:<filter_id>
 ---
 
 # segment_destination_filter (Resource)
 
-Destination filters let you send or block events, properties, and user traits from reaching a destination. Enabled filters are applied on every matching event in transit to this destination.
-		
-		To import a Destination filter into Terraform, use the following format: 'destination-id:filter-id'
+Configures a filter for a destination. For more information, visit the [Segment docs](https://segment.com/docs/connections/destinations/destination-filters/).
+
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<destination_id>:<filter_id>`. For example:
+
+```terraform
+import {
+  to = segment_destination_filter.example
+  id = "<destination_id>:<filter_id>"
+}
+```
+
+Otherwise, use `terraform import` with `<destination_id>:<filter_id>`. For example:
+
+```console
+terraform import segment_destination_filter.example <destination_id>:<filter_id>
+```
 
 ## Example Usage
 

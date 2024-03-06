@@ -3,15 +3,37 @@
 page_title: "segment_profiles_warehouse Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  A Profiles Sync Warehouse is a central repository of data collected from your workspace. It is what commonly comes to mind when you think about a relational database: structured data that fits into rows and columns.
-      To import a Profiles Warehouse into Terraform, use the following format: 'space-id:warehouse-id'
+  Configures a Profiles Sync Warehouse. For more information, visit the Segment docs https://segment.com/docs/unify/profiles-sync/overview/.\n\n## Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <space_id>:<warehouse_id>. For example:
+  terraform
+  import {
+    to = segment_profiles_warehouse.example
+    id = "<space_id>:<warehouse_id>"
+  }
+  
+  Otherwise, use terraform import with <space_id>:<warehouse_id>. For example:
+  console
+  terraform import segment_profiles_warehouse.example <space_id>:<warehouse_id>
 ---
 
 # segment_profiles_warehouse (Resource)
 
-A Profiles Sync Warehouse is a central repository of data collected from your workspace. It is what commonly comes to mind when you think about a relational database: structured data that fits into rows and columns.
-		
-		To import a Profiles Warehouse into Terraform, use the following format: 'space-id:warehouse-id'
+Configures a Profiles Sync Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/unify/profiles-sync/overview/).\n\n## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<space_id>:<warehouse_id>`. For example:
+
+```terraform
+import {
+  to = segment_profiles_warehouse.example
+  id = "<space_id>:<warehouse_id>"
+}
+```
+
+Otherwise, use `terraform import` with `<space_id>:<warehouse_id>`. For example:
+
+```console
+terraform import segment_profiles_warehouse.example <space_id>:<warehouse_id>
+```
 
 ## Example Usage
 

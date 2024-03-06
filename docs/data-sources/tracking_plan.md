@@ -3,12 +3,12 @@
 page_title: "segment_tracking_plan Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  
+  Configures a Tracking Plan. For more information, visit the Segment docs https://segment.com/docs/protocols/tracking-plan/create/.
 ---
 
 # segment_tracking_plan (Data Source)
 
-
+Configures a Tracking Plan. For more information, visit the [Segment docs](https://segment.com/docs/protocols/tracking-plan/create/).
 
 ## Example Usage
 

@@ -3,12 +3,40 @@
 page_title: "segment_function Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  The function
+  Configures a Function. For more information, visit the Segment docs https://segment.com/docs/connections/functions/.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <id>. For example:
+  terraform
+  import {
+    to = segment_function.example
+    id = "<id>"
+  }
+  
+  Otherwise, use terraform import with <id>. For example:
+  console
+  terraform import segment_function.example <id>
 ---
 
 # segment_function (Resource)
 
-The function
+Configures a Function. For more information, visit the [Segment docs](https://segment.com/docs/connections/functions/).
+
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<id>`. For example:
+
+```terraform
+import {
+  to = segment_function.example
+  id = "<id>"
+}
+```
+
+Otherwise, use `terraform import` with `<id>`. For example:
+
+```console
+terraform import segment_function.example <id>
+```
 
 ## Example Usage
 

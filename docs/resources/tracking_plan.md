@@ -3,12 +3,40 @@
 page_title: "segment_tracking_plan Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
+  Configures a Tracking Plan. For more information, visit the Segment docs https://segment.com/docs/protocols/tracking-plan/create/.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <id>. For example:
+  terraform
+  import {
+    to = segment_tracking_plan.example
+    id = "<id>"
+  }
   
+  Otherwise, use terraform import with <id>. For example:
+  console
+  terraform import segment_tracking_plan.example <id>
 ---
 
 # segment_tracking_plan (Resource)
 
+Configures a Tracking Plan. For more information, visit the [Segment docs](https://segment.com/docs/protocols/tracking-plan/create/).
 
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<id>`. For example:
+
+```terraform
+import {
+  to = segment_tracking_plan.example
+  id = "<id>"
+}
+```
+
+Otherwise, use `terraform import` with `<id>`. For example:
+
+```console
+terraform import segment_tracking_plan.example <id>
+```
 
 ## Example Usage
 

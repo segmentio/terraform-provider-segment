@@ -3,12 +3,12 @@
 page_title: "segment_user Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  A user belonging to a Segment Workspace.
+  Reads a user. For more information, visit the Segment docs https://segment.com/docs/segment-app/iam/concepts/#team-members.
 ---
 
 # segment_user (Data Source)
 
-A user belonging to a Segment Workspace.
+Reads a user. For more information, visit the [Segment docs](https://segment.com/docs/segment-app/iam/concepts/#team-members).
 
 ## Example Usage
 

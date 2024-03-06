@@ -3,12 +3,12 @@
 page_title: "segment_role Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  
+  Reads a Role. For more information, visit the Segment docs https://segment.com/docs/segment-app/iam/roles/.
 ---
 
 # segment_role (Data Source)
 
-
+Reads a Role. For more information, visit the [Segment docs](https://segment.com/docs/segment-app/iam/roles/).
 
 ## Example Usage
 

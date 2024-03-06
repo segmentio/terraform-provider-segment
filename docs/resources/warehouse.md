@@ -3,12 +3,40 @@
 page_title: "segment_warehouse Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  The warehouse
+  Configures a Warehouse. For more information, visit the Segment docs https://segment.com/docs/connections/storage/.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <id>. For example:
+  terraform
+  import {
+    to = segment_warehouse.example
+    id = "<id>"
+  }
+  
+  Otherwise, use terraform import with <id>. For example:
+  console
+  terraform import segment_warehouse.example <id>
 ---
 
 # segment_warehouse (Resource)
 
-The warehouse
+Configures a Warehouse. For more information, visit the [Segment docs](https://segment.com/docs/connections/storage/).
+
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<id>`. For example:
+
+```terraform
+import {
+  to = segment_warehouse.example
+  id = "<id>"
+}
+```
+
+Otherwise, use `terraform import` with `<id>`. For example:
+
+```console
+terraform import segment_warehouse.example <id>
+```
 
 ## Example Usage
 

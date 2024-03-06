@@ -3,12 +3,40 @@
 page_title: "segment_label Resource - terraform-provider-segment"
 subcategory: ""
 description: |-
-  A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'.
+  Configures a Label. For more information, visit the Segment docs https://segment.com/docs/segment-app/iam/labels/.
+  Import
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <key>:<value>. For example:
+  terraform
+  import {
+    to = segment_label.example
+    id = "<key>:<value>"
+  }
+  
+  Otherwise, use terraform import with <key>:<value>. For example:
+  console
+  terraform import segment_label.example <key>:<value>
 ---
 
 # segment_label (Resource)
 
-A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'.
+Configures a Label. For more information, visit the [Segment docs](https://segment.com/docs/segment-app/iam/labels/).
+
+## Import
+
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<key>:<value>`. For example:
+
+```terraform
+import {
+  to = segment_label.example
+  id = "<key>:<value>"
+}
+```
+
+Otherwise, use `terraform import` with `<key>:<value>`. For example:
+
+```console
+terraform import segment_label.example <key>:<value>
+```
 
 ## Example Usage
 

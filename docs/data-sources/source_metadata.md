@@ -3,12 +3,12 @@
 page_title: "segment_source_metadata Data Source - terraform-provider-segment"
 subcategory: ""
 description: |-
-  The source metadata
+  Reads a Source metadata. For more information, visit the Segment docs https://segment.com/docs/connections/sources/catalog/.
 ---
 
 # segment_source_metadata (Data Source)
 
-The source metadata
+Reads a Source metadata. For more information, visit the [Segment docs](https://segment.com/docs/connections/sources/catalog/).
 
 ## Example Usage
 
