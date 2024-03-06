@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -48,7 +49,8 @@ func (r *userResource) Metadata(_ context.Context, req resource.MetadataRequest,
 
 func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "A user or invite belonging to a Segment Workspace. Only users may be imported.",
+		Description: "Configures a user or invite. For more information, visit the [Segment docs](https://segment.com/docs/segment-app/iam/concepts/#team-members).\n\n" +
+			docs.GenerateImportDocs("<user_id>", "segment_user") + "\n\n **Only users may be imported.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

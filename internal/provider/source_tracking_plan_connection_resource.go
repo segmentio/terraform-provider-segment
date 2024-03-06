@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/segmentio/public-api-sdk-go/api"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 )
 
@@ -54,7 +55,8 @@ func (r *sourceTrackingPlanConnectionResource) ImportState(ctx context.Context, 
 
 func (r *sourceTrackingPlanConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Represents a connection between a Source and a Tracking Plan. To import a connection into Terraform, use the following format: 'source_id:tracking_plan_id'.",
+		Description: "Configures a connection between a Source and a Tracking Plan. For more information, visit the [Segment docs](https://segment.com/docs/protocols/validate/connect-sources/).\n\n" +
+			docs.GenerateImportDocs("<source_id>:<tracking_plan_id>", "segment_source_tracking_plan_connection"),
 		Attributes: map[string]schema.Attribute{
 			"source_id": schema.StringAttribute{
 				Required:    true,

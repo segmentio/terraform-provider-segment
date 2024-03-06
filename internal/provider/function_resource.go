@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -39,7 +40,8 @@ func (r *functionResource) Metadata(_ context.Context, req resource.MetadataRequ
 
 func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The function",
+		Description: "Configures a Function. For more information, visit the [Segment docs](https://segment.com/docs/connections/functions/).\n\n" +
+			docs.GenerateImportDocs("<id>", "segment_function"),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -38,6 +39,8 @@ func (r *trackingPlanResource) Metadata(_ context.Context, req resource.Metadata
 
 func (r *trackingPlanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Configures a Tracking Plan. For more information, visit the [Segment docs](https://segment.com/docs/protocols/tracking-plan/create/).\n\n" +
+			docs.GenerateImportDocs("<id>", "segment_tracking_plan"),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

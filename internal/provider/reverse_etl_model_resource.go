@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -37,6 +38,8 @@ func (r *reverseETLModelResource) Metadata(_ context.Context, req resource.Metad
 
 func (r *reverseETLModelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Configures a Reverse ETL Model. For more information, visit the [Segment docs](https://segment.com/docs/connections/reverse-etl/).\n\n" +
+			docs.GenerateImportDocs("<id>", "segment_reverse_etl_model"),
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

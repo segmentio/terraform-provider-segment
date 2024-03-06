@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -55,7 +56,8 @@ func (r *labelResource) Metadata(_ context.Context, req resource.MetadataRequest
 
 func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "A label associated with the current Workspace. To import a label into Terraform, use the following format: 'key:value'.",
+		Description: "Configures a Label. For more information, visit the [Segment docs](https://segment.com/docs/segment-app/iam/labels/).\n\n" +
+			docs.GenerateImportDocs("<key>:<value>", "segment_label"),
 		Attributes: map[string]schema.Attribute{
 			"key": schema.StringAttribute{
 				Description: "The key that represents the name of this label.",
