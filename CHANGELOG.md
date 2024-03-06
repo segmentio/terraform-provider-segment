@@ -1,3 +1,6 @@
+## 0.10.3 (March 6, 2024)
+Correctly taints resources upon failed create to ensure resources are not duplicated.
+
 ## 0.10.2 (March 6, 2024)
 Fixes a rendering bug for `segment_profiles_warehouse` resource docs.
 
