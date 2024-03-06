@@ -127,6 +127,8 @@ func (r *reverseETLModelResource) Create(ctx context.Context, req resource.Creat
 
 	reverseETLModel := out.Data.ReverseEtlModel
 
+	resp.State.SetAttribute(ctx, path.Root("id"), reverseETLModel.Id)
+
 	var state models.ReverseETLModelState
 	err = state.Fill(reverseETLModel)
 	if err != nil {

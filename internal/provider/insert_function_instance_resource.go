@@ -117,6 +117,8 @@ func (r *insertFunctionInstanceResource) Create(ctx context.Context, req resourc
 
 	insertFunctionInstance := out.Data.InsertFunctionInstance
 
+	resp.State.SetAttribute(ctx, path.Root("id"), insertFunctionInstance.Id)
+
 	var state models.InsertFunctionInstanceState
 	err = state.Fill(insertFunctionInstance)
 	if err != nil {

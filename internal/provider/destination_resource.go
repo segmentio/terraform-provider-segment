@@ -549,6 +549,7 @@ func (r *destinationResource) Create(ctx context.Context, req resource.CreateReq
 
 		return
 	}
+	resp.State.SetAttribute(ctx, path.Root("id"), out.Data.Destination.Id)
 
 	var state models.DestinationState
 	err = state.Fill(&out.Data.Destination)

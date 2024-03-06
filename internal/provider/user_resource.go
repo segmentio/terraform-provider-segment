@@ -167,6 +167,9 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
+	resp.State.SetAttribute(ctx, path.Root("id"), plan.Email.ValueString())
+	resp.State.SetAttribute(ctx, path.Root("is_invite"), true)
+
 	user, err := findUser(r.authContext, r.client, plan.Email.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(

@@ -130,6 +130,9 @@ func (r *profilesWarehouseResource) Create(ctx context.Context, req resource.Cre
 
 	profilesWarehouse := out.Data.GetProfilesWarehouse()
 
+	resp.State.SetAttribute(ctx, path.Root("id"), profilesWarehouse.Id)
+	resp.State.SetAttribute(ctx, path.Root("space_id"), plan.SpaceID.ValueString())
+
 	var state models.ProfilesWarehouseState
 	err = state.Fill(profilesWarehouse)
 	if err != nil {

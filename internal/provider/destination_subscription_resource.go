@@ -132,6 +132,8 @@ func (r *destinationSubscriptionResource) Create(ctx context.Context, req resour
 
 	destinationSubscription := out.Data.GetDestinationSubscription()
 
+	resp.State.SetAttribute(ctx, path.Root("id"), destinationSubscription.Id)
+
 	var state models.DestinationSubscriptionState
 	err = state.Fill(destinationSubscription)
 	if err != nil {
