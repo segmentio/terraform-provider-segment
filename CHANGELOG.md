@@ -1,3 +1,6 @@
+## 1.0.0 (April 8, 2024)
+General Availability release. No changes from the previous release.
+
 ## 0.10.3 (March 6, 2024)
 Correctly taints resources upon failed create to ensure resources are not duplicated.
 
