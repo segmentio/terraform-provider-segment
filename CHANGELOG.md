@@ -1,3 +1,6 @@
+## 1.0.1 (April 18, 2024)
+Fixes a bug where the `segment_profiles_warehouse` resource was dereferencing a nil pointer upon invalid import.
+
 ## 1.0.0 (April 8, 2024)
 General Availability release. No changes from the previous release.
 
