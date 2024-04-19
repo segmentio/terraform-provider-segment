@@ -178,7 +178,7 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 	if warehouse == nil {
 		resp.Diagnostics.AddError(
 			"Unable to find Profile Warehouse",
-			err.Error(),
+			fmt.Sprintf("Profile Warehouse with id '%s' and space id '%s' not found", previousState.ID.ValueString(), previousState.SpaceID.ValueString()),
 		)
 
 		return
