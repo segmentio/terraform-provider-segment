@@ -12,12 +12,12 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.23.0
 	github.com/hashicorp/terraform-plugin-testing v1.8.0
 	github.com/segmentio/public-api-sdk-go v0.0.0-20231114153454-3be55fde5c99
-	gotest.tools/gotestsum v1.11.0
+	gotest.tools/gotestsum v1.12.0
 )
 
 require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0 // indirect
-	github.com/bitfield/gotestdox v0.2.1 // indirect
+	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/hashicorp/cli v1.1.6 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/yuin/goldmark v1.6.0 // indirect
@@ -37,7 +37,7 @@ require (
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
@@ -88,7 +88,7 @@ require (
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/term v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
-	golang.org/x/tools v0.13.0 // indirect
+	golang.org/x/tools v0.19.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/grpc v1.63.2 // indirect
