@@ -5,16 +5,16 @@ subcategory: ""
 description: |-
   Configures a Destination subscription to an action. For more information, visit the Segment docs https://segment.com/docs/connections/destinations/actions/.
   Import
-  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <id>. For example:
+  In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <destination_id>:<subscription_id>. For example:
   terraform
   import {
     to = segment_destination_subscription.example
-    id = "<id>"
+    id = "<destination_id>:<subscription_id>"
   }
   
-  Otherwise, use terraform import with <id>. For example:
+  Otherwise, use terraform import with <destination_id>:<subscription_id>. For example:
   console
-  terraform import segment_destination_subscription.example <id>
+  terraform import segment_destination_subscription.example <destination_id>:<subscription_id>
 ---
 
 # segment_destination_subscription (Resource)
@@ -23,19 +23,19 @@ Configures a Destination subscription to an action. For more information, visit 
 
 ## Import
 
-In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<id>`. For example:
+In Terraform v1.5.0 and later, use an [import block](https://developer.hashicorp.com/terraform/language/import) with `<destination_id>:<subscription_id>`. For example:
 
 ```terraform
 import {
   to = segment_destination_subscription.example
-  id = "<id>"
+  id = "<destination_id>:<subscription_id>"
 }
 ```
 
-Otherwise, use `terraform import` with `<id>`. For example:
+Otherwise, use `terraform import` with `<destination_id>:<subscription_id>`. For example:
 
 ```console
-terraform import segment_destination_subscription.example <id>
+terraform import segment_destination_subscription.example <destination_id>:<subscription_id>
 ```
 
 ## Example Usage
