@@ -1,5 +1,11 @@
-## 1.0.2 (Aug 1, 2024)
+## 1.0.4 (August 1, 2024)
 Fixes a bug where imported `segment_reverse_etl_model` resources could have invalid configuration parameters.
+
+## 1.0.3 (July 1, 2024)
+Fix goreleaser config.
+
+## 1.0.2 (June 21, 2024)
+Fix typo in docs.
 
 ## 1.0.1 (April 18, 2024)
 Fixes a bug where the `segment_profiles_warehouse` resource was dereferencing a nil pointer upon invalid import.
