@@ -32,6 +32,10 @@ func (r *ReverseETLModelState) Fill(model api.ReverseEtlModel) error {
 		return err
 	}
 	r.ScheduleConfig = scheduleConfig
+	if r.ScheduleConfig.IsNull() {
+		empty := "{}"
+		r.ScheduleConfig = jsontypes.NewNormalizedPointerValue(&empty)
+	}
 
 	return nil
 }
