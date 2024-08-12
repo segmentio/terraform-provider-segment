@@ -1,3 +1,6 @@
+## 1.0.5 (August 12, 2024)
+Fixes a bug where user groups could not be cleared.
+
 ## 1.0.4 (August 1, 2024)
 Fixes a bug where imported `segment_reverse_etl_model` resources could have invalid configuration parameters.
 
