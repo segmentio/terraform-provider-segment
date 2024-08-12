@@ -352,21 +352,19 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	for _, member := range plan.Members {
 		members = append(members, member.ValueString())
 	}
-	if len(members) > 0 {
-		_, body, err = r.client.IAMGroupsAPI.ReplaceUsersInUserGroup(r.authContext, config.ID.ValueString()).ReplaceUsersInUserGroupV1Input(api.ReplaceUsersInUserGroupV1Input{
-			Emails: members,
-		}).Execute()
-		if body != nil {
-			defer body.Body.Close()
-		}
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Unable to add users/invites to User Group",
-				getError(err, body),
-			)
+	_, body, err = r.client.IAMGroupsAPI.ReplaceUsersInUserGroup(r.authContext, config.ID.ValueString()).ReplaceUsersInUserGroupV1Input(api.ReplaceUsersInUserGroupV1Input{
+		Emails: members,
+	}).Execute()
+	if body != nil {
+		defer body.Body.Close()
+	}
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to add users/invites to User Group",
+			getError(err, body),
+		)
 
-			return
-		}
+		return
 	}
 
 	getOut, body, err := r.client.IAMGroupsAPI.GetUserGroup(r.authContext, config.ID.ValueString()).Execute()
