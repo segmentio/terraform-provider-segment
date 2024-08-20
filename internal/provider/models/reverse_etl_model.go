@@ -27,7 +27,7 @@ func (r *ReverseETLModelState) Fill(model api.ReverseEtlModel) error {
 	r.ScheduleStrategy = types.StringValue(model.ScheduleStrategy)
 	r.Query = types.StringValue(model.Query)
 	r.QueryIdentifierColumn = types.StringValue(model.QueryIdentifierColumn)
-	scheduleConfig, err := GetSettings(model.ScheduleConfig)
+	scheduleConfig, err := GetScheduleConfig(model.ScheduleConfig)
 	if err != nil {
 		return err
 	}
@@ -38,4 +38,21 @@ func (r *ReverseETLModelState) Fill(model api.ReverseEtlModel) error {
 	}
 
 	return nil
+}
+
+func GetScheduleConfig(scheduleConfig api.NullableScheduleConfig) (jsontypes.Normalized, error) {
+	if !scheduleConfig.IsSet() {
+		return jsontypes.NewNormalizedNull(), nil
+	}
+
+	jsonScheduleConfigString, err := scheduleConfig.Get().MarshalJSON()
+	if err != nil {
+		return jsontypes.NewNormalizedNull(), err
+	}
+
+	if jsonScheduleConfigString == nil {
+		return jsontypes.NewNormalizedValue("{}"), nil
+	}
+
+	return jsontypes.NewNormalizedValue(string(jsonScheduleConfigString)), nil
 }
