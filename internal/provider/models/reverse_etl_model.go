@@ -1,6 +1,9 @@
 package models
 
 import (
+	"encoding/json"
+	"errors"
+
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
@@ -45,7 +48,8 @@ func GetScheduleConfig(scheduleConfig api.NullableScheduleConfig) (jsontypes.Nor
 		return jsontypes.NewNormalizedNull(), nil
 	}
 
-	jsonScheduleConfigString, err := scheduleConfig.Get().MarshalJSON()
+	jsonScheduleConfigString, err := json.Marshal(scheduleConfig)
+	return jsontypes.NewNormalizedNull(), errors.New(string(jsonScheduleConfigString))
 	if err != nil {
 		return jsontypes.NewNormalizedNull(), err
 	}
