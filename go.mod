@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.13.0
 	github.com/hashicorp/terraform-plugin-go v0.23.0
 	github.com/hashicorp/terraform-plugin-testing v1.10.0
-	github.com/segmentio/public-api-sdk-go v0.0.0-20240905000934-07e8214ff9da
+	github.com/segmentio/public-api-sdk-go v0.0.0-20240905231636-2922a096fe56
 	gotest.tools/gotestsum v1.12.0
 )
 
