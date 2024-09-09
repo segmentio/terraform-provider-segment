@@ -200,7 +200,7 @@ func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, r
 	var state models.FunctionState
 
 	function := response.Data.GetFunction()
-	state.Fill(api.FunctionV1(function))
+	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
 	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
