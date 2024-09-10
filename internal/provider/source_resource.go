@@ -276,11 +276,14 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	disconnectAllWarehouses := true
+
 	out, body, err := r.client.SourcesAPI.CreateSource(r.authContext).CreateSourceV1Input(api.CreateSourceV1Input{
-		Slug:       plan.Slug.ValueString(),
-		Enabled:    plan.Enabled.ValueBool(),
-		MetadataId: metadataID,
-		Settings:   settings,
+		Slug:                    plan.Slug.ValueString(),
+		Enabled:                 plan.Enabled.ValueBool(),
+		MetadataId:              metadataID,
+		Settings:                settings,
+		DisconnectAllWarehouses: &disconnectAllWarehouses,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()

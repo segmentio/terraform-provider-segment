@@ -219,11 +219,14 @@ func (r *warehouseResource) Create(ctx context.Context, req resource.CreateReque
 		name = nil
 	}
 
+	disconnectAllSources := true
+
 	out, body, err := r.client.WarehousesAPI.CreateWarehouse(r.authContext).CreateWarehouseV1Input(api.CreateWarehouseV1Input{
-		Enabled:    plan.Enabled.ValueBoolPointer(),
-		MetadataId: metadataID,
-		Settings:   settings,
-		Name:       name,
+		Enabled:              plan.Enabled.ValueBoolPointer(),
+		MetadataId:           metadataID,
+		Settings:             settings,
+		Name:                 name,
+		DisconnectAllSources: &disconnectAllSources,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
