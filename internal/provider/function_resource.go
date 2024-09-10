@@ -159,7 +159,7 @@ func (r *functionResource) Create(ctx context.Context, req resource.CreateReques
 	resp.State.SetAttribute(ctx, path.Root("id"), function.Id)
 
 	var state models.FunctionState
-	state.Fill(api.Function(function))
+	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
 	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
@@ -256,7 +256,7 @@ func (r *functionResource) Update(ctx context.Context, req resource.UpdateReques
 
 	function := out.Data.GetFunction()
 
-	state.Fill(api.Function(function))
+	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
 	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {

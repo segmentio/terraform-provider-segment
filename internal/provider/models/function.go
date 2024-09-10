@@ -41,7 +41,7 @@ type FunctionPlan struct {
 	Settings          types.Set    `tfsdk:"settings"`
 }
 
-func (f *FunctionState) Fill(function api.Function) {
+func (f *FunctionState) Fill(function api.FunctionV1) {
 	f.ID = types.StringPointerValue(function.Id)
 	f.Code = types.StringPointerValue(function.Code)
 	f.DisplayName = types.StringPointerValue(function.DisplayName)

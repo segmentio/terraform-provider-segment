@@ -1,3 +1,6 @@
+## 1.1.0 (August 20, 2024)
+Stops connecting newly created sources and warehouses by default.
+
 ## 1.0.5 (August 12, 2024)
 Fixes a bug where user groups could not be cleared.
 
