@@ -1,8 +1,8 @@
 module github.com/segmentio/terraform-provider-segment
 
-go 1.21
+go 1.22.0
 
-toolchain go1.21.7
+toolchain go1.22.5
 
 require (
 	github.com/avast/retry-go/v4 v4.6.0
@@ -57,7 +57,7 @@ require (
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-exec v0.21.0 // indirect
 	github.com/hashicorp/terraform-json v0.22.1 // indirect
-	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.1.0
+	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0 // indirect
 	github.com/hashicorp/terraform-registry-address v0.2.3 // indirect
