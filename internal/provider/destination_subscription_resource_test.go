@@ -36,6 +36,7 @@ func TestAccDestinationSubscriptionResource(t *testing.T) {
 					}
 				`
 			} else if req.URL.Path == "/destinations/my-destination-id/subscriptions/my-subscription-id" && req.Method == http.MethodPatch {
+				// First update is to set the model id
 				if updated < 1 {
 					payload = `
 					{
@@ -78,6 +79,7 @@ func TestAccDestinationSubscriptionResource(t *testing.T) {
 
 				updated++
 			} else if req.URL.Path == "/destinations/my-destination-id/subscriptions/my-subscription-id" && req.Method == http.MethodGet {
+				// First update is to set the model id
 				if updated <= 1 {
 					payload = `
 						{

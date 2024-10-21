@@ -74,8 +74,20 @@ resource "segment_destination_subscription" "send_to_webhook" {
 ### Optional
 
 - `model_id` (String) The unique identifier for the linked ReverseETLModel, if this part of a Reverse ETL connection.
+- `reverse_etl_schedule` (Attributes) (Reverse ETL only) The schedule for the subscription being attached to ReverseETL model. (see [below for nested schema](#nestedatt--reverse_etl_schedule))
 
 ### Read-Only
 
 - `action_slug` (String) The URL-friendly key for the associated Destination action.
 - `id` (String) The unique identifier for the subscription.
+
+<a id="nestedatt--reverse_etl_schedule"></a>
+### Nested Schema for `reverse_etl_schedule`
+
+Required:
+
+- `strategy` (String) Strategy supports three modes: PERIODIC, SPECIFIC_DAYS, or MANUAL.
+
+Optional:
+
+- `config` (String) Configures the schedule for the subscription.
