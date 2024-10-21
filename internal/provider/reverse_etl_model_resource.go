@@ -99,10 +99,12 @@ func (r *reverseETLModelResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	var scheduleConfig map[string]interface{}
-	diags = plan.ScheduleConfig.Unmarshal(&scheduleConfig)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
+	if !plan.ScheduleConfig.IsNull() && !plan.ScheduleConfig.IsUnknown() {
+		diags = plan.ScheduleConfig.Unmarshal(&scheduleConfig)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	out, body, err := r.client.ReverseETLAPI.CreateReverseEtlModel(r.authContext).CreateReverseEtlModelInput(api.CreateReverseEtlModelInput{

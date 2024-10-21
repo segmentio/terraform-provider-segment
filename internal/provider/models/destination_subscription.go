@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
@@ -72,7 +74,7 @@ func getReverseETLSchedule(schedule *api.ReverseEtlScheduleDefinition) (*Reverse
 	if schedule.Config.IsSet() {
 		byteConfig, err := schedule.Config.MarshalJSON()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to marshal reverse ETL schedule config: %w", err)
 		}
 		stringConfig := string(byteConfig)
 

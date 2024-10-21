@@ -163,6 +163,7 @@ func (r *destinationSubscriptionResource) Create(ctx context.Context, req resour
 	reverseETLSchedule, diags := getSchedule(ctx, plan.ReverseETLSchedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
+
 		return
 	}
 
@@ -292,6 +293,7 @@ func (r *destinationSubscriptionResource) Update(ctx context.Context, req resour
 	reverseETLSchedule, diags := getSchedule(ctx, plan.ReverseETLSchedule)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
+
 		return
 	}
 
