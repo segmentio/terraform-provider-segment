@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -9,11 +10,13 @@ import (
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/segmentio/public-api-sdk-go/api"
 )
@@ -91,12 +94,27 @@ func (r *destinationSubscriptionResource) Schema(_ context.Context, _ resource.S
 				Description: `The customer settings for action fields. Only settings included in the configuration will be managed by Terraform.`,
 				CustomType:  jsontypes.NormalizedType{},
 			},
+			"reverse_etl_schedule": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: "(Reverse ETL only) The schedule for the subscription being attached to ReverseETL model.",
+				Attributes: map[string]schema.Attribute{
+					"strategy": schema.StringAttribute{
+						Required:    true,
+						Description: "Strategy supports three modes: PERIODIC, SPECIFIC_DAYS, or MANUAL.",
+					},
+					"config": schema.StringAttribute{
+						Optional:    true,
+						Description: "Configures the schedule for the subscription.",
+						CustomType:  jsontypes.NormalizedType{},
+					},
+				},
+			},
 		},
 	}
 }
 
 func (r *destinationSubscriptionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan models.DestinationSubscriptionState
+	var plan models.DestinationSubscriptionPlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -107,6 +125,15 @@ func (r *destinationSubscriptionResource) Create(ctx context.Context, req resour
 	diags = plan.Settings.Unmarshal(&settings)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !plan.ModelID.IsNull() && !plan.ModelID.IsUnknown() && (plan.ReverseETLSchedule.IsNull() || plan.ReverseETLSchedule.IsUnknown()) {
+		resp.Diagnostics.AddError(
+			"Reverse ETL model ID provided without reverse ETL schedule",
+			"Reverse ETL model ID must be provided with a reverse ETL schedule",
+		)
+
 		return
 	}
 
@@ -130,9 +157,39 @@ func (r *destinationSubscriptionResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	destinationSubscription := out.Data.GetDestinationSubscription()
+	resp.State.SetAttribute(ctx, path.Root("id"), out.Data.DestinationSubscription.Id)
+	resp.State.SetAttribute(ctx, path.Root("destination_id"), out.Data.DestinationSubscription.DestinationId)
 
-	resp.State.SetAttribute(ctx, path.Root("id"), destinationSubscription.Id)
+	reverseETLSchedule, diags := getSchedule(ctx, plan.ReverseETLSchedule)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+
+		return
+	}
+
+	updateOut, body, err := r.client.DestinationsAPI.UpdateSubscriptionForDestination(r.authContext, plan.DestinationID.ValueString(), out.Data.DestinationSubscription.Id).UpdateSubscriptionForDestinationAlphaInput(api.UpdateSubscriptionForDestinationAlphaInput{
+		Input: api.DestinationSubscriptionUpdateInput{
+			Name:               plan.Name.ValueStringPointer(),
+			Trigger:            plan.Trigger.ValueStringPointer(),
+			Enabled:            plan.Enabled.ValueBoolPointer(),
+			Settings:           settings,
+			ReverseETLModelId:  plan.ModelID.ValueStringPointer(),
+			ReverseETLSchedule: reverseETLSchedule,
+		},
+	}).Execute()
+	if body != nil {
+		defer body.Body.Close()
+	}
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to update Destination subscription",
+			getError(err, body),
+		)
+
+		return
+	}
+
+	destinationSubscription := updateOut.Data.Subscription
 
 	var state models.DestinationSubscriptionState
 	err = state.Fill(destinationSubscription)
@@ -203,7 +260,7 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 }
 
 func (r *destinationSubscriptionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan models.DestinationSubscriptionState
+	var plan models.DestinationSubscriptionPlan
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -224,12 +281,30 @@ func (r *destinationSubscriptionResource) Update(ctx context.Context, req resour
 		return
 	}
 
+	if !plan.ModelID.IsNull() && !plan.ModelID.IsUnknown() && (plan.ReverseETLSchedule.IsNull() || plan.ReverseETLSchedule.IsUnknown()) {
+		resp.Diagnostics.AddError(
+			"Reverse ETL model ID provided without reverse ETL schedule",
+			"Reverse ETL model ID must be provided with a reverse ETL schedule",
+		)
+
+		return
+	}
+
+	reverseETLSchedule, diags := getSchedule(ctx, plan.ReverseETLSchedule)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+
+		return
+	}
+
 	out, body, err := r.client.DestinationsAPI.UpdateSubscriptionForDestination(r.authContext, state.DestinationID.ValueString(), state.ID.ValueString()).UpdateSubscriptionForDestinationAlphaInput(api.UpdateSubscriptionForDestinationAlphaInput{
 		Input: api.DestinationSubscriptionUpdateInput{
-			Name:     plan.Name.ValueStringPointer(),
-			Trigger:  plan.Trigger.ValueStringPointer(),
-			Enabled:  plan.Enabled.ValueBoolPointer(),
-			Settings: settings,
+			Name:               plan.Name.ValueStringPointer(),
+			Trigger:            plan.Trigger.ValueStringPointer(),
+			Enabled:            plan.Enabled.ValueBoolPointer(),
+			Settings:           settings,
+			ReverseETLModelId:  plan.ModelID.ValueStringPointer(),
+			ReverseETLSchedule: reverseETLSchedule,
 		},
 	}).Execute()
 	if body != nil {
@@ -319,4 +394,116 @@ func (r *destinationSubscriptionResource) Configure(_ context.Context, req resou
 
 	r.client = config.client
 	r.authContext = config.authContext
+}
+
+func getSchedule(ctx context.Context, planSchedule basetypes.ObjectValue) (*api.ReverseEtlScheduleDefinition, diag.Diagnostics) {
+	var reverseETLSchedule *api.ReverseEtlScheduleDefinition
+	var diags diag.Diagnostics
+	if !planSchedule.IsNull() && !planSchedule.IsUnknown() {
+		reverseETLSchedule = &api.ReverseEtlScheduleDefinition{}
+
+		wrappedReverseETLModelScheduleStrategy, err := planSchedule.Attributes()["strategy"].ToTerraformValue(ctx)
+		if err != nil {
+			diags.AddError(
+				"Unable to decode reverse ETL schedule strategy",
+				err.Error(),
+			)
+
+			return nil, diags
+		}
+
+		var reverseETLModelScheduleStrategy string
+		err = wrappedReverseETLModelScheduleStrategy.As(&reverseETLModelScheduleStrategy)
+		if err != nil {
+			diags.AddError(
+				"Unable to decode reverse ETL schedule strategy",
+				err.Error(),
+			)
+
+			return nil, diags
+		}
+
+		reverseETLSchedule.Strategy = reverseETLModelScheduleStrategy
+
+		wrappedReverseETLModelScheduleConfig, err := planSchedule.Attributes()["config"].ToTerraformValue(ctx)
+		if err != nil {
+			diags.AddError(
+				"Unable to decode reverse ETL schedule config",
+				err.Error(),
+			)
+
+			return nil, diags
+		}
+
+		if !wrappedReverseETLModelScheduleConfig.IsNull() && wrappedReverseETLModelScheduleConfig.IsKnown() {
+			if reverseETLSchedule.Strategy == "PERIODIC" {
+				reverseETLModelScheduleConfig := api.ReverseEtlPeriodicScheduleConfig{}
+				var config string
+				err = wrappedReverseETLModelScheduleConfig.As(&config)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				err = json.Unmarshal([]byte(config), &reverseETLModelScheduleConfig)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				reverseETLSchedule.Config = *api.NewNullableConfig(&api.Config{
+					ReverseEtlPeriodicScheduleConfig: &reverseETLModelScheduleConfig,
+				})
+			} else if reverseETLSchedule.Strategy == "SPECIFIC_DAYS" {
+				reverseETLModelScheduleConfig := api.ReverseEtlSpecificTimeScheduleConfig{}
+				var config string
+				err = wrappedReverseETLModelScheduleConfig.As(&config)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				err = json.Unmarshal([]byte(config), &reverseETLModelScheduleConfig)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				reverseETLSchedule.Config = *api.NewNullableConfig(&api.Config{
+					ReverseEtlSpecificTimeScheduleConfig: &reverseETLModelScheduleConfig,
+				})
+			} else if reverseETLSchedule.Strategy == "MANUAL" {
+				diags.AddError(
+					"Manual reverse ETL schedule strategy does not require a config",
+					"Manual reverse ETL schedule strategy does not require a config",
+				)
+				reverseETLSchedule.Config = *api.NewNullableConfig(nil)
+			} else {
+				diags.AddError(
+					"Unsupported reverse ETL schedule strategy",
+					fmt.Sprintf("Strategy %q is not supported", reverseETLSchedule.Strategy),
+				)
+
+				return nil, diags
+			}
+		}
+	}
+
+	return reverseETLSchedule, diags
 }
