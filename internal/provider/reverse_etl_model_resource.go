@@ -68,8 +68,9 @@ func (r *reverseETLModelResource) Schema(_ context.Context, _ resource.SchemaReq
 				Description: "Indicates whether the Model should have syncs enabled. When disabled, no syncs will be triggered, regardless of the enabled status of the attached destinations/subscriptions.",
 			},
 			"schedule_strategy": schema.StringAttribute{
-				Required:    true,
-				Description: "Determines the strategy used for triggering syncs, which will be used in conjunction with scheduleConfig.",
+				Optional:           true,
+				DeprecationMessage: "Remove this attribute's configuration as it no longer is used and the attribute will be removed in the next major version of the provider. Please use `reverse_etl_schedule` in the destination_subscription resource instead.",
+				Description:        "Determines the strategy used for triggering syncs, which will be used in conjunction with scheduleConfig.",
 			},
 			"query": schema.StringAttribute{
 				Required:    true,
@@ -80,9 +81,10 @@ func (r *reverseETLModelResource) Schema(_ context.Context, _ resource.SchemaReq
 				Description: "Indicates the column named in `query` that should be used to uniquely identify the extracted records.",
 			},
 			"schedule_config": schema.StringAttribute{
-				Required:    true,
-				Description: "Depending on the chosen strategy, configures the schedule for this model.",
-				CustomType:  jsontypes.NormalizedType{},
+				Optional:           true,
+				DeprecationMessage: "Remove this attribute's configuration as it no longer is used and the attribute will be removed in the next major version of the provider. Please use `reverse_etl_schedule` in the destination_subscription resource instead.",
+				Description:        "Depending on the chosen strategy, configures the schedule for this model.",
+				CustomType:         jsontypes.NormalizedType{},
 			},
 		},
 	}

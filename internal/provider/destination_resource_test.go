@@ -138,6 +138,7 @@ func TestAccDestinationResource(t *testing.T) {
 			if req.Method == http.MethodPatch {
 				updated++
 			}
+			// First update is in create to set the reverse etl model id
 			if updated > 0 {
 				payload = `{
 					"data": {
