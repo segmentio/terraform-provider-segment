@@ -113,8 +113,8 @@ github.com/hashicorp/terraform-plugin-framework v1.12.0 h1:7HKaueHPaikX5/7cbC1r9
 github.com/hashicorp/terraform-plugin-framework v1.12.0/go.mod h1:N/IOQ2uYjW60Jp39Cp3mw7I/OpC/GfZ0385R0YibmkE=
 github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0 h1:SJXL5FfJJm17554Kpt9jFXngdM6fXbnUnZ6iT2IeiYA=
 github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0/go.mod h1:p0phD0IYhsu9bR4+6OetVvvH59I6LwjXGnTVEr8ox6E=
-github.com/hashicorp/terraform-plugin-framework-validators v0.13.0 h1:bxZfGo9DIUoLLtHMElsu+zwqI4IsMZQBRRy4iLzZJ8E=
-github.com/hashicorp/terraform-plugin-framework-validators v0.13.0/go.mod h1:wGeI02gEhj9nPANU62F2jCaHjXulejm/X+af4PdZaNo=
+github.com/hashicorp/terraform-plugin-framework-validators v0.14.0 h1:3PCn9iyzdVOgHYOBmncpSSOxjQhCTYmc+PGvbdlqSaI=
+github.com/hashicorp/terraform-plugin-framework-validators v0.14.0/go.mod h1:LwDKNdzxrDY/mHBrlC6aYfE2fQ3Dk3gaJD64vNiXvo4=
 github.com/hashicorp/terraform-plugin-go v0.24.0 h1:2WpHhginCdVhFIrWHxDEg6RBn3YaWzR2o6qUeIEat2U=
 github.com/hashicorp/terraform-plugin-go v0.24.0/go.mod h1:tUQ53lAsOyYSckFGEefGC5C8BAaO0ENqzFd3bQeuYQg=
 github.com/hashicorp/terraform-plugin-log v0.9.0 h1:i7hOA+vdAItN1/7UrfBqBwvYPQ9TFvymaRGZED3FCV0=
@@ -185,10 +185,6 @@ github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
 github.com/russross/blackfriday v1.6.0 h1:KqfZb0pUVN2lYqZUYRddxF4OR8ZMURnJIG5Y3VRLtww=
 github.com/russross/blackfriday v1.6.0/go.mod h1:ti0ldHuxg49ri4ksnFxlkCfN+hvslNlmVHqNRXXJNAY=
-github.com/segmentio/public-api-sdk-go v0.0.0-20240909200753-311bb8d791a2 h1:vlKTelJ32DPBuiiSx2PJaxN9jJd3OFK2avHU/XR/qB8=
-github.com/segmentio/public-api-sdk-go v0.0.0-20240909200753-311bb8d791a2/go.mod h1:yKkoPfcOkkYjiZQj4lRWxji0Qwc6ncNEf7wCfywochY=
-github.com/segmentio/public-api-sdk-go v0.0.0-20241017001201-fbbdab459db8 h1:pYJu97HA0FVdy+WCqQbS/baDzXxg2q0Vl+akD6SUBSI=
-github.com/segmentio/public-api-sdk-go v0.0.0-20241017001201-fbbdab459db8/go.mod h1:yKkoPfcOkkYjiZQj4lRWxji0Qwc6ncNEf7wCfywochY=
 github.com/segmentio/public-api-sdk-go v0.0.0-20241025180535-501a23c07559 h1:6jgXPksz5bEJUMbhp4biSIViye/Os2yfAOx9yy44e1g=
 github.com/segmentio/public-api-sdk-go v0.0.0-20241025180535-501a23c07559/go.mod h1:yKkoPfcOkkYjiZQj4lRWxji0Qwc6ncNEf7wCfywochY=
 github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 h1:n661drycOFuPLCN3Uc8sB6B/s6Z4t2xvBgU1htSHuq8=

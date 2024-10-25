@@ -8,7 +8,7 @@ require (
 	github.com/avast/retry-go/v4 v4.6.0
 	github.com/hashicorp/terraform-plugin-docs v0.18.0
 	github.com/hashicorp/terraform-plugin-framework v1.12.0
-	github.com/hashicorp/terraform-plugin-framework-validators v0.13.0
+	github.com/hashicorp/terraform-plugin-framework-validators v0.14.0
 	github.com/hashicorp/terraform-plugin-go v0.24.0
 	github.com/hashicorp/terraform-plugin-testing v1.10.0
 	github.com/segmentio/public-api-sdk-go v0.0.0-20241025180535-501a23c07559
