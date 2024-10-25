@@ -187,6 +187,10 @@ github.com/russross/blackfriday v1.6.0 h1:KqfZb0pUVN2lYqZUYRddxF4OR8ZMURnJIG5Y3V
 github.com/russross/blackfriday v1.6.0/go.mod h1:ti0ldHuxg49ri4ksnFxlkCfN+hvslNlmVHqNRXXJNAY=
 github.com/segmentio/public-api-sdk-go v0.0.0-20240909200753-311bb8d791a2 h1:vlKTelJ32DPBuiiSx2PJaxN9jJd3OFK2avHU/XR/qB8=
 github.com/segmentio/public-api-sdk-go v0.0.0-20240909200753-311bb8d791a2/go.mod h1:yKkoPfcOkkYjiZQj4lRWxji0Qwc6ncNEf7wCfywochY=
+github.com/segmentio/public-api-sdk-go v0.0.0-20241017001201-fbbdab459db8 h1:pYJu97HA0FVdy+WCqQbS/baDzXxg2q0Vl+akD6SUBSI=
+github.com/segmentio/public-api-sdk-go v0.0.0-20241017001201-fbbdab459db8/go.mod h1:yKkoPfcOkkYjiZQj4lRWxji0Qwc6ncNEf7wCfywochY=
+github.com/segmentio/public-api-sdk-go v0.0.0-20241025180535-501a23c07559 h1:6jgXPksz5bEJUMbhp4biSIViye/Os2yfAOx9yy44e1g=
+github.com/segmentio/public-api-sdk-go v0.0.0-20241025180535-501a23c07559/go.mod h1:yKkoPfcOkkYjiZQj4lRWxji0Qwc6ncNEf7wCfywochY=
 github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 h1:n661drycOFuPLCN3Uc8sB6B/s6Z4t2xvBgU1htSHuq8=
 github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3/go.mod h1:A0bzQcvG0E7Rwjx0REVgAGH58e96+X0MeOfepqsbeW4=
 github.com/shopspring/decimal v1.2.0/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
