@@ -98,24 +98,13 @@ func (r *reverseETLModelResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	var scheduleConfig map[string]interface{}
-	if !plan.ScheduleConfig.IsNull() && !plan.ScheduleConfig.IsUnknown() {
-		diags = plan.ScheduleConfig.Unmarshal(&scheduleConfig)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-	}
-
 	out, body, err := r.client.ReverseETLAPI.CreateReverseEtlModel(r.authContext).CreateReverseEtlModelInput(api.CreateReverseEtlModelInput{
 		Name:                  plan.Name.ValueString(),
 		SourceId:              plan.SourceID.ValueString(),
 		Description:           plan.Description.ValueString(),
 		Enabled:               plan.Enabled.ValueBool(),
-		ScheduleStrategy:      plan.ScheduleStrategy.ValueString(),
 		Query:                 plan.Query.ValueString(),
 		QueryIdentifierColumn: plan.QueryIdentifierColumn.ValueString(),
-		ScheduleConfig:        scheduleConfig,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
@@ -150,6 +139,10 @@ func (r *reverseETLModelResource) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Since we deprecated these values, we just need to set them to the plan values so there are no errors
+	resp.State.SetAttribute(ctx, path.Root("schedule_config"), plan.ScheduleConfig)
+	resp.State.SetAttribute(ctx, path.Root("schedule_strategy"), plan.ScheduleStrategy)
 }
 
 func (r *reverseETLModelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -192,6 +185,14 @@ func (r *reverseETLModelResource) Read(ctx context.Context, req resource.ReadReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Since we deprecated these values, we just need to set them to the plan values so there are no errors
+	if !previousState.ScheduleConfig.IsNull() && !previousState.ScheduleConfig.IsUnknown() {
+		resp.State.SetAttribute(ctx, path.Root("schedule_config"), previousState.ScheduleConfig)
+	}
+	if !previousState.ScheduleStrategy.IsNull() && !previousState.ScheduleStrategy.IsUnknown() {
+		resp.State.SetAttribute(ctx, path.Root("schedule_strategy"), previousState.ScheduleStrategy)
+	}
 }
 
 func (r *reverseETLModelResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -209,19 +210,10 @@ func (r *reverseETLModelResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	var scheduleConfig map[string]interface{}
-	diags = plan.ScheduleConfig.Unmarshal(&scheduleConfig)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	out, body, err := r.client.ReverseETLAPI.UpdateReverseEtlModel(r.authContext, state.ID.ValueString()).UpdateReverseEtlModelInput(api.UpdateReverseEtlModelInput{
 		Name:                  plan.Name.ValueStringPointer(),
 		Description:           plan.Description.ValueStringPointer(),
 		Enabled:               plan.Enabled.ValueBoolPointer(),
-		ScheduleStrategy:      plan.ScheduleStrategy.ValueStringPointer(),
-		ScheduleConfig:        scheduleConfig,
 		Query:                 plan.Query.ValueStringPointer(),
 		QueryIdentifierColumn: plan.QueryIdentifierColumn.ValueStringPointer(),
 	}).Execute()
@@ -252,6 +244,10 @@ func (r *reverseETLModelResource) Update(ctx context.Context, req resource.Updat
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Since we deprecated these values, we just need to set them to the plan values so there are no errors
+	resp.State.SetAttribute(ctx, path.Root("schedule_config"), plan.ScheduleConfig)
+	resp.State.SetAttribute(ctx, path.Root("schedule_strategy"), plan.ScheduleStrategy)
 }
 
 func (r *reverseETLModelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
