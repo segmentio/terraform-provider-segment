@@ -1,3 +1,6 @@
+## 1.2.0 (Octover 25, 2024)
+Moves RETL schedule config to destination_subscription and deprecates those fields in reverse_etl_model.
+
 ## 1.1.0 (August 20, 2024)
 Stops connecting newly created sources and warehouses by default.
 
