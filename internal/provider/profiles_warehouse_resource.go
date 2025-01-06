@@ -168,7 +168,7 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 	warehouse, err := findProfileWarehouse(r.authContext, r.client, previousState.ID.ValueString(), previousState.SpaceID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Profiles Warehouse",
+			fmt.Sprintf("Unable to read Profiles Warehouse (ID: %s)", previousState.ID.ValueString()),
 			err.Error(),
 		)
 
@@ -240,7 +240,7 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Profiles Warehouse",
+			fmt.Sprintf("Unable to update Profiles Warehouse (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -283,7 +283,7 @@ func (r *profilesWarehouseResource) Delete(ctx context.Context, req resource.Del
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Profiles Warehouse",
+			fmt.Sprintf("Unable to delete Profiles Warehouse (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

@@ -199,7 +199,7 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read User Group",
+			fmt.Sprintf("Unable to read User Group (ID: %s)", userGroup.Id),
 			getError(err, body),
 		)
 
@@ -239,7 +239,7 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read User Group",
+			fmt.Sprintf("Unable to read User Group (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -253,7 +253,7 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read User Group members",
+			fmt.Sprintf("Unable to read User Group members (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -266,7 +266,7 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read User Group members",
+			fmt.Sprintf("Unable to read User Group members (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -320,7 +320,7 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update User Group",
+			fmt.Sprintf("Unable to update User Group (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -373,7 +373,7 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read User Group",
+			fmt.Sprintf("Unable to read User Group (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -412,7 +412,7 @@ func (r *userGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete User Group",
+			fmt.Sprintf("Unable to delete User Group (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

@@ -161,7 +161,7 @@ func (r *reverseETLModelResource) Read(ctx context.Context, req resource.ReadReq
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Reverse ETL model",
+			fmt.Sprintf("Unable to read Reverse ETL model (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -222,7 +222,7 @@ func (r *reverseETLModelResource) Update(ctx context.Context, req resource.Updat
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Reverse ETL model",
+			fmt.Sprintf("Unable to update Reverse ETL model (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -264,7 +264,7 @@ func (r *reverseETLModelResource) Delete(ctx context.Context, req resource.Delet
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Reverse ETL model",
+			fmt.Sprintf("Unable to delete Reverse ETL model (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

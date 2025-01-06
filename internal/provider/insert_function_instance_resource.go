@@ -160,7 +160,7 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Insert Function instance",
+			fmt.Sprintf("Unable to read Insert Function instance (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -227,7 +227,7 @@ func (r *insertFunctionInstanceResource) Update(ctx context.Context, req resourc
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Insert Function instance",
+			fmt.Sprintf("Unable to update Insert Function instance (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -271,7 +271,7 @@ func (r *insertFunctionInstanceResource) Delete(ctx context.Context, req resourc
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Insert Function instance",
+			fmt.Sprintf("Unable to delete Insert Function instance (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

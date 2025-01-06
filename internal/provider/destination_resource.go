@@ -588,7 +588,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Destination",
+			fmt.Sprintf("Unable to read Destination (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -650,7 +650,7 @@ func (r *destinationResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Destination",
+			fmt.Sprintf("Unable to update Destination (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -695,7 +695,7 @@ func (r *destinationResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Destination",
+			fmt.Sprintf("Unable to delete Destination (ID: %s)", state.ID.ValueString()),
 			getError(err, body),
 		)
 

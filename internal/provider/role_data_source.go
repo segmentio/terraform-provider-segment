@@ -90,7 +90,7 @@ func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Role",
+			fmt.Sprintf("Unable to read Role (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -100,7 +100,7 @@ func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	role, err := findRole(out.Data.Roles, id)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Role",
+			fmt.Sprintf("Unable to read Role (ID: %s)", config.ID.ValueString()),
 			err.Error(),
 		)
 

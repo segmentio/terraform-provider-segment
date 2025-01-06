@@ -133,7 +133,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read user",
+			fmt.Sprintf("Unable to read user (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -144,7 +144,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	err = state.Fill(out.Data.User)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read user",
+			"Unable to populate user state",
 			err.Error(),
 		)
 

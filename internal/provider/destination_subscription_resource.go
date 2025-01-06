@@ -182,7 +182,7 @@ func (r *destinationSubscriptionResource) Create(ctx context.Context, req resour
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Destination subscription",
+			fmt.Sprintf("Unable to update Destination subscription (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -229,7 +229,7 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Destination subscription",
+			fmt.Sprintf("Unable to read Destination subscription (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -312,7 +312,7 @@ func (r *destinationSubscriptionResource) Update(ctx context.Context, req resour
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Destination subscription",
+			fmt.Sprintf("Unable to update Destination subscription (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -353,7 +353,7 @@ func (r *destinationSubscriptionResource) Delete(ctx context.Context, req resour
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Destination subscription",
+			fmt.Sprintf("Unable to delete Destination subscription (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
