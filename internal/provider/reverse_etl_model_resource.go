@@ -187,10 +187,10 @@ func (r *reverseETLModelResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	// Since we deprecated these values, we just need to set them to the plan values so there are no errors
-	if !previousState.ScheduleConfig.IsNull() && !previousState.ScheduleConfig.IsUnknown() {
+	if !previousState.ScheduleConfig.IsUnknown() {
 		resp.State.SetAttribute(ctx, path.Root("schedule_config"), previousState.ScheduleConfig)
 	}
-	if !previousState.ScheduleStrategy.IsNull() && !previousState.ScheduleStrategy.IsUnknown() {
+	if !previousState.ScheduleStrategy.IsUnknown() {
 		resp.State.SetAttribute(ctx, path.Root("schedule_strategy"), previousState.ScheduleStrategy)
 	}
 }
