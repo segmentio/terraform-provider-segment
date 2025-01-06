@@ -131,7 +131,7 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Warehouse metadata",
+			fmt.Sprintf("Unable to Read Warehouse metadata (ID: %s)", state.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -143,7 +143,7 @@ func (d *warehouseMetadataDataSource) Read(ctx context.Context, req datasource.R
 	err = state.Fill(warehouseMetadata)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Warehouse metadata",
+			"Unable to populate Warehouse metadata state",
 			err.Error(),
 		)
 

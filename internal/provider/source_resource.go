@@ -310,7 +310,7 @@ func (r *sourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to update Source after creation",
+				fmt.Sprintf("Unable to update Source after creation (ID: %s)", plan.ID.ValueString()),
 				getError(err, body),
 			)
 
@@ -388,7 +388,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Source",
+			fmt.Sprintf("Unable to read Source (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -454,7 +454,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Source before update",
+			fmt.Sprintf("Unable to read Source before update (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -479,7 +479,7 @@ func (r *sourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Source",
+			fmt.Sprintf("Unable to update Source (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -546,7 +546,7 @@ func (r *sourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Source",
+			fmt.Sprintf("Unable to delete Source (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

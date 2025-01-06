@@ -289,7 +289,7 @@ func (r *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Warehouse",
+			fmt.Sprintf("Unable to read Warehouse (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -350,7 +350,7 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Warehouse before update",
+			fmt.Sprintf("Unable to read Warehouse before update (ID: %s)", state.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -374,7 +374,7 @@ func (r *warehouseResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Warehouse",
+			fmt.Sprintf("Unable to update Warehouse (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -417,7 +417,7 @@ func (r *warehouseResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Warehouse",
+			fmt.Sprintf("Unable to delete Warehouse (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

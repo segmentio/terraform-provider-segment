@@ -228,7 +228,7 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Tracking Plan",
+			fmt.Sprintf("Unable to read Tracking Plan (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -245,7 +245,7 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 		err = state.Fill(trackingPlan, nil)
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to read Tracking Plan",
+				"Unable to populate Tracking Plan state",
 				err.Error(),
 			)
 
@@ -259,7 +259,7 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to read Tracking Plan rules",
+				fmt.Sprintf("Unable to read Tracking Plan rules (ID: %s)", id),
 				getError(err, body),
 			)
 
@@ -319,7 +319,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Tracking Plan",
+			fmt.Sprintf("Unable to update Tracking Plan (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -332,7 +332,7 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Tracking Plan",
+			fmt.Sprintf("Unable to read Tracking Plan (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -411,7 +411,7 @@ func (r *trackingPlanResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Tracking Plan",
+			fmt.Sprintf("Unable to delete Tracking Plan (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

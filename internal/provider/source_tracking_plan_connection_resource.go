@@ -211,7 +211,7 @@ func (r *sourceTrackingPlanConnectionResource) Create(ctx context.Context, req r
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to update Source schema settings",
+				fmt.Sprintf("Unable to update Source schema settings (ID: %s)", plan.SourceID.ValueString()),
 				getError(err, body),
 			)
 
@@ -256,7 +256,7 @@ func (r *sourceTrackingPlanConnectionResource) Read(ctx context.Context, req res
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Source",
+			fmt.Sprintf("Unable to read Source (ID: %s)", previousState.SourceID.ValueString()),
 			getError(err, body),
 		)
 
@@ -284,7 +284,7 @@ func (r *sourceTrackingPlanConnectionResource) Read(ctx context.Context, req res
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to read Source schema settings",
+				fmt.Sprintf("Unable to read Source schema settings (ID: %s)", previousState.SourceID.ValueString()),
 				getError(err, body),
 			)
 
@@ -321,7 +321,7 @@ func (r *sourceTrackingPlanConnectionResource) Update(ctx context.Context, req r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Source",
+			fmt.Sprintf("Unable to read Source (ID: %s)", plan.SourceID.ValueString()),
 			getError(err, body),
 		)
 
@@ -357,7 +357,7 @@ func (r *sourceTrackingPlanConnectionResource) Update(ctx context.Context, req r
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to update Source schema settings",
+				fmt.Sprintf("Unable to update Source schema settings (ID: %s)", plan.SourceID.ValueString()),
 				getError(err, body),
 			)
 

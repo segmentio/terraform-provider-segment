@@ -60,7 +60,7 @@ func (d *sourceMetadataDataSource) Read(ctx context.Context, req datasource.Read
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Source metadata",
+			fmt.Sprintf("Unable to read Source metadata (ID: %s)", state.ID.ValueString()),
 			getError(err, body),
 		)
 
