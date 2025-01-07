@@ -1,3 +1,6 @@
+## 1.2.1 (Octover 25, 2025)
+Fixes a bug where the `segment_reverse_etl_model` resource would continously update the schedule config. Also adds resource ID to error messages and upgrades some packages.
+
 ## 1.2.0 (Octover 25, 2024)
 Moves RETL schedule config to destination_subscription and deprecates those fields in reverse_etl_model.
 
