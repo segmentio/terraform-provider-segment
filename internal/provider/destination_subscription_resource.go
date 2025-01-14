@@ -100,7 +100,7 @@ func (r *destinationSubscriptionResource) Schema(_ context.Context, _ resource.S
 				Attributes: map[string]schema.Attribute{
 					"strategy": schema.StringAttribute{
 						Required:    true,
-						Description: "Strategy supports three modes: PERIODIC, SPECIFIC_DAYS, or MANUAL.",
+						Description: "Strategy supports the following modes: PERIODIC, SPECIFIC_DAYS, CRON, DBT_CLOUD or MANUAL.",
 					},
 					"config": schema.StringAttribute{
 						Optional:    true,
@@ -494,6 +494,58 @@ func getSchedule(ctx context.Context, planSchedule basetypes.ObjectValue) (*api.
 					"Manual reverse ETL schedule strategy does not require a config",
 				)
 				reverseETLSchedule.Config = *api.NewNullableConfig(nil)
+			} else if reverseETLSchedule.Strategy == "CRON" {
+				reverseETLModelScheduleConfig := api.ReverseEtlCronScheduleConfig{}
+				var config string
+				err = wrappedReverseETLModelScheduleConfig.As(&config)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				err = json.Unmarshal([]byte(config), &reverseETLModelScheduleConfig)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				reverseETLSchedule.Config = *api.NewNullableConfig(&api.Config{
+					ReverseEtlCronScheduleConfig: &reverseETLModelScheduleConfig,
+				})
+			} else if reverseETLSchedule.Strategy == "DBT_CLOUD" {
+				reverseETLModelScheduleConfig := api.ReverseEtlDbtCloudScheduleConfig{}
+				var config string
+				err = wrappedReverseETLModelScheduleConfig.As(&config)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				err = json.Unmarshal([]byte(config), &reverseETLModelScheduleConfig)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				reverseETLSchedule.Config = *api.NewNullableConfig(&api.Config{
+					ReverseEtlDbtCloudScheduleConfig: &reverseETLModelScheduleConfig,
+				})
 			} else {
 				diags.AddError(
 					"Unsupported reverse ETL schedule strategy",
