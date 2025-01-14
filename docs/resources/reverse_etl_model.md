@@ -47,8 +47,14 @@ resource "segment_reverse_etl_model" "example" {
   name                    = "Example Reverse ETL model"
   enabled                 = true
   description             = "Example Reverse ETL model"
+  schedule_strategy       = "SPECIFIC_DAYS"
   query                   = "SELECT good_stuff FROM stuff"
   query_identifier_column = "good_stuff"
+  schedule_config = jsonencode({
+    "days" : [0, 1, 2, 3],
+    "hours" : [0, 1, 3],
+    "timezone" : "America/Los_Angeles"
+  })
 }
 ```
 
@@ -63,6 +69,11 @@ resource "segment_reverse_etl_model" "example" {
 - `query` (String) The SQL query that will be executed to extract data from the connected Source.
 - `query_identifier_column` (String) Indicates the column named in `query` that should be used to uniquely identify the extracted records.
 - `source_id` (String) Indicates which Source to attach this model to.
+
+### Optional
+
+- `schedule_config` (String, Deprecated) Depending on the chosen strategy, configures the schedule for this model.
+- `schedule_strategy` (String, Deprecated) Determines the strategy used for triggering syncs, which will be used in conjunction with scheduleConfig.
 
 ### Read-Only
 
