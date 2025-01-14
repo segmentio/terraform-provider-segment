@@ -7,7 +7,6 @@ import (
 	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 
-	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -67,11 +66,11 @@ func (r *reverseETLModelResource) Schema(_ context.Context, _ resource.SchemaReq
 				Required:    true,
 				Description: "Indicates whether the Model should have syncs enabled. When disabled, no syncs will be triggered, regardless of the enabled status of the attached destinations/subscriptions.",
 			},
-			"schedule_strategy": schema.StringAttribute{
-				Optional:           true,
-				DeprecationMessage: "Remove this attribute's configuration as it no longer is used and the attribute will be removed in the next major version of the provider. Please use `reverse_etl_schedule` in the destination_subscription resource instead.",
-				Description:        "Determines the strategy used for triggering syncs, which will be used in conjunction with scheduleConfig.",
-			},
+			// "schedule_strategy": schema.StringAttribute{
+			// 	Optional:           true,
+			// 	DeprecationMessage: "Remove this attribute's configuration as it no longer is used and the attribute will be removed in the next major version of the provider. Please use `reverse_etl_schedule` in the destination_subscription resource instead.",
+			// 	Description:        "Determines the strategy used for triggering syncs, which will be used in conjunction with scheduleConfig.",
+			// },
 			"query": schema.StringAttribute{
 				Required:    true,
 				Description: "The SQL query that will be executed to extract data from the connected Source.",
@@ -80,12 +79,12 @@ func (r *reverseETLModelResource) Schema(_ context.Context, _ resource.SchemaReq
 				Required:    true,
 				Description: "Indicates the column named in `query` that should be used to uniquely identify the extracted records.",
 			},
-			"schedule_config": schema.StringAttribute{
-				Optional:           true,
-				DeprecationMessage: "Remove this attribute's configuration as it no longer is used and the attribute will be removed in the next major version of the provider. Please use `reverse_etl_schedule` in the destination_subscription resource instead.",
-				Description:        "Depending on the chosen strategy, configures the schedule for this model.",
-				CustomType:         jsontypes.NormalizedType{},
-			},
+			// "schedule_config": schema.StringAttribute{
+			// 	Optional:           true,
+			// 	DeprecationMessage: "Remove this attribute's configuration as it no longer is used and the attribute will be removed in the next major version of the provider. Please use `reverse_etl_schedule` in the destination_subscription resource instead.",
+			// 	Description:        "Depending on the chosen strategy, configures the schedule for this model.",
+			// 	CustomType:         jsontypes.NormalizedType{},
+			// },
 		},
 	}
 }
@@ -139,10 +138,6 @@ func (r *reverseETLModelResource) Create(ctx context.Context, req resource.Creat
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Since we deprecated these values, we just need to set them to the plan values so there are no errors
-	resp.State.SetAttribute(ctx, path.Root("schedule_config"), plan.ScheduleConfig)
-	resp.State.SetAttribute(ctx, path.Root("schedule_strategy"), plan.ScheduleStrategy)
 }
 
 func (r *reverseETLModelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -184,14 +179,6 @@ func (r *reverseETLModelResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	// Since we deprecated these values, we just need to set them to the plan values so there are no errors
-	if !previousState.ScheduleConfig.IsUnknown() {
-		resp.State.SetAttribute(ctx, path.Root("schedule_config"), previousState.ScheduleConfig)
-	}
-	if !previousState.ScheduleStrategy.IsUnknown() {
-		resp.State.SetAttribute(ctx, path.Root("schedule_strategy"), previousState.ScheduleStrategy)
 	}
 }
 
@@ -244,10 +231,6 @@ func (r *reverseETLModelResource) Update(ctx context.Context, req resource.Updat
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Since we deprecated these values, we just need to set them to the plan values so there are no errors
-	resp.State.SetAttribute(ctx, path.Root("schedule_config"), plan.ScheduleConfig)
-	resp.State.SetAttribute(ctx, path.Root("schedule_strategy"), plan.ScheduleStrategy)
 }
 
 func (r *reverseETLModelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
