@@ -143,7 +143,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Tracking Plan",
+			fmt.Sprintf("Unable to read Tracking Plan (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -158,7 +158,7 @@ func (d *trackingPlanDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Tracking Plan rules",
+			fmt.Sprintf("Unable to read Tracking Plan rules (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

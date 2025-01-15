@@ -207,7 +207,7 @@ func (r *transformationResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Transformation",
+			fmt.Sprintf("Unable to read Transformation (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -274,7 +274,7 @@ func (r *transformationResource) Update(ctx context.Context, req resource.Update
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Transformation",
+			fmt.Sprintf("Unable to update Transformation (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -304,7 +304,7 @@ func (r *transformationResource) Delete(ctx context.Context, req resource.Delete
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Transformation",
+			fmt.Sprintf("Unable to delete Transformation (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

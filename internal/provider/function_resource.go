@@ -190,7 +190,7 @@ func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Function",
+			fmt.Sprintf("Unable to read Function (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -247,7 +247,7 @@ func (r *functionResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Function",
+			fmt.Sprintf("Unable to update Function (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -284,7 +284,7 @@ func (r *functionResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Function",
+			fmt.Sprintf("Unable to delete Function (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 

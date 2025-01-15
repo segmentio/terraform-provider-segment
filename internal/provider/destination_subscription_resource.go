@@ -100,7 +100,7 @@ func (r *destinationSubscriptionResource) Schema(_ context.Context, _ resource.S
 				Attributes: map[string]schema.Attribute{
 					"strategy": schema.StringAttribute{
 						Required:    true,
-						Description: "Strategy supports three modes: PERIODIC, SPECIFIC_DAYS, or MANUAL.",
+						Description: "Strategy supports the following modes: PERIODIC, SPECIFIC_DAYS, CRON, DBT_CLOUD or MANUAL.",
 					},
 					"config": schema.StringAttribute{
 						Optional:    true,
@@ -182,7 +182,7 @@ func (r *destinationSubscriptionResource) Create(ctx context.Context, req resour
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Destination subscription",
+			fmt.Sprintf("Unable to update Destination subscription (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -229,7 +229,7 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Destination subscription",
+			fmt.Sprintf("Unable to read Destination subscription (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -312,7 +312,7 @@ func (r *destinationSubscriptionResource) Update(ctx context.Context, req resour
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Destination subscription",
+			fmt.Sprintf("Unable to update Destination subscription (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -353,7 +353,7 @@ func (r *destinationSubscriptionResource) Delete(ctx context.Context, req resour
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Destination subscription",
+			fmt.Sprintf("Unable to delete Destination subscription (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -494,6 +494,58 @@ func getSchedule(ctx context.Context, planSchedule basetypes.ObjectValue) (*api.
 					"Manual reverse ETL schedule strategy does not require a config",
 				)
 				reverseETLSchedule.Config = *api.NewNullableConfig(nil)
+			} else if reverseETLSchedule.Strategy == "CRON" {
+				reverseETLModelScheduleConfig := api.ReverseEtlCronScheduleConfig{}
+				var config string
+				err = wrappedReverseETLModelScheduleConfig.As(&config)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				err = json.Unmarshal([]byte(config), &reverseETLModelScheduleConfig)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				reverseETLSchedule.Config = *api.NewNullableConfig(&api.Config{
+					ReverseEtlCronScheduleConfig: &reverseETLModelScheduleConfig,
+				})
+			} else if reverseETLSchedule.Strategy == "DBT_CLOUD" {
+				reverseETLModelScheduleConfig := api.ReverseEtlDbtCloudScheduleConfig{}
+				var config string
+				err = wrappedReverseETLModelScheduleConfig.As(&config)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				err = json.Unmarshal([]byte(config), &reverseETLModelScheduleConfig)
+				if err != nil {
+					diags.AddError(
+						"Unable to decode reverse ETL schedule config",
+						err.Error(),
+					)
+
+					return nil, diags
+				}
+
+				reverseETLSchedule.Config = *api.NewNullableConfig(&api.Config{
+					ReverseEtlDbtCloudScheduleConfig: &reverseETLModelScheduleConfig,
+				})
 			} else {
 				diags.AddError(
 					"Unsupported reverse ETL schedule strategy",

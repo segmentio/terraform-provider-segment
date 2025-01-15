@@ -1,4 +1,10 @@
-## 1.2.0 (Octover 25, 2024)
+## 1.2.2 (January 15, 2025)
+Enabled support for `cron` and `dbt_cloud` schedule strategies on Reverse ETL subscriptions.
+
+## 1.2.1 (October 25, 2024)
+Fixes a bug where the `segment_reverse_etl_model` resource would continously update the schedule config. Also adds resource ID to error messages and upgrades some packages.
+
+## 1.2.0 (October 25, 2024)
 Moves RETL schedule config to destination_subscription and deprecates those fields in reverse_etl_model.
 
 ## 1.1.0 (August 20, 2024)

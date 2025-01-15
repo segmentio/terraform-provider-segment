@@ -202,7 +202,7 @@ func (r *destinationFilterResource) Read(ctx context.Context, req resource.ReadR
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Destination Filter",
+			fmt.Sprintf("Unable to read Destination Filter (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -271,7 +271,7 @@ func (r *destinationFilterResource) Update(ctx context.Context, req resource.Upd
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update Destination Filter",
+			fmt.Sprintf("Unable to update Destination Filter (ID: %s)", state.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -314,7 +314,7 @@ func (r *destinationFilterResource) Delete(ctx context.Context, req resource.Del
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Destination Filter",
+			fmt.Sprintf("Unable to delete Destination Filter (ID: %s)", state.ID.ValueString()),
 			getError(err, body),
 		)
 

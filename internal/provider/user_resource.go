@@ -260,7 +260,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to read user",
+				fmt.Sprintf("Unable to read user (ID: %s)", state.ID.ValueString()),
 				getError(err, body),
 			)
 
@@ -329,7 +329,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			}
 			if err != nil {
 				resp.Diagnostics.AddError(
-					"Unable to delete user",
+					fmt.Sprintf("Unable to delete user (ID: %s)", state.ID.ValueString()),
 					getError(err, body),
 				)
 
@@ -393,7 +393,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update user",
+			fmt.Sprintf("Unable to update user (ID: %s)", plan.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -406,7 +406,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read user",
+			fmt.Sprintf("Unable to read user (ID: %s)", userID),
 			getError(err, body),
 		)
 
@@ -459,7 +459,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 			}
 			if err != nil {
 				resp.Diagnostics.AddError(
-					"Unable to delete user",
+					fmt.Sprintf("Unable to delete user (ID: %s)", state.ID.ValueString()),
 					getError(err, body),
 				)
 
@@ -478,7 +478,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete user",
+			fmt.Sprintf("Unable to delete user (ID: %s)", state.ID.ValueString()),
 			getError(err, body),
 		)
 

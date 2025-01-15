@@ -284,7 +284,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Source",
+			fmt.Sprintf("Unable to Read Source (ID: %s)", config.ID.ValueString()),
 			getError(err, body),
 		)
 
@@ -302,7 +302,7 @@ func (d *sourceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		}
 		if err != nil {
 			resp.Diagnostics.AddError(
-				"Unable to read Source schema settings",
+				fmt.Sprintf("Unable to read Source schema settings (ID: %s)", config.ID.ValueString()),
 				getError(err, body),
 			)
 

@@ -81,7 +81,7 @@ func (d *destinationDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to read Destination",
+			fmt.Sprintf("Unable to read Destination (ID: %s)", state.ID.ValueString()),
 			getError(err, body),
 		)
 
