@@ -7,6 +7,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -128,6 +129,9 @@ func (p *segmentProvider) Configure(ctx context.Context, req provider.ConfigureR
 			URL: url,
 		},
 	}
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = 10
+	configuration.HTTPClient = retryClient.StandardClient()
 
 	client := api.NewAPIClient(configuration)
 
