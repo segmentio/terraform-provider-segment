@@ -86,7 +86,7 @@ resource "segment_destination_subscription" "send_to_webhook" {
 
 Required:
 
-- `strategy` (String) Strategy supports three modes: PERIODIC, SPECIFIC_DAYS, or MANUAL.
+- `strategy` (String) Strategy supports the following modes: PERIODIC, SPECIFIC_DAYS, CRON, DBT_CLOUD or MANUAL.
 
 Optional:
 
