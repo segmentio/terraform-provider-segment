@@ -8,9 +8,10 @@ linters:
   disable-all: true
   enable:
     - bodyclose
+    - copyloopvar
+    - usetesting
     - durationcheck
     - errcheck
-    - exportloopref
     - forcetypeassert
     - godot
     - gofmt
@@ -30,6 +31,6 @@ linters:
     - unparam
     - unused
     - usestdlibvars
-    - vet
+    - govet
     - wastedassign
     - wrapcheck
