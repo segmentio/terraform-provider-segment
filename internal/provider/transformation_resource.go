@@ -206,6 +206,12 @@ func (r *transformationResource) Read(ctx context.Context, req resource.ReadRequ
 		defer body.Body.Close()
 	}
 	if err != nil {
+		if body.StatusCode == 404 || body.StatusCode == 403 {
+			resp.State.RemoveResource(ctx)
+
+			return
+		}
+
 		resp.Diagnostics.AddError(
 			fmt.Sprintf("Unable to read Transformation (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),

@@ -126,6 +126,12 @@ func (r *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 			defer body.Body.Close()
 		}
 		if err != nil {
+			if body.StatusCode == 404 {
+				resp.State.RemoveResource(ctx)
+
+				return
+			}
+
 			resp.Diagnostics.AddError(
 				"Unable to read Source-Warehouse connection",
 				getError(err, body),

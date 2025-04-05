@@ -189,6 +189,12 @@ func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, r
 		defer body.Body.Close()
 	}
 	if err != nil {
+		if body.StatusCode == 404 {
+			resp.State.RemoveResource(ctx)
+
+			return
+		}
+
 		resp.Diagnostics.AddError(
 			fmt.Sprintf("Unable to read Function (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),

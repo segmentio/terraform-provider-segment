@@ -228,6 +228,12 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 		defer body.Body.Close()
 	}
 	if err != nil {
+		if body.StatusCode == 404 {
+			resp.State.RemoveResource(ctx)
+
+			return
+		}
+
 		resp.Diagnostics.AddError(
 			fmt.Sprintf("Unable to read Destination subscription (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),

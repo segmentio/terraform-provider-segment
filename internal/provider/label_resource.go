@@ -163,10 +163,7 @@ func (r *labelResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	if label == nil {
-		resp.Diagnostics.AddError(
-			"Unable to find Label",
-			fmt.Sprintf("Unable to find Label with key: %q and value: %q", state.Key, state.Value),
-		)
+		resp.State.RemoveResource(ctx)
 
 		return
 	}
