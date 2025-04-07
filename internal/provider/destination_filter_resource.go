@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -201,6 +202,12 @@ func (r *destinationFilterResource) Read(ctx context.Context, req resource.ReadR
 		defer body.Body.Close()
 	}
 	if err != nil {
+		if body.StatusCode == http.StatusNotFound {
+			resp.State.RemoveResource(ctx)
+
+			return
+		}
+
 		resp.Diagnostics.AddError(
 			fmt.Sprintf("Unable to read Destination Filter (ID: %s)", previousState.ID.ValueString()),
 			getError(err, body),

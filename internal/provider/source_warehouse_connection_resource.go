@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -126,6 +127,12 @@ func (r *sourceWarehouseConnectionResource) Read(ctx context.Context, req resour
 			defer body.Body.Close()
 		}
 		if err != nil {
+			if body.StatusCode == http.StatusNotFound {
+				resp.State.RemoveResource(ctx)
+
+				return
+			}
+
 			resp.Diagnostics.AddError(
 				"Unable to read Source-Warehouse connection",
 				getError(err, body),

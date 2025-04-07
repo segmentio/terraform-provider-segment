@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"regexp"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
@@ -238,6 +239,12 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 		defer body.Body.Close()
 	}
 	if err != nil {
+		if body.StatusCode == http.StatusNotFound {
+			resp.State.RemoveResource(ctx)
+
+			return
+		}
+
 		resp.Diagnostics.AddError(
 			fmt.Sprintf("Unable to read User Group (ID: %s)", config.ID.ValueString()),
 			getError(err, body),

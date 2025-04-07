@@ -167,6 +167,8 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 
 	warehouse, err := findProfileWarehouse(r.authContext, r.client, previousState.ID.ValueString(), previousState.SpaceID.ValueString())
 	if err != nil {
+		resp.State.RemoveResource(ctx)
+
 		resp.Diagnostics.AddError(
 			fmt.Sprintf("Unable to read Profiles Warehouse (ID: %s)", previousState.ID.ValueString()),
 			err.Error(),
@@ -176,10 +178,7 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	if warehouse == nil {
-		resp.Diagnostics.AddError(
-			"Unable to find Profile Warehouse",
-			fmt.Sprintf("Profile Warehouse with id '%s' and space id '%s' not found", previousState.ID.ValueString(), previousState.SpaceID.ValueString()),
-		)
+		resp.State.RemoveResource(ctx)
 
 		return
 	}
