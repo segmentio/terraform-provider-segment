@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -259,7 +260,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			defer body.Body.Close()
 		}
 		if err != nil {
-			if body.StatusCode == 404 {
+			if body.StatusCode == http.StatusNotFound {
 				resp.State.RemoveResource(ctx)
 
 				return

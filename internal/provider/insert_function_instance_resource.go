@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
@@ -159,7 +160,7 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 		defer body.Body.Close()
 	}
 	if err != nil {
-		if body.StatusCode == 404 {
+		if body.StatusCode == http.StatusNotFound {
 			resp.State.RemoveResource(ctx)
 
 			return

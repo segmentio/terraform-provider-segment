@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/avast/retry-go/v4"
@@ -255,7 +256,7 @@ func (r *sourceTrackingPlanConnectionResource) Read(ctx context.Context, req res
 		defer body.Body.Close()
 	}
 	if err != nil {
-		if body.StatusCode == 404 {
+		if body.StatusCode == http.StatusNotFound {
 			resp.State.RemoveResource(ctx)
 
 			return

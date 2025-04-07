@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -201,7 +202,7 @@ func (r *destinationFilterResource) Read(ctx context.Context, req resource.ReadR
 		defer body.Body.Close()
 	}
 	if err != nil {
-		if body.StatusCode == 404 {
+		if body.StatusCode == http.StatusNotFound {
 			resp.State.RemoveResource(ctx)
 
 			return

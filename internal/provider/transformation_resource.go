@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
@@ -206,7 +207,7 @@ func (r *transformationResource) Read(ctx context.Context, req resource.ReadRequ
 		defer body.Body.Close()
 	}
 	if err != nil {
-		if body.StatusCode == 404 || body.StatusCode == 403 {
+		if body.StatusCode == http.StatusNotFound || body.StatusCode == http.StatusForbidden {
 			resp.State.RemoveResource(ctx)
 
 			return

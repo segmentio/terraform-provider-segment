@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
@@ -228,7 +229,7 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 		defer body.Body.Close()
 	}
 	if err != nil {
-		if body.StatusCode == 404 {
+		if body.StatusCode == http.StatusNotFound {
 			resp.State.RemoveResource(ctx)
 
 			return
