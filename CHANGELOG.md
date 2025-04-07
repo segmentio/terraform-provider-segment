@@ -1,3 +1,9 @@
+## 1.4.0 (April 7, 2025)
+Adds graceful handling of 404 errors when getting resources. The resource is now removed from the state file and regenerated on the next plan/apply.
+
+## 1.3.2 (March 11, 2025)
+Adds automatic retries for retriable errors like 429 Too Many Requests.
+
 ## 1.2.2 (January 15, 2025)
 Enabled support for `cron` and `dbt_cloud` schedule strategies on Reverse ETL subscriptions.
 
