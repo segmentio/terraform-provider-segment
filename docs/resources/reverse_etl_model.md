@@ -6,14 +6,14 @@ description: |-
   Configures a Reverse ETL Model. For more information, visit the Segment docs https://segment.com/docs/connections/reverse-etl/.
   Import
   In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <id>. For example:
-  terraform
+  
   import {
     to = segment_reverse_etl_model.example
     id = "<id>"
   }
   
   Otherwise, use terraform import with <id>. For example:
-  console
+  
   terraform import segment_reverse_etl_model.example <id>
 ---
 

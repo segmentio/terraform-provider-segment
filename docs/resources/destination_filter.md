@@ -6,14 +6,14 @@ description: |-
   Configures a filter for a destination. For more information, visit the Segment docs https://segment.com/docs/connections/destinations/destination-filters/.
   Import
   In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <destination_id>:<filter_id>. For example:
-  terraform
+  
   import {
     to = segment_destination_filter.example
     id = "<destination_id>:<filter_id>"
   }
   
   Otherwise, use terraform import with <destination_id>:<filter_id>. For example:
-  console
+  
   terraform import segment_destination_filter.example <destination_id>:<filter_id>
 ---
 

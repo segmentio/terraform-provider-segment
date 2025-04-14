@@ -6,14 +6,14 @@ description: |-
   Configures a connection between a Source and a Tracking Plan. For more information, visit the Segment docs https://segment.com/docs/protocols/validate/connect-sources/.
   Import
   In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <source_id>:<tracking_plan_id>. For example:
-  terraform
+  
   import {
     to = segment_source_tracking_plan_connection.example
     id = "<source_id>:<tracking_plan_id>"
   }
   
   Otherwise, use terraform import with <source_id>:<tracking_plan_id>. For example:
-  console
+  
   terraform import segment_source_tracking_plan_connection.example <source_id>:<tracking_plan_id>
 ---
 

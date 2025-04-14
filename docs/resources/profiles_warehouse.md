@@ -6,14 +6,14 @@ description: |-
   Configures a Profiles Sync Warehouse. For more information, visit the Segment docs https://segment.com/docs/unify/profiles-sync/overview/.
   Import
   In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <space_id>:<warehouse_id>. For example:
-  terraform
+  
   import {
     to = segment_profiles_warehouse.example
     id = "<space_id>:<warehouse_id>"
   }
   
   Otherwise, use terraform import with <space_id>:<warehouse_id>. For example:
-  console
+  
   terraform import segment_profiles_warehouse.example <space_id>:<warehouse_id>
 ---
 
