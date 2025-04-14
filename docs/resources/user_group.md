@@ -6,14 +6,14 @@ description: |-
   Configures a User Group. For more information, visit the Segment docs https://segment.com/docs/segment-app/iam/concepts/#user-groups.
   Import
   In Terraform v1.5.0 and later, use an import block https://developer.hashicorp.com/terraform/language/import with <id>. For example:
-  terraform
+  
   import {
     to = segment_user_group.example
     id = "<id>"
   }
   
   Otherwise, use terraform import with <id>. For example:
-  console
+  
   terraform import segment_user_group.example <id>
 ---
 
