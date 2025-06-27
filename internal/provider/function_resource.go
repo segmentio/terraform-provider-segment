@@ -163,7 +163,7 @@ func (r *functionResource) Create(ctx context.Context, req resource.CreateReques
 	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
-	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE"{
 		state.DisplayName = plan.DisplayName
 	}
 
@@ -210,7 +210,7 @@ func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, r
 	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
-	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE"{
 		state.DisplayName = previousState.DisplayName
 	}
 
@@ -266,7 +266,7 @@ func (r *functionResource) Update(ctx context.Context, req resource.UpdateReques
 	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
-	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE"{
 		state.DisplayName = plan.DisplayName
 	}
 

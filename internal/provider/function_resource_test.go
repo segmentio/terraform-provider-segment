@@ -269,3 +269,223 @@ func TestAccFunctionResource(t *testing.T) {
 		},
 	})
 }
+
+
+func TestAccFunctionResource_InsertSource(t *testing.T) {
+	t.Parallel()
+
+	// keeps track of whether we’ve already updated the Function
+	updated := 0
+
+	// ──────────────────────────  Fake Segment API  ──────────────────────────
+	fakeServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("content-type", "application/json")
+
+		switch {
+		// ── CREATE ─────────────────────────────────────────────────────────
+		case req.URL.Path == "/functions" && req.Method == http.MethodPost:
+			_, _ = w.Write([]byte(`
+			{
+				"data": {
+					"function": {
+						"id":            "my-function-id",
+						"workspaceId":   "my-workspace-id",
+						"displayName":   "My test function (my-workspace)",    // Segment appends workspace
+						"description":   "My function description",
+						"logoUrl":       "https://segment.com/cool-logo.png",
+						"code":          "// My test code!",
+						"createdAt":     "2023-10-11T18:52:07.087Z",
+						"createdBy":     "my-user-id",
+						"previewWebhookUrl": "",
+						"settings": [{
+							"name":        "mySettingName",
+							"label":       "My setting label",
+							"description": "My setting description",
+							"type":        "STRING",
+							"required":    false,
+							"sensitive":   false
+						}],
+						"buildpack":     "boreal",
+						"catalogId":     "my-catalog-id",
+						"batchMaxCount": 0,
+						"resourceType":  "INSERT_SOURCE"
+					}
+				}
+			}`))
+		// ── UPDATE ─────────────────────────────────────────────────────────
+		case req.URL.Path == "/functions/my-function-id" && req.Method == http.MethodPatch:
+			updated++
+			_, _ = w.Write([]byte(`
+			{
+				"data": {
+					"function": {
+						"id":            "my-function-id",
+						"workspaceId":   "my-workspace-id",
+						"displayName":   "My new test function (my-workspace)",
+						"description":   "My new function description",
+						"logoUrl":       "https://segment.com/cool-other-logo.png",
+						"code":          "// My new test code!",
+						"createdAt":     "2023-10-11T18:52:07.087Z",
+						"createdBy":     "my-user-id",
+						"previewWebhookUrl": "",
+						"settings": [{
+							"name":        "myNewSettingName",
+							"label":       "My new setting label",
+							"description": "My new setting description",
+							"type":        "STRING",
+							"required":    true,
+							"sensitive":   true
+						}],
+						"buildpack":     "boreal",
+						"catalogId":     "my-catalog-id",
+						"batchMaxCount": 0,
+						"resourceType":  "INSERT_SOURCE"
+					}
+				}
+			}`))
+		// ── READ (initial + after update) ─────────────────────────────────
+		case req.URL.Path == "/functions/my-function-id" && req.Method == http.MethodGet:
+			if updated == 0 {
+				_, _ = w.Write([]byte(`
+				{
+					"data": {
+						"function": {
+							"id":            "my-function-id",
+							"workspaceId":   "my-workspace-id",
+							"displayName":   "My test function (my-workspace)",
+							"description":   "My function description",
+							"logoUrl":       "https://segment.com/cool-logo.png",
+							"code":          "// My test code!",
+							"createdAt":     "2023-10-11T18:52:07.087Z",
+							"createdBy":     "my-user-id",
+							"previewWebhookUrl": "",
+							"settings": [{
+								"name":        "mySettingName",
+								"label":       "My setting label",
+								"description": "My setting description",
+								"type":        "STRING",
+								"required":    false,
+								"sensitive":   false
+							}],
+							"buildpack":     "boreal",
+							"catalogId":     "my-catalog-id",
+							"batchMaxCount": 0,
+							"resourceType":  "INSERT_SOURCE"
+						}
+					}
+				}`))
+			} else {
+				_, _ = w.Write([]byte(`
+				{
+					"data": {
+						"function": {
+							"id":            "my-function-id",
+							"workspaceId":   "my-workspace-id",
+							"displayName":   "My new test function (my-workspace)",
+							"description":   "My new function description",
+							"logoUrl":       "https://segment.com/cool-other-logo.png",
+							"code":          "// My new test code!",
+							"createdAt":     "2023-10-11T18:52:07.087Z",
+							"createdBy":     "my-user-id",
+							"previewWebhookUrl": "",
+							"settings": [{
+								"name":        "myNewSettingName",
+								"label":       "My new setting label",
+								"description": "My new setting description",
+								"type":        "STRING",
+								"required":    true,
+								"sensitive":   true
+							}],
+							"buildpack":     "boreal",
+							"catalogId":     "my-catalog-id",
+							"batchMaxCount": 0,
+							"resourceType":  "INSERT_SOURCE"
+						}
+					}
+				}`))
+			}
+		}
+	}))
+	defer fakeServer.Close()
+
+	// common provider block
+	providerConfig := `
+		provider "segment" {
+			url   = "` + fakeServer.URL + `"
+			token = "abc123"
+		}
+	`
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// ── CREATE + READ ──────────────────────────────────────────────
+			{
+				Config: providerConfig + `
+					resource "segment_function" "test" {
+						code          = "// My test code!"
+						display_name  = "My test function"
+						logo_url      = "https://segment.com/cool-logo.png"
+						resource_type = "INSERT_SOURCE"
+						description   = "My function description"
+						settings = [{
+							name        = "mySettingName"
+							label       = "My setting label"
+							type        = "STRING"
+							description = "My setting description"
+							required    = false
+							sensitive   = false
+						}]
+					}
+				`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("segment_function.test", "id",            "my-function-id"),
+					resource.TestCheckResourceAttr("segment_function.test", "resource_type", "INSERT_SOURCE"),
+					resource.TestCheckResourceAttr("segment_function.test", "display_name",  "My test function"),
+					resource.TestCheckResourceAttr("segment_function.test", "logo_url",      "https://segment.com/cool-logo.png"),
+					resource.TestCheckResourceAttr("segment_function.test", "description",   "My function description"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.#",    "1"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.name",        "mySettingName"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.required",    "false"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive",   "false"),
+				),
+			},
+			// ── IMPORT ────────────────────────────────────────────────────
+			{
+				ResourceName:      "segment_function.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// ── UPDATE + READ ────────────────────────────────────────────
+			{
+				Config: providerConfig + `
+					resource "segment_function" "test" {
+						code          = "// My new test code!"
+						display_name  = "My new test function"
+						logo_url      = "https://segment.com/cool-other-logo.png"
+						resource_type = "INSERT_SOURCE"
+						description   = "My new function description"
+						settings = [{
+							name        = "myNewSettingName"
+							label       = "My new setting label"
+							type        = "STRING"
+							description = "My new setting description"
+							required    = true
+							sensitive   = true
+						}]
+					}
+				`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("segment_function.test", "resource_type", "INSERT_SOURCE"),
+					resource.TestCheckResourceAttr("segment_function.test", "display_name",  "My new test function"),
+					resource.TestCheckResourceAttr("segment_function.test", "logo_url",      "https://segment.com/cool-other-logo.png"),
+					resource.TestCheckResourceAttr("segment_function.test", "description",   "My new function description"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.name",      "myNewSettingName"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.required",  "true"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive", "true"),
+				),
+			},
+			// destroy is implicit
+		},
+	})
+}
