@@ -270,7 +270,6 @@ func TestAccFunctionResource(t *testing.T) {
 	})
 }
 
-
 func TestAccFunctionResource_InsertSource(t *testing.T) {
 	t.Parallel()
 
@@ -439,15 +438,15 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("segment_function.test", "id",            "my-function-id"),
+					resource.TestCheckResourceAttr("segment_function.test", "id", "my-function-id"),
 					resource.TestCheckResourceAttr("segment_function.test", "resource_type", "INSERT_SOURCE"),
-					resource.TestCheckResourceAttr("segment_function.test", "display_name",  "My test function"),
-					resource.TestCheckResourceAttr("segment_function.test", "logo_url",      "https://segment.com/cool-logo.png"),
-					resource.TestCheckResourceAttr("segment_function.test", "description",   "My function description"),
-					resource.TestCheckResourceAttr("segment_function.test", "settings.#",    "1"),
-					resource.TestCheckResourceAttr("segment_function.test", "settings.0.name",        "mySettingName"),
-					resource.TestCheckResourceAttr("segment_function.test", "settings.0.required",    "false"),
-					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive",   "false"),
+					resource.TestCheckResourceAttr("segment_function.test", "display_name", "My test function"),
+					resource.TestCheckResourceAttr("segment_function.test", "logo_url", "https://segment.com/cool-logo.png"),
+					resource.TestCheckResourceAttr("segment_function.test", "description", "My function description"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.#", "1"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.name", "mySettingName"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.required", "false"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive", "false"),
 				),
 			},
 			// ── IMPORT ────────────────────────────────────────────────────
@@ -477,11 +476,11 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("segment_function.test", "resource_type", "INSERT_SOURCE"),
-					resource.TestCheckResourceAttr("segment_function.test", "display_name",  "My new test function"),
-					resource.TestCheckResourceAttr("segment_function.test", "logo_url",      "https://segment.com/cool-other-logo.png"),
-					resource.TestCheckResourceAttr("segment_function.test", "description",   "My new function description"),
-					resource.TestCheckResourceAttr("segment_function.test", "settings.0.name",      "myNewSettingName"),
-					resource.TestCheckResourceAttr("segment_function.test", "settings.0.required",  "true"),
+					resource.TestCheckResourceAttr("segment_function.test", "display_name", "My new test function"),
+					resource.TestCheckResourceAttr("segment_function.test", "logo_url", "https://segment.com/cool-other-logo.png"),
+					resource.TestCheckResourceAttr("segment_function.test", "description", "My new function description"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.name", "myNewSettingName"),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.0.required", "true"),
 					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive", "true"),
 				),
 			},
