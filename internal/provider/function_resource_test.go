@@ -289,7 +289,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					"function": {
 						"id":            "my-function-id",
 						"workspaceId":   "my-workspace-id",
-						"displayName":   "My test function (my-workspace)",    
+						"displayName":   "My test function",    
 						"description":   "My function description",
 						"logoUrl":       "https://segment.com/cool-logo.png",
 						"code":          "// My test code!",
@@ -320,7 +320,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					"function": {
 						"id":            "my-function-id",
 						"workspaceId":   "my-workspace-id",
-						"displayName":   "My new test function (my-workspace)",
+						"displayName":   "My new test function",
 						"description":   "My new function description",
 						"logoUrl":       "https://segment.com/cool-other-logo.png",
 						"code":          "// My new test code!",
@@ -351,7 +351,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 						"function": {
 							"id":            "my-function-id",
 							"workspaceId":   "my-workspace-id",
-							"displayName":   "My test function (my-workspace)",
+							"displayName":   "My test function",
 							"description":   "My function description",
 							"logoUrl":       "https://segment.com/cool-logo.png",
 							"code":          "// My test code!",
@@ -380,7 +380,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 						"function": {
 							"id":            "my-function-id",
 							"workspaceId":   "my-workspace-id",
-							"displayName":   "My new test function (my-workspace)",
+							"displayName":   "My new test function",
 							"description":   "My new function description",
 							"logoUrl":       "https://segment.com/cool-other-logo.png",
 							"code":          "// My new test code!",
