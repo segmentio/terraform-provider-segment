@@ -407,7 +407,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 	}))
 	defer fakeServer.Close()
 
-	// common provider block
+	
 	providerConfig := `
 		provider "segment" {
 			url   = "` + fakeServer.URL + `"
@@ -418,7 +418,6 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// ── CREATE + READ ──────────────────────────────────────────────
 			{
 				Config: providerConfig + `
 					resource "segment_function" "test" {
@@ -449,13 +448,13 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive", "false"),
 				),
 			},
-			// ── IMPORT ────────────────────────────────────────────────────
+			
 			{
 				ResourceName:      "segment_function.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// ── UPDATE + READ ────────────────────────────────────────────
+			
 			{
 				Config: providerConfig + `
 					resource "segment_function" "test" {
@@ -484,7 +483,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive", "true"),
 				),
 			},
-			// destroy is implicit
+			
 		},
 	})
 }
