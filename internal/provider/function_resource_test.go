@@ -289,7 +289,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					"function": {
 						"id":            "my-function-id",
 						"workspaceId":   "my-workspace-id",
-						"displayName":   "My test function (my-workspace)",    // Segment appends workspace
+						"displayName":   "My test function (my-workspace)",    
 						"description":   "My function description",
 						"logoUrl":       "https://segment.com/cool-logo.png",
 						"code":          "// My test code!",
@@ -342,7 +342,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					}
 				}
 			}`))
-		// ── READ (initial + after update) ─────────────────────────────────
+		
 		case req.URL.Path == "/functions/my-function-id" && req.Method == http.MethodGet:
 			if updated == 0 {
 				_, _ = w.Write([]byte(`
