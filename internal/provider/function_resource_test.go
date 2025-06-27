@@ -342,7 +342,7 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					}
 				}
 			}`))
-		
+
 		case req.URL.Path == "/functions/my-function-id" && req.Method == http.MethodGet:
 			if updated == 0 {
 				_, _ = w.Write([]byte(`
