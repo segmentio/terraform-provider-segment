@@ -407,7 +407,6 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 	}))
 	defer fakeServer.Close()
 
-	
 	providerConfig := `
 		provider "segment" {
 			url   = "` + fakeServer.URL + `"
@@ -448,13 +447,13 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive", "false"),
 				),
 			},
-			
+
 			{
 				ResourceName:      "segment_function.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			
+
 			{
 				Config: providerConfig + `
 					resource "segment_function" "test" {
@@ -483,7 +482,6 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_function.test", "settings.0.sensitive", "true"),
 				),
 			},
-			
 		},
 	})
 }
