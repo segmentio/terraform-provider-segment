@@ -3,9 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"net/http"
 	"regexp"
-	"strings"
 
 	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
@@ -17,24 +17,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-
+	tftypes "github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/segmentio/public-api-sdk-go/api"
 )
-
-/*──────────────────────────── helper ────────────────────────────*/
-
-// Matches "<name> (workspace-slug)" and returns "<name>"
-var wsSuffix = regexp.MustCompile(`^(.*) [^)]+$`)
-
-func stripWorkspaceSuffix(name string) string {
-	if m := wsSuffix.FindStringSubmatch(name); m != nil {
-		return strings.TrimSpace(m[1])
-	}
-	return name
-}
-
-/*──────────────────────────── resource boilerplate ──────────────*/
 
 var (
 	_ resource.Resource                = &functionResource{}
@@ -51,11 +36,13 @@ type functionResource struct {
 	authContext context.Context
 }
 
+func hasValue(v tftypes.String) bool {
+	return !(v.IsNull() || v.IsUnknown())
+}
+
 func (r *functionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_function"
 }
-
-/*──────────────────────────── schema ────────────────────────────*/
 
 func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
@@ -75,7 +62,7 @@ func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			},
 			"display_name": schema.StringAttribute{
 				Optional:    true,
-				Description: "A display name for this Function (alphanumeric + spaces).",
+				Description: "A display name for this Function. Destination Functions append the Workspace to the display name, but this is omitted from the Terraform output for consistency purposes.",
 			},
 			"logo_url": schema.StringAttribute{
 				Optional:    true,
@@ -102,7 +89,7 @@ func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			},
 			"settings": schema.SetNestedAttribute{
 				Optional:    true,
-				Description: "Settings associated with this Function.",
+				Description: "The settings associated with this Function. Common settings are connection-related configuration used to connect to it, for example host, username, and port.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
@@ -111,26 +98,26 @@ func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 						},
 						"label": schema.StringAttribute{
 							Required:    true,
-							Description: "The label for this Function setting.",
+							Description: "The label for this Function Setting.",
 						},
 						"description": schema.StringAttribute{
 							Required:    true,
-							Description: "A description of this Function setting.",
+							Description: "A description of this Function Setting.",
 						},
 						"type": schema.StringAttribute{
 							Required:    true,
-							Description: "The type of this Function setting.",
+							Description: "The type of this Function Setting.",
 							Validators: []validator.String{
 								stringvalidator.RegexMatches(regexp.MustCompile("^[A-Z_]+$"), "'type' must be in all uppercase"),
 							},
 						},
 						"required": schema.BoolAttribute{
 							Required:    true,
-							Description: "Whether this Function setting is required.",
+							Description: "Whether this Function Setting is required.",
 						},
 						"sensitive": schema.BoolAttribute{
 							Required:    true,
-							Description: "Whether this Function setting contains sensitive information.",
+							Description: "Whether this Function Setting contains sensitive information.",
 						},
 					},
 				},
@@ -138,8 +125,6 @@ func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 		},
 	}
 }
-
-/*──────────────────────────── CREATE ────────────────────────────*/
 
 func (r *functionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan models.FunctionPlan
@@ -167,7 +152,11 @@ func (r *functionResource) Create(ctx context.Context, req resource.CreateReques
 		defer body.Body.Close()
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create Function", getError(err, body))
+		resp.Diagnostics.AddError(
+			"Unable to create Function",
+			getError(err, body),
+		)
+
 		return
 	}
 
@@ -178,18 +167,24 @@ func (r *functionResource) Create(ctx context.Context, req resource.CreateReques
 	var state models.FunctionState
 	state.Fill(function)
 
-	// Always normalise the name for workspace-scoped types
-	state.DisplayName = types.StringValue(stripWorkspaceSuffix(state.DisplayName.ValueString()))
+	// Destination functions append workspace name to display name causing inconsistency
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE" {
+		state.DisplayName = plan.DisplayName
+	}
 
-	diags = resp.State.Set(ctx, &state)
+	// Set state to fully populated data
+	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
-
-/*──────────────────────────── READ ───────────────────────────────*/
 
 func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var previousState models.FunctionState
+
 	diags := req.State.Get(ctx, &previousState)
+
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -202,25 +197,34 @@ func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, r
 	if err != nil {
 		if body.StatusCode == http.StatusNotFound {
 			resp.State.RemoveResource(ctx)
+
 			return
 		}
-		resp.Diagnostics.AddError(fmt.Sprintf("Unable to read Function (ID: %s)", previousState.ID.ValueString()), getError(err, body))
+
+		resp.Diagnostics.AddError(
+			fmt.Sprintf("Unable to read Function (ID: %s)", previousState.ID.ValueString()),
+			getError(err, body),
+		)
+
 		return
 	}
 
 	var state models.FunctionState
-	state.Fill(response.Data.GetFunction())
 
-	// normalise if necessary
-	if rt := state.ResourceType.ValueString(); rt == "DESTINATION" || rt == "INSERT_DESTINATION" || rt == "INSERT_SOURCE" {
-		state.DisplayName = types.StringValue(stripWorkspaceSuffix(state.DisplayName.ValueString()))
+	function := response.Data.GetFunction()
+	state.Fill(function)
+
+	// Destination functions append workspace name to display name causing inconsistency
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE" && hasValue(previousState.DisplayName) {
+		state.DisplayName = previousState.DisplayName
 	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
-
-/*──────────────────────────── UPDATE ────────────────────────────*/
 
 func (r *functionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan models.FunctionPlan
@@ -254,21 +258,29 @@ func (r *functionResource) Update(ctx context.Context, req resource.UpdateReques
 		defer body.Body.Close()
 	}
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Unable to update Function (ID: %s)", plan.ID.ValueString()), getError(err, body))
+		resp.Diagnostics.AddError(
+			fmt.Sprintf("Unable to update Function (ID: %s)", plan.ID.ValueString()),
+			getError(err, body),
+		)
+
 		return
 	}
 
-	state.Fill(out.Data.GetFunction())
+	function := out.Data.GetFunction()
 
-	if rt := state.ResourceType.ValueString(); rt == "DESTINATION" || rt == "INSERT_DESTINATION" || rt == "INSERT_SOURCE" {
-		state.DisplayName = types.StringValue(stripWorkspaceSuffix(state.DisplayName.ValueString()))
+	state.Fill(function)
+
+	// Destination functions append workspace name to display name causing inconsistency
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE" {
+		state.DisplayName = plan.DisplayName
 	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
-
-/*──────────────────────────── DELETE ────────────────────────────*/
 
 func (r *functionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var config models.FunctionState
@@ -283,30 +295,35 @@ func (r *functionResource) Delete(ctx context.Context, req resource.DeleteReques
 		defer body.Body.Close()
 	}
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Unable to delete Function (ID: %s)", config.ID.ValueString()), getError(err, body))
+		resp.Diagnostics.AddError(
+			fmt.Sprintf("Unable to delete Function (ID: %s)", config.ID.ValueString()),
+			getError(err, body),
+		)
+
+		return
 	}
 }
 
-/*──────────────────────────── IMPORT ────────────────────────────*/
-
 func (r *functionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
-
-/*──────────────────────────── CONFIGURE ─────────────────────────*/
 
 func (r *functionResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
+
 	config, ok := req.ProviderData.(*ClientInfo)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected ClientInfo, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
+
 		return
 	}
+
 	r.client = config.client
 	r.authContext = config.authContext
 }
