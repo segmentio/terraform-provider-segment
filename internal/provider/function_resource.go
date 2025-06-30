@@ -1,30 +1,29 @@
 package provider
 
 import (
-	"context"
-	"fmt"
+    "context"
+    "fmt"
+    "net/http"
+    "regexp"
 
-	"net/http"
-	"regexp"
+    "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+    "github.com/hashicorp/terraform-plugin-framework/path"
+    "github.com/hashicorp/terraform-plugin-framework/resource"
+    "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+    "github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+    "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+    "github.com/hashicorp/terraform-plugin-framework/schema/validator"
+    tftypes "github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
-	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
-
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	tftypes "github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/segmentio/public-api-sdk-go/api"
+    "github.com/segmentio/public-api-sdk-go/api"
+    "github.com/segmentio/terraform-provider-segment/internal/provider/docs"
+    "github.com/segmentio/terraform-provider-segment/internal/provider/models"
 )
 
 var (
-	_ resource.Resource                = &functionResource{}
-	_ resource.ResourceWithConfigure   = &functionResource{}
-	_ resource.ResourceWithImportState = &functionResource{}
+    _ resource.Resource                = &functionResource{}
+    _ resource.ResourceWithConfigure   = &functionResource{}
+    _ resource.ResourceWithImportState = &functionResource{}
 )
 
 func NewFunctionResource() resource.Resource {
