@@ -16,6 +16,7 @@ import (
 	tftypes "github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/segmentio/public-api-sdk-go/api"
+
 	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
 	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 )
