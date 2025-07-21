@@ -1,3 +1,9 @@
+## 1.4.1 (July 21, 2025)
+Bump the Go language version to `v1.24.2` to fix the following security vulnerabilities:
+
+- [CVE-2025-22871](https://nvd.nist.gov/vuln/detail/CVE-2025-22871)
+- [CVE-2024-45337](https://github.com/advisories/GHSA-v778-237x-gjrc)
+
 ## 1.4.0 (April 7, 2025)
 Adds graceful handling of 404 errors when getting resources. The resource is now removed from the state file and regenerated on the next plan/apply.
 
