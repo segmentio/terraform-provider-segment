@@ -1,3 +1,6 @@
+## 1.5.0 (August 11, 2025)
+Bump the allowed number of rules in a Tracking Plan to 2000 items depending on workspace limits.
+
 ## 1.4.1 (July 21, 2025)
 Bump the Go language version to `v1.24.2` to fix the following security vulnerabilities:
 
