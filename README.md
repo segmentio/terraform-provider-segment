@@ -26,3 +26,4 @@ To compile the provider, run `go install`. This will build the provider and put 
 To generate or update documentation, run `make generate`.
 
 In order to run the full suite of tests, run `make test`. Please refer to the `Makefile` for more targets.
+ 
