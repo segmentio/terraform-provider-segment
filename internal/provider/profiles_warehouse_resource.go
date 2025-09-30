@@ -367,7 +367,19 @@ func findProfileWarehouse(authContext context.Context, client *api.APIClient, id
 // determineSchemaNameForUpdate determines whether schemaName should be sent to the API
 // based on comparing the plan and state values. This prevents API failures when the
 // schema name already exists in the warehouse configuration.
+//
+// The function returns nil (not sent to API) when:
+// - Plan value is unknown (should not send unknown values to API)
+// - Plan and state values are equal (no change needed)
+//
+// The function returns a pointer to the plan value when:
+// - Plan and state values are different (legitimate change)
 func determineSchemaNameForUpdate(planSchemaName, stateSchemaName types.String) *string {
+	// Don't send schemaName to API if plan value is unknown.
+	if planSchemaName.IsUnknown() {
+		return nil
+	}
+
 	// Only send schemaName to API if it differs from the remote state.
 	if !planSchemaName.Equal(stateSchemaName) {
 		return planSchemaName.ValueStringPointer()
