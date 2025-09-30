@@ -145,10 +145,10 @@ func (r *profilesWarehouseResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response.
 	state.Settings = plan.Settings
 
-	// Set state to fully populated data
+	// Set state to fully populated data.
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -229,7 +229,7 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	// Only send schemaName to API if it differs from the remote state
+	// Only send schemaName to API if it differs from the remote state.
 	// This prevents API failures when the schema name already exists in the warehouse.
 	// The Segment API fails if we send a schemaName that matches the current configuration,
 	// even though it should be a no-op. This handles all cases:
@@ -269,7 +269,7 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response.
 	state.Settings = plan.Settings
 
 	diags = resp.State.Set(ctx, &state)

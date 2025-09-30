@@ -162,7 +162,7 @@ func TestAccProfilesWarehouseResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read testing
+			// Create and Read testing.
 			{
 				Config: providerConfig + `
 					resource "segment_profiles_warehouse" "test" {
@@ -186,7 +186,7 @@ func TestAccProfilesWarehouseResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_profiles_warehouse.test", "schema_name", "my-schema-name"),
 				),
 			},
-			// ImportState testing
+			// ImportState testing.
 			{
 				ResourceName: "segment_profiles_warehouse.test",
 				Config: providerConfig + `
@@ -204,7 +204,7 @@ func TestAccProfilesWarehouseResource(t *testing.T) {
 				ImportState:   true,
 				ImportStateId: "my-space-id:my-warehouse-id",
 			},
-			// Update and Read testing
+			// Update and Read testing.
 			{
 				Config: providerConfig + `
 					resource "segment_profiles_warehouse" "test" {
@@ -227,14 +227,14 @@ func TestAccProfilesWarehouseResource(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_profiles_warehouse.test", "settings", "{\"token\":\"my-other-token\"}"),
 					resource.TestCheckResourceAttr("segment_profiles_warehouse.test", "schema_name", "my-new-schema-name")),
 			},
-			// Delete testing automatically occurs in TestCase
+			// Delete testing automatically occurs in TestCase.
 		},
 	})
 }
 
 func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 	// Test the schemaName handling that prevents API failures when the schema
-	// name already exists in the warehouse configuration
+	// name already exists in the warehouse configuration.
 	t.Parallel()
 
 	updateCount := 0
@@ -244,7 +244,7 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 
 			payload := ""
 			if req.URL.Path == "/spaces/my-space-id/profiles-warehouses" && req.Method == http.MethodPost {
-				// Initial create response
+				// Initial create response.
 				payload = `
 					{
 						"data": {
@@ -275,7 +275,7 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 					}
 				`
 			} else if req.URL.Path == "/spaces/my-space-id/profiles-warehouses/my-warehouse-id" && req.Method == http.MethodPatch {
-				// Update response - schemaName should only be sent when it changes
+				// Update response - schemaName should only be sent when it changes.
 				updateCount++
 				payload = `
 					{
@@ -307,7 +307,7 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 					}
 				`
 			} else if req.URL.Path == "/spaces/my-space-id/profiles-warehouses" && req.Method == http.MethodGet {
-				// Read response
+				// Read response.
 				payload = `
 					{
 						"data": {
@@ -356,7 +356,7 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create with schema_name
+			// Create with schema_name.
 			{
 				Config: providerConfig + `
 					resource "segment_profiles_warehouse" "test" {
@@ -374,7 +374,7 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_profiles_warehouse.test", "schema_name", "my-schema-name"),
 				),
 			},
-			// Update with same schema_name - should not send schemaName to API (prevents API failure)
+			// Update with same schema_name - should not send schemaName to API (prevents API failure).
 			{
 				Config: providerConfig + `
 					resource "segment_profiles_warehouse" "test" {
@@ -392,7 +392,7 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 					resource.TestCheckResourceAttr("segment_profiles_warehouse.test", "schema_name", "my-schema-name"),
 				),
 			},
-			// Update with different schema_name - should send schemaName to API (legitimate change)
+			// Update with different schema_name - should send schemaName to API (legitimate change).
 			{
 				Config: providerConfig + `
 					resource "segment_profiles_warehouse" "test" {
@@ -415,6 +415,8 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 }
 
 func TestDetermineSchemaNameForUpdate(t *testing.T) {
+	t.Parallel()
+
 	// Test the determineSchemaNameForUpdate function that prevents API failures
 	// when the schema name already exists in the warehouse configuration.
 	tests := []struct {
@@ -498,7 +500,9 @@ func TestDetermineSchemaNameForUpdate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Test the actual function
+			t.Parallel()
+
+			// Test the actual function.
 			result := determineSchemaNameForUpdate(tt.planSchemaName, tt.stateSchemaName)
 
 			// Check if the result matches expected.
