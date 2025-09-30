@@ -231,12 +231,12 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 
 	// Only send schemaName to API if it differs from the remote state.
 	// This prevents API failures when the schema name already exists in the warehouse.
-	// The Segment API fails if we send a schemaName that matches the current configuration,
+	// The Segment API fails if we send a schemaName that matches the current configuration.
 	// even though it should be a no-op. This handles all cases:
-	// 1. Both null/undefined: Equal() returns true, schemaName stays nil (not sent)
-	// 2. Both have same value: Equal() returns true, schemaName stays nil (not sent)
-	// 3. One null, other has value: Equal() returns false, schemaName gets the plan value (sent)
-	// 4. Both have different values: Equal() returns false, schemaName gets the plan value (sent)
+	// 1. Both null/undefined: Equal() returns true, schemaName stays nil (not sent).
+	// 2. Both have same value: Equal() returns true, schemaName stays nil (not sent).
+	// 3. One null, other has value: Equal() returns false, schemaName gets the plan value (sent).
+	// 4. Both have different values: Equal() returns false, schemaName gets the plan value (sent).
 	schemaName := determineSchemaNameForUpdate(plan.SchemaName, state.SchemaName)
 
 	out, body, err := r.client.ProfilesSyncAPI.UpdateProfilesWarehouseForSpaceWarehouse(r.authContext, state.SpaceID.ValueString(), state.ID.ValueString()).UpdateProfilesWarehouseForSpaceWarehouseAlphaInput(api.UpdateProfilesWarehouseForSpaceWarehouseAlphaInput{
@@ -369,11 +369,11 @@ func findProfileWarehouse(authContext context.Context, client *api.APIClient, id
 // schema name already exists in the warehouse configuration.
 //
 // The function returns nil (not sent to API) when:
-// - Plan value is unknown (should not send unknown values to API)
-// - Plan and state values are equal (no change needed)
+// - Plan value is unknown (should not send unknown values to API).
+// - Plan and state values are equal (no change needed).
 //
 // The function returns a pointer to the plan value when:
-// - Plan and state values are different (legitimate change)
+// - Plan and state values are different (legitimate change).
 func determineSchemaNameForUpdate(planSchemaName, stateSchemaName types.String) *string {
 	// Don't send schemaName to API if plan value is unknown.
 	if planSchemaName.IsUnknown() {
