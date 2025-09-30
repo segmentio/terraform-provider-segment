@@ -277,42 +277,43 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 			} else if req.URL.Path == "/spaces/my-space-id/profiles-warehouses/my-warehouse-id" && req.Method == http.MethodPatch {
 				// Update response - schemaName should only be sent when it changes.
 				updateCount++
-				payload = `
-					{
-						"data": {
-							"profilesWarehouse": {
-								"id": "my-warehouse-id",
-								"spaceId": "my-space-id",
-								"workspaceId": "my-workspace-id",
-								"enabled": false,
-								"metadata": {
-									"id": "my-metadata-id",
-									"slug": "snowflake",
-									"name": "Snowflake",
-									"description": "Data warehouse built for the cloud",
-									"logos": {
-										"default": "https://cdn.filepicker.io/api/file/JrQWOYvMRRCVvSHp4HL0",
-										"mark": "https://cdn.filepicker.io/api/file/OBhrGoCRKaSyvAhDX3fw",
-										"alt": ""
+				if updateCount == 1 {
+					// First update: name changes, schema_name stays the same
+					payload = `
+						{
+							"data": {
+								"profilesWarehouse": {
+									"id": "my-warehouse-id",
+									"spaceId": "my-space-id",
+									"workspaceId": "my-workspace-id",
+									"enabled": false,
+									"metadata": {
+										"id": "my-metadata-id",
+										"slug": "snowflake",
+										"name": "Snowflake",
+										"description": "Data warehouse built for the cloud",
+										"logos": {
+											"default": "https://cdn.filepicker.io/api/file/JrQWOYvMRRCVvSHp4HL0",
+											"mark": "https://cdn.filepicker.io/api/file/OBhrGoCRKaSyvAhDX3fw",
+											"alt": ""
+										},
+										"options": []
 									},
-									"options": []
-								},
-								"settings": {
-									"name": "My new warehouse name",
-									"token": "my-other-token"
-								},
-								"schemaName": "my-new-schema-name"
+									"settings": {
+										"name": "My updated warehouse name",
+										"token": "my-other-token"
+									},
+									"schemaName": "my-schema-name"
+								}
 							}
 						}
-					}
-				`
-			} else if req.URL.Path == "/spaces/my-space-id/profiles-warehouses" && req.Method == http.MethodGet {
-				// Read response.
-				payload = `
-					{
-						"data": {
-							"profilesWarehouses": [
-								{
+					`
+				} else {
+					// Second update: schema_name changes
+					payload = `
+						{
+							"data": {
+								"profilesWarehouse": {
 									"id": "my-warehouse-id",
 									"spaceId": "my-space-id",
 									"workspaceId": "my-workspace-id",
@@ -330,15 +331,117 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 										"options": []
 									},
 									"settings": {
-										"name": "My warehouse name",
-										"token": "my-token"
+										"name": "My final warehouse name",
+										"token": "my-final-token"
 									},
-									"schemaName": "my-schema-name"
+									"schemaName": "my-new-schema-name"
 								}
-							]
+							}
 						}
-					}
-				`
+					`
+				}
+			} else if req.URL.Path == "/spaces/my-space-id/profiles-warehouses" && req.Method == http.MethodGet {
+				// Read response - return current state based on update count.
+				if updateCount == 0 {
+					// Initial state
+					payload = `
+						{
+							"data": {
+								"profilesWarehouses": [
+									{
+										"id": "my-warehouse-id",
+										"spaceId": "my-space-id",
+										"workspaceId": "my-workspace-id",
+										"enabled": true,
+										"metadata": {
+											"id": "my-metadata-id",
+											"slug": "snowflake",
+											"name": "Snowflake",
+											"description": "Data warehouse built for the cloud",
+											"logos": {
+												"default": "https://cdn.filepicker.io/api/file/JrQWOYvMRRCVvSHp4HL0",
+												"mark": "https://cdn.filepicker.io/api/file/OBhrGoCRKaSyvAhDX3fw",
+												"alt": ""
+											},
+											"options": []
+										},
+										"settings": {
+											"name": "My warehouse name",
+											"token": "my-token"
+										},
+										"schemaName": "my-schema-name"
+									}
+								]
+							}
+						}
+					`
+				} else if updateCount == 1 {
+					// After first update: name changed, schema_name same
+					payload = `
+						{
+							"data": {
+								"profilesWarehouses": [
+									{
+										"id": "my-warehouse-id",
+										"spaceId": "my-space-id",
+										"workspaceId": "my-workspace-id",
+										"enabled": false,
+										"metadata": {
+											"id": "my-metadata-id",
+											"slug": "snowflake",
+											"name": "Snowflake",
+											"description": "Data warehouse built for the cloud",
+											"logos": {
+												"default": "https://cdn.filepicker.io/api/file/JrQWOYvMRRCVvSHp4HL0",
+												"mark": "https://cdn.filepicker.io/api/file/OBhrGoCRKaSyvAhDX3fw",
+												"alt": ""
+											},
+											"options": []
+										},
+										"settings": {
+											"name": "My updated warehouse name",
+											"token": "my-other-token"
+										},
+										"schemaName": "my-schema-name"
+									}
+								]
+							}
+						}
+					`
+				} else {
+					// After second update: schema_name changed
+					payload = `
+						{
+							"data": {
+								"profilesWarehouses": [
+									{
+										"id": "my-warehouse-id",
+										"spaceId": "my-space-id",
+										"workspaceId": "my-workspace-id",
+										"enabled": true,
+										"metadata": {
+											"id": "my-metadata-id",
+											"slug": "snowflake",
+											"name": "Snowflake",
+											"description": "Data warehouse built for the cloud",
+											"logos": {
+												"default": "https://cdn.filepicker.io/api/file/JrQWOYvMRRCVvSHp4HL0",
+												"mark": "https://cdn.filepicker.io/api/file/OBhrGoCRKaSyvAhDX3fw",
+												"alt": ""
+											},
+											"options": []
+										},
+										"settings": {
+											"name": "My final warehouse name",
+											"token": "my-final-token"
+										},
+										"schemaName": "my-new-schema-name"
+									}
+								]
+							}
+						}
+					`
+				}
 			}
 
 			_, _ = w.Write([]byte(payload))
