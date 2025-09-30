@@ -416,7 +416,7 @@ func TestAccProfilesWarehouseResource_SchemaNameHandling(t *testing.T) {
 
 func TestDetermineSchemaNameForUpdate(t *testing.T) {
 	// Test the determineSchemaNameForUpdate function that prevents API failures
-	// when the schema name already exists in the warehouse configuration
+	// when the schema name already exists in the warehouse configuration.
 	tests := []struct {
 		name            string
 		planSchemaName  types.String
@@ -501,7 +501,7 @@ func TestDetermineSchemaNameForUpdate(t *testing.T) {
 			// Test the actual function
 			result := determineSchemaNameForUpdate(tt.planSchemaName, tt.stateSchemaName)
 
-			// Check if the result matches expected
+			// Check if the result matches expected.
 			if !compareStringPointers(result, tt.expectedResult) {
 				t.Errorf("Test case '%s' failed: %s\nExpected: %v, but got: %v",
 					tt.name, tt.description, tt.expectedResult, result)
@@ -510,18 +510,20 @@ func TestDetermineSchemaNameForUpdate(t *testing.T) {
 	}
 }
 
-// Helper function to create string pointers for test cases
+// Helper function to create string pointers for test cases.
 func stringPtr(s string) *string {
 	return &s
 }
 
-// Helper function to compare string pointers
+// Helper function to compare string pointers.
 func compareStringPointers(a, b *string) bool {
 	if a == nil && b == nil {
 		return true
 	}
+
 	if a == nil || b == nil {
 		return false
 	}
+
 	return *a == *b
 }

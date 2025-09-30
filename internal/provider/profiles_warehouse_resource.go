@@ -368,9 +368,10 @@ func findProfileWarehouse(authContext context.Context, client *api.APIClient, id
 // based on comparing the plan and state values. This prevents API failures when the
 // schema name already exists in the warehouse configuration.
 func determineSchemaNameForUpdate(planSchemaName, stateSchemaName types.String) *string {
-	// Only send schemaName to API if it differs from the remote state
+	// Only send schemaName to API if it differs from the remote state.
 	if !planSchemaName.Equal(stateSchemaName) {
 		return planSchemaName.ValueStringPointer()
 	}
+
 	return nil
 }
