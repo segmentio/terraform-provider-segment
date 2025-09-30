@@ -234,7 +234,7 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 	// The Segment API fails if we send a schemaName that matches the current configuration,
 	// even though it should be a no-op. This handles all cases:
 	// 1. Both null/undefined: Equal() returns true, schemaName stays nil (not sent)
-	// 2. Both have same value: Equal() returns true, schemaName stays nil (not sent)  
+	// 2. Both have same value: Equal() returns true, schemaName stays nil (not sent)
 	// 3. One null, other has value: Equal() returns false, schemaName gets the plan value (sent)
 	// 4. Both have different values: Equal() returns false, schemaName gets the plan value (sent)
 	schemaName := determineSchemaNameForUpdate(plan.SchemaName, state.SchemaName)
