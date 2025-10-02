@@ -6,9 +6,6 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
-	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -16,8 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	tftypes "github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/segmentio/public-api-sdk-go/api"
+
+	"github.com/segmentio/terraform-provider-segment/internal/provider/docs"
+	"github.com/segmentio/terraform-provider-segment/internal/provider/models"
 )
 
 var (
@@ -33,6 +34,10 @@ func NewFunctionResource() resource.Resource {
 type functionResource struct {
 	client      *api.APIClient
 	authContext context.Context
+}
+
+func hasValue(v tftypes.String) bool {
+	return !(v.IsNull() || v.IsUnknown())
 }
 
 func (r *functionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -163,7 +168,7 @@ func (r *functionResource) Create(ctx context.Context, req resource.CreateReques
 	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
-	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE" {
 		state.DisplayName = plan.DisplayName
 	}
 
@@ -210,7 +215,7 @@ func (r *functionResource) Read(ctx context.Context, req resource.ReadRequest, r
 	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
-	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE" && hasValue(previousState.DisplayName) {
 		state.DisplayName = previousState.DisplayName
 	}
 
@@ -266,7 +271,7 @@ func (r *functionResource) Update(ctx context.Context, req resource.UpdateReques
 	state.Fill(function)
 
 	// Destination functions append workspace name to display name causing inconsistency
-	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" {
+	if state.ResourceType.ValueString() == "DESTINATION" || state.ResourceType.ValueString() == "INSERT_DESTINATION" || state.ResourceType.ValueString() == "INSERT_SOURCE" {
 		state.DisplayName = plan.DisplayName
 	}
 
