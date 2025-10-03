@@ -255,8 +255,17 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 		return
 	}
 
+	// Merge settings: keep config-defined settings while ignoring backend-generated ones not in config
 	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
-		state.Settings = previousState.Settings
+		mergedSettings, err := mergeSettings(previousState.Settings, state.Settings, false)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to merge Destination subscription settings",
+				err.Error(),
+			)
+			return
+		}
+		state.Settings = mergedSettings
 	}
 
 	diags = resp.State.Set(ctx, &state)

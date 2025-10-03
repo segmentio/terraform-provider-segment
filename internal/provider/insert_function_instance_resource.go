@@ -186,8 +186,17 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 		return
 	}
 
+	// Merge settings: keep config-defined settings while ignoring backend-generated ones not in config
 	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
-		state.Settings = previousState.Settings
+		mergedSettings, err := mergeSettings(previousState.Settings, state.Settings, false)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to merge Insert Function instance settings",
+				err.Error(),
+			)
+			return
+		}
+		state.Settings = mergedSettings
 	}
 
 	// This is to satisfy terraform requirements that the input fields must match the returned ones. The input FunctionID can be prefixed with "ifnd_" and the returned one is not.
