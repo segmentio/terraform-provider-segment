@@ -11,6 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.26.0
 	github.com/hashicorp/terraform-plugin-testing v1.12.0
 	github.com/segmentio/public-api-sdk-go v0.0.0-20250113195817-34106b6e08dd
+	github.com/stretchr/testify v1.10.0
 	gotest.tools/gotestsum v1.13.0
 )
 
@@ -19,8 +20,10 @@ require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0 // indirect
 	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/hashicorp/cli v1.1.7 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/yuin/goldmark v1.7.7 // indirect
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
 	go.abhg.dev/goldmark/frontmatter v0.2.0 // indirect
