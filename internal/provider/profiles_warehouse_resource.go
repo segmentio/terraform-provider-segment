@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/segmentio/public-api-sdk-go/api"
 )
@@ -144,10 +145,10 @@ func (r *profilesWarehouseResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response.
 	state.Settings = plan.Settings
 
-	// Set state to fully populated data
+	// Set state to fully populated data.
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -238,11 +239,21 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	// Only send schemaName to API if it differs from the remote state.
+	// This prevents API failures when the schema name already exists in the warehouse.
+	// The Segment API fails if we send a schemaName that matches the current configuration.
+	// even though it should be a no-op. This handles all cases:
+	// 1. Both null/undefined: Equal() returns true, schemaName stays nil (not sent).
+	// 2. Both have same value: Equal() returns true, schemaName stays nil (not sent).
+	// 3. One null, other has value: Equal() returns false, schemaName gets the plan value (sent).
+	// 4. Both have different values: Equal() returns false, schemaName gets the plan value (sent).
+	schemaName := determineSchemaNameForUpdate(plan.SchemaName, state.SchemaName)
+
 	out, body, err := r.client.ProfilesSyncAPI.UpdateProfilesWarehouseForSpaceWarehouse(r.authContext, state.SpaceID.ValueString(), state.ID.ValueString()).UpdateProfilesWarehouseForSpaceWarehouseAlphaInput(api.UpdateProfilesWarehouseForSpaceWarehouseAlphaInput{
 		Enabled:    plan.Enabled.ValueBoolPointer(),
 		Settings:   settings,
 		Name:       plan.Name.ValueStringPointer(),
-		SchemaName: plan.SchemaName.ValueStringPointer(),
+		SchemaName: schemaName,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
@@ -268,7 +279,7 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response.
 	state.Settings = plan.Settings
 
 	diags = resp.State.Set(ctx, &state)
@@ -361,4 +372,28 @@ func findProfileWarehouse(authContext context.Context, client *api.APIClient, id
 	}
 
 	return nil, nil
+}
+
+// determineSchemaNameForUpdate determines whether schemaName should be sent to the API
+// based on comparing the plan and state values. This prevents API failures when the
+// schema name already exists in the warehouse configuration.
+//
+// The function returns nil (not sent to API) when:
+// - Plan value is unknown (should not send unknown values to API).
+// - Plan and state values are equal (no change needed).
+//
+// The function returns a pointer to the plan value when:
+// - Plan and state values are different (legitimate change).
+func determineSchemaNameForUpdate(planSchemaName, stateSchemaName types.String) *string {
+	// Don't send schemaName to API if plan value is unknown.
+	if planSchemaName.IsUnknown() {
+		return nil
+	}
+
+	// Only send schemaName to API if it differs from the remote state.
+	if !planSchemaName.Equal(stateSchemaName) {
+		return planSchemaName.ValueStringPointer()
+	}
+
+	return nil
 }
