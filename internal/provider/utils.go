@@ -59,7 +59,7 @@ func mergeSettings(configSettings, remoteSettings jsontypes.Normalized, isWareho
 
 	result, err := models.GetSettings(merged)
 	if err != nil {
-		return jsontypes.Normalized{}, fmt.Errorf("failed to merge settings: %s", err.Error())
+		return jsontypes.Normalized{}, fmt.Errorf("failed to merge settings: %w", err)
 	}
 
 	return result, nil
