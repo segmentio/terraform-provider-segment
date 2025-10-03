@@ -623,6 +623,7 @@ func (r *destinationResource) Read(ctx context.Context, req resource.ReadRequest
 				"Unable to merge Destination settings",
 				err.Error(),
 			)
+
 			return
 		}
 		state.Settings = mergedSettings

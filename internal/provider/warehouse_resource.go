@@ -324,6 +324,7 @@ func (r *warehouseResource) Read(ctx context.Context, req resource.ReadRequest, 
 				"Unable to merge Warehouse settings",
 				err.Error(),
 			)
+
 			return
 		}
 		state.Settings = mergedSettings

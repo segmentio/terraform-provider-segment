@@ -194,6 +194,7 @@ func (r *insertFunctionInstanceResource) Read(ctx context.Context, req resource.
 				"Unable to merge Insert Function instance settings",
 				err.Error(),
 			)
+
 			return
 		}
 		state.Settings = mergedSettings

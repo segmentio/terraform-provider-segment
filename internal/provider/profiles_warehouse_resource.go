@@ -203,6 +203,7 @@ func (r *profilesWarehouseResource) Read(ctx context.Context, req resource.ReadR
 				"Unable to merge Profiles Warehouse settings",
 				err.Error(),
 			)
+
 			return
 		}
 		state.Settings = mergedSettings

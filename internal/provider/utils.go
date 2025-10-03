@@ -29,7 +29,7 @@ func getError(err error, body *http.Response) string {
 	return err.Error() + "\n" + formattedBody.String()
 }
 
-// mergeSettings merges config settings with remote settings, preserving only the keys defined in config
+// mergeSettings merges config settings with remote settings, preserving only the keys defined in config.
 func mergeSettings(configSettings, remoteSettings jsontypes.Normalized, isWarehouse bool) (jsontypes.Normalized, error) {
 	var configMap map[string]interface{}
 	if diags := configSettings.Unmarshal(&configMap); diags.HasError() {
@@ -57,5 +57,10 @@ func mergeSettings(configSettings, remoteSettings jsontypes.Normalized, isWareho
 		}
 	}
 
-	return models.GetSettings(merged)
+	result, err := models.GetSettings(merged)
+	if err != nil {
+		return jsontypes.Normalized{}, fmt.Errorf("failed to merge settings: %s", err.Error())
+	}
+
+	return result, nil
 }

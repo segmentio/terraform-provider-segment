@@ -263,6 +263,7 @@ func (r *destinationSubscriptionResource) Read(ctx context.Context, req resource
 				"Unable to merge Destination subscription settings",
 				err.Error(),
 			)
+
 			return
 		}
 		state.Settings = mergedSettings

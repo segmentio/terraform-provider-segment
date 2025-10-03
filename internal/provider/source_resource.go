@@ -423,6 +423,7 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 				"Unable to merge Source settings",
 				err.Error(),
 			)
+
 			return
 		}
 		state.Settings = mergedSettings
