@@ -1,3 +1,6 @@
+## 1.6.0 (October 3, 2025)
+Gracefully handles drifted state for settings across all relevant resources. Updates dependencies.
+
 ## 1.5.0 (August 11, 2025)
 Bump the allowed number of rules in a Tracking Plan to 2000 items depending on workspace limits.
 
