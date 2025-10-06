@@ -415,9 +415,18 @@ func (r *sourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	// This is to satisfy terraform requirements that the returned fields must match the input ones because new settings can be generated in the response
+	// Merge settings: keep config-defined settings while ignoring backend-generated ones not in config
 	if !previousState.Settings.IsNull() && !previousState.Settings.IsUnknown() {
-		state.Settings = previousState.Settings
+		mergedSettings, err := mergeSettings(previousState.Settings, state.Settings, false)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to merge Source settings",
+				err.Error(),
+			)
+
+			return
+		}
+		state.Settings = mergedSettings
 	}
 
 	diags = resp.State.Set(ctx, &state)
