@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/hashicorp/terraform-plugin-docs v0.23.0
 	github.com/hashicorp/terraform-plugin-framework v1.16.1
-	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
+	github.com/hashicorp/terraform-plugin-framework-validators v0.19.0
 	github.com/hashicorp/terraform-plugin-go v0.29.0
 	github.com/hashicorp/terraform-plugin-testing v1.13.3
 	github.com/segmentio/public-api-sdk-go v0.0.0-20250113195817-34106b6e08dd
