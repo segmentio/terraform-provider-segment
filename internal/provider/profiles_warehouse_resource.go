@@ -239,9 +239,18 @@ func (r *profilesWarehouseResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	if (plan.SchemaName.IsNull() || plan.SchemaName.IsUnknown()) && !state.SchemaName.IsNull() {
+		resp.Diagnostics.AddError(
+			fmt.Sprintf("Unable to update Profiles Warehouse (ID: %s)", plan.ID.ValueString()),
+			"Cannot unset schema name",
+		)
+
+		return
+	}
+
 	// Only send schemaName to API if it differs from the remote state.
 	// This prevents API failures when the schema name already exists in the warehouse.
-	// The Segment API fails if we send a schemaName that matches the current configuration.
+	// The Segment API fails if we send a schemaName that matches the current configuration
 	// even though it should be a no-op. This handles all cases:
 	// 1. Both null/undefined: Equal() returns true, schemaName stays nil (not sent).
 	// 2. Both have same value: Equal() returns true, schemaName stays nil (not sent).

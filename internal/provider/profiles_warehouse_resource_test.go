@@ -554,8 +554,8 @@ func TestDetermineSchemaNameForUpdate(t *testing.T) {
 			name:            "plan_null_state_has_value",
 			planSchemaName:  types.StringNull(),
 			stateSchemaName: types.StringValue("my-schema"),
-			expectedResult:  nil, // null pointer, not the actual value
-			description:     "Plan null, state has value - should send schemaName to API",
+			expectedResult:  nil,
+			description:     "Plan null, state has value - should send nil schemaName to API",
 		},
 		{
 			name:            "plan_has_value_state_null",
