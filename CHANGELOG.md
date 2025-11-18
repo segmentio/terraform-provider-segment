@@ -1,3 +1,6 @@
+## 1.6.1 (November 18, 2025)
+Fixes a bug where `segment_profiles_warehouse` would error on updates if `schema_name` was set.
+
 ## 1.6.0 (October 3, 2025)
 Gracefully handles drifted state for settings across all relevant resources. Updates dependencies.
 
