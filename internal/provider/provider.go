@@ -177,6 +177,7 @@ func (p *segmentProvider) DataSources(_ context.Context) []func() datasource.Dat
 		NewTrackingPlanDataSource,
 		NewRoleDataSource,
 		NewUserDataSource,
+		NewAudienceDataSource,
 	}
 }
 
