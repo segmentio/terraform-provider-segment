@@ -34,6 +34,8 @@ type trackingPlanResource struct {
 	authContext context.Context
 }
 
+var MaxRules = 2000
+
 func (r *trackingPlanResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_tracking_plan"
 }
@@ -87,7 +89,7 @@ To see an exact representation of this Tracking Plan's rules, please use the dat
 
 This field is currently limited to 200 items.`,
 				Validators: []validator.Set{
-					setvalidator.SizeAtMost(MaxPageSize),
+					setvalidator.SizeAtMost(MaxRules),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -260,6 +262,8 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 		}
 		state.Rules = rules
 	} else {
+		outRules := []api.RuleV1{}
+
 		out, body, err := r.client.TrackingPlansAPI.ListRulesFromTrackingPlan(r.authContext, id).Pagination(*api.NewPaginationInput(MaxPageSize)).Execute()
 		if body != nil {
 			defer body.Body.Close()
@@ -273,15 +277,41 @@ func (r *trackingPlanResource) Read(ctx context.Context, req resource.ReadReques
 			return
 		}
 
-		outRules := out.Data.GetRules()
+		outRules = append(outRules, out.Data.GetRules()...)
+		nextPointer := out.Data.GetPagination().Next.Get()
+
+		for nextPointer != nil && len(outRules) < MaxRules {
+			paginationInput := *api.NewPaginationInput(MaxPageSize)
+			paginationInput.SetCursor(*nextPointer)
+
+			out, body, err = r.client.TrackingPlansAPI.ListRulesFromTrackingPlan(r.authContext, id).Pagination(paginationInput).Execute()
+			if body != nil {
+				defer body.Body.Close()
+			}
+			if err != nil {
+				resp.Diagnostics.AddError(
+					fmt.Sprintf("Unable to read Tracking Plan rules (ID: %s)", id),
+					getError(err, body),
+				)
+
+				return
+			}
+
+			outRules = append(outRules, out.Data.GetRules()...)
+			nextPointer = out.Data.GetPagination().Next.Get()
+		}
+
+		// Limit the number of rules to MAX_RULES
+		if len(outRules) > MaxRules {
+			outRules = outRules[:MaxRules]
+		}
+
 		err = state.Fill(trackingPlan, &outRules)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to populate Tracking Plan state",
 				err.Error(),
 			)
-
-			return
 		}
 	}
 
