@@ -9,15 +9,16 @@ import (
 )
 
 type SourcePlan struct {
-	Enabled     types.Bool           `tfsdk:"enabled"`
-	ID          types.String         `tfsdk:"id"`
-	Labels      types.Set            `tfsdk:"labels"`
-	Metadata    types.Object         `tfsdk:"metadata"`
-	Name        types.String         `tfsdk:"name"`
-	Slug        types.String         `tfsdk:"slug"`
-	WorkspaceID types.String         `tfsdk:"workspace_id"`
-	WriteKeys   types.List           `tfsdk:"write_keys"`
-	Settings    jsontypes.Normalized `tfsdk:"settings"`
+	Enabled                 types.Bool           `tfsdk:"enabled"`
+	ID                      types.String         `tfsdk:"id"`
+	Labels                  types.Set            `tfsdk:"labels"`
+	Metadata                types.Object         `tfsdk:"metadata"`
+	Name                    types.String         `tfsdk:"name"`
+	Slug                    types.String         `tfsdk:"slug"`
+	WorkspaceID             types.String         `tfsdk:"workspace_id"`
+	WriteKeys               types.List           `tfsdk:"write_keys"`
+	Settings                jsontypes.Normalized `tfsdk:"settings"`
+	DisconnectAllWarehouses types.Bool           `tfsdk:"disconnect_all_warehouses"`
 }
 
 type SourceState struct {
