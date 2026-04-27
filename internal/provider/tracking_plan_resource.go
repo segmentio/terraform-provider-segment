@@ -82,12 +82,10 @@ func (r *trackingPlanResource) Schema(_ context.Context, _ resource.SchemaReques
 			},
 			"rules": schema.SetNestedAttribute{
 				Required: true,
-				Description: `The list of Tracking Plan rules. 
-				
-Due to Terraform resource limitations, this list might not show an exact representation of how the Tracking Plan interprets each rule.
-To see an exact representation of this Tracking Plan's rules, please use the data source.
+				Description: `The list of Tracking Plan rules.
 
-This field is currently limited to 200 items.`,
+Due to Terraform resource limitations, this list might not show an exact representation of how the Tracking Plan interprets each rule.
+To see an exact representation of this Tracking Plan's rules, please use the data source.`,
 				Validators: []validator.Set{
 					setvalidator.SizeAtMost(MaxRules),
 				},
@@ -117,6 +115,25 @@ This field is currently limited to 200 items.`,
 			},
 		},
 	}
+}
+
+// trackingPlanRuleKey returns a comparable identity for a rule.
+// Rules are identified by (type, key); key is optional and defaults to "".
+func trackingPlanRuleKey(ruleType, key string) string {
+	return ruleType + "\x00" + key
+}
+
+// ruleInputToUpsert converts a RuleInputV1 to the UpsertRuleV1 required by PATCH.
+func ruleInputToUpsert(r api.RuleInputV1) api.UpsertRuleV1 {
+	u := api.UpsertRuleV1{
+		Type:       r.Type,
+		JsonSchema: r.JsonSchema,
+		Version:    r.Version,
+	}
+	if r.Key != nil {
+		u.Key = r.Key
+	}
+	return u
 }
 
 func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -156,18 +173,16 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 	var rules []models.RulesState
 	plan.Rules.ElementsAs(ctx, &rules, false)
 
-	replaceRules := []api.RuleInputV1{}
+	upsertRules := []api.UpsertRuleV1{}
+	rulesOut := []api.RuleV1{}
 	for _, rule := range rules {
-		apiRule, diags := rule.ToAPIRuleInput()
+		apiRuleInput, diags := rule.ToAPIRuleInput()
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		replaceRules = append(replaceRules, apiRule)
-	}
+		upsertRules = append(upsertRules, ruleInputToUpsert(apiRuleInput))
 
-	rulesOut := []api.RuleV1{}
-	for _, rule := range rules {
 		apiRule, diags := rule.ToAPIRule()
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -176,19 +191,21 @@ func (r *trackingPlanResource) Create(ctx context.Context, req resource.CreateRe
 		rulesOut = append(rulesOut, apiRule)
 	}
 
-	_, body, err = r.client.TrackingPlansAPI.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
-		Rules: replaceRules,
-	}).Execute()
-	if body != nil {
-		defer body.Body.Close()
-	}
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to create Tracking Plan rules",
-			getError(err, body),
-		)
+	if len(upsertRules) > 0 {
+		_, body, err = r.client.TrackingPlansAPI.UpdateRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).UpdateRulesInTrackingPlanV1Input(api.UpdateRulesInTrackingPlanV1Input{
+			Rules: upsertRules,
+		}).Execute()
+		if body != nil {
+			defer body.Body.Close()
+		}
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to create Tracking Plan rules",
+				getError(err, body),
+			)
 
-		return
+			return
+		}
 	}
 
 	var state models.TrackingPlanState
@@ -378,21 +395,28 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 
 	trackingPlan := out.Data.GetTrackingPlan()
 
-	var rules []models.RulesState
-	plan.Rules.ElementsAs(ctx, &rules, false)
+	// Build desired rule set from plan.
+	var desiredRules []models.RulesState
+	plan.Rules.ElementsAs(ctx, &desiredRules, false)
 
-	replaceRules := []api.RuleInputV1{}
-	for _, rule := range rules {
-		apiRule, diags := rule.ToAPIRuleInput()
+	upsertRules := []api.UpsertRuleV1{}
+	desiredKeys := make(map[string]struct{}, len(desiredRules))
+	rulesOut := []api.RuleV1{}
+
+	for _, rule := range desiredRules {
+		key := ""
+		if !rule.Key.IsNull() && !rule.Key.IsUnknown() {
+			key = rule.Key.ValueString()
+		}
+		desiredKeys[trackingPlanRuleKey(rule.Type.ValueString(), key)] = struct{}{}
+
+		apiRuleInput, diags := rule.ToAPIRuleInput()
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		replaceRules = append(replaceRules, apiRule)
-	}
+		upsertRules = append(upsertRules, ruleInputToUpsert(apiRuleInput))
 
-	rulesOut := []api.RuleV1{}
-	for _, rule := range rules {
 		apiRule, diags := rule.ToAPIRule()
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -401,19 +425,60 @@ func (r *trackingPlanResource) Update(ctx context.Context, req resource.UpdateRe
 		rulesOut = append(rulesOut, apiRule)
 	}
 
-	_, body, err = r.client.TrackingPlansAPI.ReplaceRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).ReplaceRulesInTrackingPlanV1Input(api.ReplaceRulesInTrackingPlanV1Input{
-		Rules: replaceRules,
+	// PATCH: upsert all desired rules. Uses PATCH instead of PUT to avoid the
+	// 200-rule replacement limit on PUT /tracking-plans/{id}/rules.
+	_, body, err = r.client.TrackingPlansAPI.UpdateRulesInTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).UpdateRulesInTrackingPlanV1Input(api.UpdateRulesInTrackingPlanV1Input{
+		Rules: upsertRules,
 	}).Execute()
 	if body != nil {
 		defer body.Body.Close()
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to replace Tracking Plan rules",
+			"Unable to update Tracking Plan rules",
 			getError(err, body),
 		)
 
 		return
+	}
+
+	// DELETE: remove rules that were in the previous state but are absent from the new plan.
+	var previousRules []models.RulesState
+	config.Rules.ElementsAs(ctx, &previousRules, false)
+
+	deleteRules := []api.RemoveRuleV1{}
+	for _, rule := range previousRules {
+		key := ""
+		if !rule.Key.IsNull() && !rule.Key.IsUnknown() {
+			key = rule.Key.ValueString()
+		}
+		if _, exists := desiredKeys[trackingPlanRuleKey(rule.Type.ValueString(), key)]; !exists {
+			removeRule := api.RemoveRuleV1{
+				Type:    rule.Type.ValueString(),
+				Version: float32(rule.Version.ValueFloat64()),
+			}
+			if key != "" {
+				removeRule.Key = &key
+			}
+			deleteRules = append(deleteRules, removeRule)
+		}
+	}
+
+	if len(deleteRules) > 0 {
+		_, body, err = r.client.TrackingPlansAPI.RemoveRulesFromTrackingPlan(r.authContext, out.Data.TrackingPlan.Id).
+			Rules(deleteRules).
+			Execute()
+		if body != nil {
+			defer body.Body.Close()
+		}
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to remove stale Tracking Plan rules",
+				getError(err, body),
+			)
+
+			return
+		}
 	}
 
 	var state models.TrackingPlanState
