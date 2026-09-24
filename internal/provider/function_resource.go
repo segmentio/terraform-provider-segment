@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	tftypes "github.com/hashicorp/terraform-plugin-framework/types"
@@ -40,6 +41,18 @@ func hasValue(v tftypes.String) bool {
 	return !(v.IsNull() || v.IsUnknown())
 }
 
+// optionalString returns nil unless the attribute holds a concrete value, so an
+// unset attribute is omitted from the request body. ValueStringPointer() alone
+// is not enough: an unknown value yields a pointer to "", and the API rejects a
+// present-but-empty logo_url because it is not a valid URI.
+func optionalString(v tftypes.String) *string {
+	if !hasValue(v) {
+		return nil
+	}
+
+	return v.ValueStringPointer()
+}
+
 func (r *functionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_function"
 }
@@ -65,8 +78,14 @@ func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				Description: "A display name for this Function. Destination Functions append the Workspace to the display name, but this is omitted from the Terraform output for consistency purposes.",
 			},
 			"logo_url": schema.StringAttribute{
-				Optional:    true,
-				Description: "The URL of the logo for this Function.",
+				Optional: true,
+				// The API assigns a default logo when none is supplied, so this
+				// has to be Computed or Terraform rejects the create response.
+				Computed:    true,
+				Description: "The URL of the logo for this Function. If not set, Segment assigns a default logo.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"resource_type": schema.StringAttribute{
 				Required: true,
@@ -82,14 +101,27 @@ func (r *functionResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"preview_webhook_url": schema.StringAttribute{
 				Computed:    true,
 				Description: "The preview webhook URL for this Function.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"catalog_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The catalog id of this Function.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"settings": schema.SetNestedAttribute{
-				Optional:    true,
+				Optional: true,
+				// The API always returns a settings collection, empty when none
+				// were supplied, so this has to be Computed for the same reason
+				// as logo_url above.
+				Computed:    true,
 				Description: "The settings associated with this Function. Common settings are connection-related configuration used to connect to it, for example host, username, and port.",
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
@@ -144,7 +176,7 @@ func (r *functionResource) Create(ctx context.Context, req resource.CreateReques
 		Code:         plan.Code.ValueString(),
 		Description:  plan.Description.ValueStringPointer(),
 		DisplayName:  plan.DisplayName.ValueString(),
-		LogoUrl:      plan.LogoURL.ValueStringPointer(),
+		LogoUrl:      optionalString(plan.LogoURL),
 		ResourceType: plan.ResourceType.ValueString(),
 		Settings:     settings,
 	}).Execute()
@@ -251,7 +283,7 @@ func (r *functionResource) Update(ctx context.Context, req resource.UpdateReques
 		Code:        plan.Code.ValueStringPointer(),
 		Description: plan.Description.ValueStringPointer(),
 		DisplayName: plan.DisplayName.ValueStringPointer(),
-		LogoUrl:     plan.LogoURL.ValueStringPointer(),
+		LogoUrl:     optionalString(plan.LogoURL),
 		Settings:    settings,
 	}).Execute()
 	if body != nil {

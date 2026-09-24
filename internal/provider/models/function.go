@@ -82,6 +82,13 @@ func (f *FunctionSettingState) ToAPIValue() api.FunctionSettingV1 {
 func GetFunctionSettingAPIValueFromPlan(ctx context.Context, settings types.Set) ([]api.FunctionSettingV1, diag.Diagnostics) {
 	var outDiags diag.Diagnostics
 
+	// Settings is Optional+Computed, so it is unknown when omitted from the
+	// configuration and null when explicitly cleared. Neither can be read into
+	// a concrete slice, and both mean "send no settings".
+	if settings.IsNull() || settings.IsUnknown() {
+		return []api.FunctionSettingV1{}, outDiags
+	}
+
 	var settingsState = []FunctionSettingState{}
 	diags := settings.ElementsAs(ctx, &settingsState, false)
 	outDiags.Append(diags...)

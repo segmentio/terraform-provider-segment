@@ -73,7 +73,7 @@ resource "segment_function" "example" {
 
 - `description` (String) A description for this function.
 - `display_name` (String) A display name for this Function. Destination Functions append the Workspace to the display name, but this is omitted from the Terraform output for consistency purposes.
-- `logo_url` (String) The URL of the logo for this Function.
+- `logo_url` (String) The URL of the logo for this Function. If not set, Segment assigns a default logo.
 - `settings` (Attributes Set) The settings associated with this Function. Common settings are connection-related configuration used to connect to it, for example host, username, and port. (see [below for nested schema](#nestedatt--settings))
 
 ### Read-Only
