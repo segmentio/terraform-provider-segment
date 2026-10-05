@@ -485,3 +485,85 @@ func TestAccFunctionResource_InsertSource(t *testing.T) {
 		},
 	})
 }
+
+// TestAccFunctionResource_APIPopulatedDefaults covers a configuration that
+// omits logo_url and settings. The API fills in a default logo and returns an
+// empty settings collection, so both attributes must be Computed; otherwise
+// the apply fails with "Provider produced inconsistent result after apply".
+func TestAccFunctionResource_APIPopulatedDefaults(t *testing.T) {
+	t.Parallel()
+
+	const defaultLogoURL = "https://cdn-devcenter.segment.com/2e87e186-3bca-4d55-b93b-97705deb2a73.svg"
+
+	fakeServer := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Set("content-type", "application/json")
+
+			// The API defaults logo_url, returns an empty settings list and
+			// appends the workspace to a Destination Function's display name.
+			payload := `
+			{
+				"data": {
+					"function": {
+						"id": "my-function-id",
+						"workspaceId": "my-workspace-id",
+						"displayName": "My test function My Workspace",
+						"description": "My function description",
+						"logoUrl": "` + defaultLogoURL + `",
+						"code": "// My test code!",
+						"createdAt": "2023-10-11T18:52:07.087Z",
+						"createdBy": "my-user-id",
+						"previewWebhookUrl": "",
+						"settings": [],
+						"buildpack": "boreal",
+						"catalogId": "my-catalog-id",
+						"batchMaxCount": 0,
+						"resourceType": "DESTINATION"
+					}
+				}
+			}`
+
+			_, _ = w.Write([]byte(payload))
+		}),
+	)
+	defer fakeServer.Close()
+
+	providerConfig := `
+		provider "segment" {
+			url   = "` + fakeServer.URL + `"
+			token = "abc123"
+		}
+	`
+
+	// Neither logo_url nor settings is declared.
+	config := providerConfig + `
+		resource "segment_function" "test" {
+			code = "// My test code!"
+			display_name = "My test function"
+			resource_type = "DESTINATION"
+			description = "My function description"
+		}
+	`
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("segment_function.test", "id", "my-function-id"),
+					resource.TestCheckResourceAttr("segment_function.test", "display_name", "My test function"),
+					resource.TestCheckResourceAttr("segment_function.test", "resource_type", "DESTINATION"),
+					resource.TestCheckResourceAttr("segment_function.test", "logo_url", defaultLogoURL),
+					resource.TestCheckResourceAttr("segment_function.test", "settings.#", "0"),
+				),
+			},
+			// Re-applying the same configuration must be a no-op: the values the
+			// API filled in are kept rather than planned back to null.
+			{
+				Config:   config,
+				PlanOnly: true,
+			},
+		},
+	})
+}
